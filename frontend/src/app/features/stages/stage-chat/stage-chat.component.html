@@ -1,0 +1,46 @@
+<div class="chat-wrapper bg-white rounded-xl border border-gray-200 overflow-hidden mt-4">
+  <!-- Header -->
+  <div class="px-5 py-3 border-b border-gray-100 flex items-center gap-2">
+    <mat-icon class="text-blue-500">forum</mat-icon>
+    <span class="font-semibold text-gray-900 text-sm">Discussion du groupe</span>
+  </div>
+
+  <!-- Messages -->
+  <div class="messages-area" #msgContainer>
+    <div *ngIf="loading" class="flex justify-center py-6">
+      <mat-spinner diameter="28"></mat-spinner>
+    </div>
+
+    <div *ngIf="!loading && messages.length === 0" class="text-center py-8 text-gray-400">
+      <p class="text-sm">Aucun message. Soyez le premier à écrire !</p>
+    </div>
+
+    <div *ngFor="let msg of messages" class="msg-row" [class.own]="isOwn(msg)">
+      <div *ngIf="!isOwn(msg)" class="avatar">{{ getInitials(msg.sender) }}</div>
+      <div class="bubble-wrap">
+        <span *ngIf="!isOwn(msg)" class="sender-name">
+          {{ msg.sender?.prenom }} {{ msg.sender?.nom }}
+        </span>
+        <div class="bubble" [class.own-bubble]="isOwn(msg)">
+          <p>{{ msg.contenu }}</p>
+          <span class="time">{{ msg.created_at | date:'HH:mm' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input -->
+  <div class="input-area">
+    <mat-form-field appearance="outline" class="flex-1" subscriptSizing="dynamic">
+      <textarea matInput [formControl]="messageCtrl"
+                placeholder="Votre message..."
+                rows="1" (keydown)="onKeyDown($event)"
+                class="resize-none"></textarea>
+    </mat-form-field>
+    <button mat-icon-button color="primary"
+            [disabled]="messageCtrl.invalid || sending"
+            (click)="sendMessage()">
+      <mat-icon>send</mat-icon>
+    </button>
+  </div>
+</div>

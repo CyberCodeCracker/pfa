@@ -1,0 +1,7 @@
+::ng-deep .mat-sidenav {
+  border-right: none;
+}
+
+::ng-deep .mat-list-item.active {
+  background: rgba(59, 130, 246, 0.15);
+}

@@ -1,0 +1,88 @@
+<mat-sidenav-container class="h-screen" [hasBackdrop]="false">
+
+  <!-- Sidebar -->
+  <mat-sidenav #sidenav mode="side" [opened]="sidenavOpen"
+               class="w-64 bg-gray-900 text-white">
+    <div class="p-6 border-b border-gray-700">
+      <h1 class="text-xl font-bold text-white">ScholarFlow</h1>
+      <p *ngIf="user$ | async as user"
+         class="text-gray-400 text-sm mt-1">{{ user.role === 'enseignant' ? 'Enseignant' : 'Étudiant' }}</p>
+    </div>
+
+    <mat-nav-list>
+      <ng-container *ngIf="(user$ | async)?.role === 'enseignant'">
+        <a mat-list-item routerLink="/dashboard" routerLinkActive="bg-blue-700/30">
+          <mat-icon matListItemIcon>dashboard</mat-icon>
+          <span matListItemTitle>Tableau de bord</span>
+        </a>
+        <a mat-list-item routerLink="/stages" routerLinkActive="bg-blue-700/30">
+          <mat-icon matListItemIcon>work_outline</mat-icon>
+          <span matListItemTitle>Mes stages</span>
+        </a>
+        <a mat-list-item routerLink="/etudiants" routerLinkActive="bg-blue-700/30">
+          <mat-icon matListItemIcon>group</mat-icon>
+          <span matListItemTitle>Étudiants</span>
+        </a>
+        <a mat-list-item routerLink="/reunions" routerLinkActive="bg-blue-700/30">
+          <mat-icon matListItemIcon>event</mat-icon>
+          <span matListItemTitle>Réunions</span>
+        </a>
+      </ng-container>
+
+      <ng-container *ngIf="(user$ | async)?.role === 'etudiant'">
+        <a mat-list-item routerLink="/mes-stages" routerLinkActive="bg-blue-700/30">
+          <mat-icon matListItemIcon>school</mat-icon>
+          <span matListItemTitle>Mes stages</span>
+        </a>
+        <a mat-list-item routerLink="/reunions" routerLinkActive="bg-blue-700/30">
+          <mat-icon matListItemIcon>event</mat-icon>
+          <span matListItemTitle>Réunions</span>
+        </a>
+      </ng-container>
+
+      <a mat-list-item routerLink="/messagerie" routerLinkActive="bg-blue-700/30">
+        <mat-icon matListItemIcon>chat_bubble_outline</mat-icon>
+        <span matListItemTitle>Messagerie</span>
+      </a>
+      <a mat-list-item routerLink="/notifications" routerLinkActive="bg-blue-700/30">
+        <mat-icon matListItemIcon
+                  [matBadge]="unreadNotifCount > 0 ? unreadNotifCount : null"
+                  matBadgeColor="warn"
+                  matBadgeSize="small">notifications_none</mat-icon>
+        <span matListItemTitle>Notifications</span>
+      </a>
+    </mat-nav-list>
+
+    <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-700">
+      <button mat-button class="w-full text-gray-300 hover:text-white" (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        Déconnexion
+      </button>
+    </div>
+  </mat-sidenav>
+
+  <!-- Main content -->
+  <mat-sidenav-content class="flex flex-col">
+    <!-- Topbar -->
+    <mat-toolbar class="bg-white border-b border-gray-200 shadow-sm">
+      <button mat-icon-button (click)="sidenavOpen = !sidenavOpen">
+        <mat-icon>menu</mat-icon>
+      </button>
+
+      <span class="flex-1"></span>
+
+      <ng-container *ngIf="user$ | async as user">
+        <span class="text-sm text-gray-600 mr-4">{{ user.nom_complet }}</span>
+        <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-semibold">
+          {{ user.prenom[0] }}{{ user.nom[0] }}
+        </div>
+      </ng-container>
+    </mat-toolbar>
+
+    <!-- Page content -->
+    <main class="flex-1 overflow-y-auto p-6">
+      <router-outlet></router-outlet>
+    </main>
+  </mat-sidenav-content>
+
+</mat-sidenav-container>

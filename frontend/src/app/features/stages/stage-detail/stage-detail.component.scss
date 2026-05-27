@@ -1,0 +1,19 @@
+.page-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-draft    { background: #f3f4f6; color: #6b7280; }
+.status-active   { background: #d1fae5; color: #065f46; }
+.status-archived { background: #fef3c7; color: #92400e; }
+.status-done     { background: #dbeafe; color: #1e40af; }

@@ -1,0 +1,40 @@
+@use '@angular/material' as mat;
+@include mat.core();
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+$primary-palette: mat.define-palette(mat.$blue-palette, 600);
+$accent-palette:  mat.define-palette(mat.$teal-palette, 500);
+$warn-palette:    mat.define-palette(mat.$red-palette);
+
+$theme: mat.define-light-theme((
+  color: (
+    primary: $primary-palette,
+    accent:  $accent-palette,
+    warn:    $warn-palette,
+  ),
+  typography: mat.define-typography-config($font-family: 'Manrope, Inter, sans-serif'),
+  density: 0,
+));
+
+@include mat.all-component-themes($theme);
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Manrope', 'Inter', sans-serif;
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+.app-card {
+  @apply bg-white rounded-xl shadow-sm border border-gray-100;
+}

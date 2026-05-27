@@ -1,0 +1,74 @@
+<div class="page-container">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Gestion des étudiants</h1>
+      <p class="text-gray-500 text-sm mt-1">{{ rows.length }} étudiant(s) dans vos stages actifs</p>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="bg-white rounded-xl border border-gray-200 p-4 mb-6">
+    <mat-form-field appearance="outline" class="w-full max-w-md" subscriptSizing="dynamic">
+      <mat-label>Rechercher un étudiant</mat-label>
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput [(ngModel)]="search" (input)="onSearch()" placeholder="Nom, email, stage...">
+    </mat-form-field>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex justify-center py-12">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <!-- Empty -->
+  <div *ngIf="!loading && rows.length === 0"
+       class="text-center py-16 bg-white rounded-xl border border-gray-200">
+    <mat-icon class="!text-5xl text-gray-300 mb-3">people_outline</mat-icon>
+    <p class="text-gray-500">Aucun étudiant trouvé.</p>
+  </div>
+
+  <!-- Table -->
+  <div *ngIf="!loading && rows.length > 0"
+       class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 border-b border-gray-200">
+        <tr>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Étudiant</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Stage</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Statut</th>
+          <th class="px-4 py-3"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <tr *ngFor="let row of rows" class="hover:bg-gray-50 transition-colors">
+          <td class="px-4 py-3">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-bold flex-shrink-0">
+                {{ row.user.prenom[0] }}{{ row.user.nom[0] }}
+              </div>
+              <div>
+                <p class="font-medium text-gray-900">{{ row.user.prenom }} {{ row.user.nom }}</p>
+              </div>
+            </div>
+          </td>
+          <td class="px-4 py-3 text-gray-500">{{ row.user.email }}</td>
+          <td class="px-4 py-3">
+            <button class="text-blue-600 hover:underline text-left" (click)="goToStage(row.stage.id)">
+              {{ row.stage.titre }}
+            </button>
+          </td>
+          <td class="px-4 py-3">
+            <span [class]="'chip ' + getChipClass(row.statut)">{{ row.statut }}</span>
+          </td>
+          <td class="px-4 py-3 text-right">
+            <button mat-icon-button [routerLink]="['/messagerie']"
+                    [queryParams]="{ userId: row.user.id }" matTooltip="Envoyer un message">
+              <mat-icon class="text-gray-400">chat_bubble_outline</mat-icon>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

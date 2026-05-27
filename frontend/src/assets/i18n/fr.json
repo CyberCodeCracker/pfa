@@ -1,0 +1,38 @@
+{
+  "app": {
+    "name": "ScholarFlow"
+  },
+  "auth": {
+    "login": "Connexion",
+    "logout": "Déconnexion",
+    "email": "Email institutionnel",
+    "password": "Mot de passe",
+    "remember": "Se souvenir pendant 30 jours",
+    "forgot_password": "Mot de passe oublié ?",
+    "connect": "Se connecter au portail",
+    "tagline": "Lier Ambition et Expérience"
+  },
+  "stages": {
+    "title": "Stages",
+    "nouveau": "Nouveau stage",
+    "statuts": {
+      "brouillon": "Brouillon",
+      "actif": "Actif",
+      "archivé": "Archivé",
+      "terminé": "Terminé"
+    }
+  },
+  "common": {
+    "loading": "Chargement...",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "view": "Voir",
+    "confirm": "Confirmer",
+    "close": "Fermer",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "page_not_found": "Page introuvable"
+  }
+}

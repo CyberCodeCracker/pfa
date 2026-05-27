@@ -1,0 +1,111 @@
+<div class="bg-white rounded-xl border border-gray-200 p-6">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="font-semibold text-gray-900">
+      Étudiants affectés
+      <span class="ml-2 text-sm font-normal text-gray-500">({{ affectations.length }})</span>
+    </h3>
+    <button *ngIf="isEnseignant" mat-stroked-button color="primary"
+            (click)="showAddForm = !showAddForm">
+      <mat-icon>person_add</mat-icon>
+      Ajouter un étudiant
+    </button>
+  </div>
+
+  <!-- Add form -->
+  <div *ngIf="showAddForm && isEnseignant"
+       class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
+    <h4 class="text-sm font-semibold text-blue-800 mb-3">Nouvel étudiant</h4>
+    <p *ngIf="addError" class="text-red-600 text-sm mb-3">{{ addError }}</p>
+    <form [formGroup]="addForm" (ngSubmit)="addStudent()" class="flex flex-wrap gap-3 items-end">
+      <mat-form-field appearance="outline" class="flex-1 min-w-[140px]" subscriptSizing="dynamic">
+        <mat-label>Nom</mat-label>
+        <input matInput formControlName="nom">
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="flex-1 min-w-[140px]" subscriptSizing="dynamic">
+        <mat-label>Prénom</mat-label>
+        <input matInput formControlName="prenom">
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="flex-1 min-w-[200px]" subscriptSizing="dynamic">
+        <mat-label>Email institutionnel</mat-label>
+        <input matInput type="email" formControlName="email">
+      </mat-form-field>
+      <div class="flex gap-2">
+        <button mat-raised-button color="primary" type="submit"
+                [disabled]="addForm.invalid || addLoading">
+          <mat-spinner *ngIf="addLoading" diameter="16" class="inline mr-1"></mat-spinner>
+          Envoyer l'invitation
+        </button>
+        <button mat-stroked-button type="button" (click)="showAddForm = false">Annuler</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex justify-center py-8">
+    <mat-spinner diameter="36"></mat-spinner>
+  </div>
+
+  <!-- Error -->
+  <p *ngIf="error && !loading" class="text-red-600 text-sm">{{ error }}</p>
+
+  <!-- Empty -->
+  <div *ngIf="!loading && affectations.length === 0" class="text-center py-8 text-gray-400">
+    <mat-icon class="!text-4xl mb-2">people_outline</mat-icon>
+    <p class="text-sm">Aucun étudiant affecté à ce stage.</p>
+  </div>
+
+  <!-- Table -->
+  <div *ngIf="!loading && affectations.length > 0" class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="text-left text-xs text-gray-500 border-b border-gray-100">
+          <th class="pb-2 pr-4 font-medium">Étudiant</th>
+          <th class="pb-2 pr-4 font-medium">Email</th>
+          <th class="pb-2 pr-4 font-medium">Statut</th>
+          <th class="pb-2 pr-4 font-medium">Date d'affectation</th>
+          <th *ngIf="isEnseignant" class="pb-2 font-medium"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let a of affectations; trackBy: trackByAff"
+            class="border-b border-gray-50 hover:bg-gray-50">
+          <td class="py-3 pr-4">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold">
+                {{ a.etudiant?.prenom?.[0] }}{{ a.etudiant?.nom?.[0] }}
+              </div>
+              <span class="font-medium text-gray-900">
+                {{ a.etudiant?.prenom }} {{ a.etudiant?.nom }}
+              </span>
+            </div>
+          </td>
+          <td class="py-3 pr-4 text-gray-500">{{ a.etudiant?.email }}</td>
+          <td class="py-3 pr-4">
+            <span [class]="'chip ' + getStatutClass(a.statut)">{{ getStatutLabel(a.statut) }}</span>
+          </td>
+          <td class="py-3 pr-4 text-gray-500">{{ a.date_affectation | date:'dd/MM/yyyy' }}</td>
+          <td *ngIf="isEnseignant" class="py-3">
+            <ng-container *ngIf="confirmRetirerId !== a.etudiant?.id; else confirmBlock">
+              <button mat-icon-button color="warn" matTooltip="Retirer du stage"
+                      (click)="confirmRetirer(a.etudiant!.id)">
+                <mat-icon>person_remove</mat-icon>
+              </button>
+            </ng-container>
+            <ng-template #confirmBlock>
+              <div class="flex items-center gap-1">
+                <span class="text-xs text-red-600">Confirmer ?</span>
+                <button mat-icon-button color="warn" (click)="retirer(a.etudiant!.id)">
+                  <mat-icon>check</mat-icon>
+                </button>
+                <button mat-icon-button (click)="confirmRetirerId = null">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+            </ng-template>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

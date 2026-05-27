@@ -1,0 +1,119 @@
+<div class="page-container">
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex justify-center py-16">
+    <mat-spinner diameter="48"></mat-spinner>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error && !loading" class="bg-red-50 border border-red-200 rounded-xl p-8 text-center text-red-700">
+    <mat-icon class="!text-5xl text-red-300 mb-3">error_outline</mat-icon>
+    <p>{{ error }}</p>
+    <button mat-stroked-button color="warn" class="mt-3" (click)="goBack()">Retour aux stages</button>
+  </div>
+
+  <ng-container *ngIf="stage && !loading">
+    <!-- Header -->
+    <div class="flex items-start justify-between mb-6 gap-4 flex-wrap">
+      <div class="flex items-start gap-3">
+        <button mat-icon-button (click)="goBack()">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span [class]="'status-badge ' + getStatutClass(stage.statut)">
+              {{ stage.statut | titlecase }}
+            </span>
+            <span *ngIf="stage.niveau" class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+              {{ stage.niveau }}
+            </span>
+          </div>
+          <h1 class="text-2xl font-bold text-gray-900">{{ stage.titre }}</h1>
+          <p *ngIf="stage.etablissement" class="text-gray-500 text-sm mt-1">
+            <mat-icon class="!text-sm align-middle">business</mat-icon>
+            {{ stage.etablissement.nom }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Action buttons (V1) — enseignant only -->
+      <div *ngIf="(currentUser$ | async)?.role === 'enseignant'" class="flex gap-2 flex-wrap">
+        <button mat-stroked-button color="primary" (click)="openCreateMeeting()">
+          <mat-icon>event</mat-icon>
+          Créer Réunion
+        </button>
+        <button mat-raised-button color="primary" (click)="editStage()">
+          <mat-icon>edit</mat-icon>
+          Modifier
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats row -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+      <div class="stat-card">
+        <div class="text-2xl font-bold text-blue-600">
+          {{ stage.etudiants_count ?? stage.affectations?.length ?? 0 }}
+        </div>
+        <div class="text-xs text-gray-500 mt-1">Étudiants</div>
+      </div>
+      <div class="stat-card">
+        <div class="text-xl font-bold text-gray-700">{{ stage.date_debut | date:'dd/MM' }}</div>
+        <div class="text-xs text-gray-500 mt-1">Début</div>
+      </div>
+      <div class="stat-card">
+        <div class="text-xl font-bold text-gray-700">{{ stage.date_fin | date:'dd/MM/yy' }}</div>
+        <div class="text-xs text-gray-500 mt-1">Fin</div>
+      </div>
+      <div class="stat-card"
+           [class.border-red-200]="(getDaysRemaining() ?? 0) > 0 && (getDaysRemaining() ?? 0) < 7"
+           [class.border-yellow-200]="(getDaysRemaining() ?? 0) >= 7 && (getDaysRemaining() ?? 0) < 30">
+        <div class="text-2xl font-bold"
+             [class.text-red-600]="(getDaysRemaining() ?? 0) > 0 && (getDaysRemaining() ?? 0) < 7"
+             [class.text-yellow-600]="(getDaysRemaining() ?? 0) >= 7 && (getDaysRemaining() ?? 0) < 30"
+             [class.text-gray-700]="(getDaysRemaining() ?? 0) >= 30">
+          {{ getDaysRemaining() !== null && getDaysRemaining()! > 0 ? getDaysRemaining() : '—' }}
+        </div>
+        <div class="text-xs text-gray-500 mt-1">Jours restants</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <mat-tab-group [(selectedIndex)]="selectedTabIndex" animationDuration="150ms">
+
+      <!-- Aperçu -->
+      <mat-tab label="Aperçu">
+        <div class="bg-white rounded-xl border border-gray-200 p-6 mt-4">
+          <h3 class="font-semibold text-gray-900 mb-3">Description</h3>
+          <p *ngIf="stage.description; else noDesc" class="text-gray-600 whitespace-pre-line leading-relaxed">
+            {{ stage.description }}
+          </p>
+          <ng-template #noDesc>
+            <p class="text-gray-400 italic text-sm">Aucune description fournie.</p>
+          </ng-template>
+        </div>
+        <app-stage-feedback [stageId]="stage.id"></app-stage-feedback>
+      </mat-tab>
+
+      <!-- Étudiants -->
+      <mat-tab label="Étudiants">
+        <app-stage-students [stageId]="stage.id" class="block mt-4"></app-stage-students>
+      </mat-tab>
+
+      <!-- Documents -->
+      <mat-tab label="Documents">
+        <app-stage-documents [stageId]="stage.id" class="block mt-4"></app-stage-documents>
+      </mat-tab>
+
+      <!-- Réunions -->
+      <mat-tab label="Réunions">
+        <app-stage-meetings [stageId]="stage.id" class="block mt-4"></app-stage-meetings>
+      </mat-tab>
+
+      <!-- Chat de groupe -->
+      <mat-tab label="Discussion">
+        <app-stage-chat [stageId]="stage.id" class="block mt-4"></app-stage-chat>
+      </mat-tab>
+
+    </mat-tab-group>
+  </ng-container>
+</div>

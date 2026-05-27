@@ -1,0 +1,193 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>ScholarSync | Portal Login</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed": "#001b3c",
+                        "on-surface-variant": "#43474e",
+                        "on-tertiary-fixed-variant": "#005049",
+                        "secondary-container": "#d5e3fc",
+                        "outline": "#74777f",
+                        "on-background": "#191c1e",
+                        "secondary-fixed": "#d5e3fc",
+                        "inverse-on-surface": "#eff1f3",
+                        "error-container": "#ffdad6",
+                        "outline-variant": "#c4c6cf",
+                        "surface": "#f7f9fb",
+                        "on-error-container": "#93000a",
+                        "primary": "#002045",
+                        "tertiary": "#002522",
+                        "primary-container": "#1a365d",
+                        "tertiary-fixed-dim": "#6bd8cb",
+                        "on-surface": "#191c1e",
+                        "tertiary-fixed": "#89f5e7",
+                        "inverse-primary": "#adc7f7",
+                        "surface-variant": "#e0e3e5",
+                        "on-primary-fixed-variant": "#2d476f",
+                        "on-tertiary-container": "#3cafa2",
+                        "on-error": "#ffffff",
+                        "surface-container": "#eceef0",
+                        "secondary": "#515f74",
+                        "on-secondary-fixed-variant": "#3a485b",
+                        "surface-tint": "#455f88",
+                        "secondary-fixed-dim": "#b9c7df",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-container": "#86a0cd",
+                        "on-secondary-fixed": "#0d1c2e",
+                        "background": "#f7f9fb",
+                        "primary-fixed-dim": "#adc7f7",
+                        "on-secondary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "primary-fixed": "#d6e3ff",
+                        "surface-dim": "#d8dadc",
+                        "surface-container-highest": "#e0e3e5",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-bright": "#f7f9fb",
+                        "on-secondary-container": "#57657a",
+                        "surface-container-high": "#e6e8ea",
+                        "surface-container-low": "#f2f4f6",
+                        "on-tertiary-fixed": "#00201d",
+                        "on-primary": "#ffffff",
+                        "tertiary-container": "#003d37",
+                        "inverse-surface": "#2d3133"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .editorial-gradient {
+            background: linear-gradient(135deg, #002045 0%, #1a365d 100%);
+        }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+        }
+        .ghost-border {
+            border: 1px solid rgba(196, 198, 207, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased overflow-x-hidden">
+<div class="min-h-screen flex flex-col md:flex-row">
+<div class="hidden md:flex md:w-1/2 lg:w-3/5 bg-primary relative overflow-hidden flex-col justify-between p-12 lg:p-20">
+<div class="absolute inset-0 z-0">
+<img class="w-full h-full object-cover opacity-30 mix-blend-overlay" data-alt="Interior of a modern, sunlit university library with large windows and minimalist architecture in a high-end academic setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4g6AK3RA8yZT9FKlBQZGBviGIhMle0_iDT5PTKGpa2di7LH9dhHYBVAT_jdba0-pOibU97MlVPgDvxw1Yjepte6vAoBev2b5iHDS0AbJUo_Vfalg8MvlcUpFJWibfLOaBCS0_2MxdWr4Wn5zSCnvk4PGxuf4QNn3qS6TsrM6D1ypjMBAFYO_nKsW1uBAgjmL0HkRt4RahLpf_SCojOiuMPE-cnr-7U6EuOImkLePw5xrJy28PjGbVeq9GmvM02UHd3mKfnOybiwJZ">
+<div class="absolute inset-0 bg-gradient-to-br from-primary via-primary/80 to-transparent"></div>
+</div>
+<div class="relative z-10 flex items-center gap-3">
+<div class="w-10 h-10 bg-primary-fixed rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">auto_stories</span>
+</div>
+<span class="font-headline font-extrabold text-2xl text-white tracking-tight">StageTN</span>
+</div>
+<div class="relative z-10 max-w-xl">
+<p class="font-headline text-on-primary-container text-sm font-semibold tracking-widest uppercase mb-4">EXCELLENCE ACADÉMIQUE</p>
+<h1 class="font-headline text-display-lg text-white font-extrabold leading-tight tracking-tighter mb-8 text-5xl lg:text-6xl">Lier Ambition et Expérience.</h1>
+<p class="text-on-primary-container text-lg max-w-md leading-relaxed mb-12">Le portail institutionnel de référence pour la gestion des stages d'excellence, le suivi académique et le développement professionnel.</p>
+<div class="grid grid-cols-2 gap-8 pt-12 border-t border-white/10">
+<div>
+<p class="font-headline text-3xl text-white font-bold mb-1">94%</p>
+<p class="text-on-primary-container text-sm">Stages Réussis</p>
+</div>
+<div>
+<p class="font-headline text-3xl text-white font-bold mb-1">200+</p>
+<p class="text-on-primary-container text-sm">Établissements Partenaires</p>
+</div>
+</div>
+</div>
+<div class="relative z-10 text-white/40 text-sm">© 2024 ScholarSync. Gestion Académique Éditoriale.</div>
+</div>
+<div class="flex-1 flex items-center justify-center p-6 md:p-12 lg:p-24 bg-surface-container-low">
+<div class="w-full max-w-md space-y-10">
+<div class="md:hidden flex items-center gap-2 mb-12">
+<div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-sm" style="font-variation-settings: 'FILL' 1;">auto_stories</span>
+</div>
+<span class="font-headline font-extrabold text-xl text-primary tracking-tight">ScholarSync</span>
+</div>
+<div class="space-y-3">
+<h2 class="font-headline text-headline-md text-on-surface font-bold text-3xl tracking-tight">Bon retour</h2>
+<p class="text-on-surface-variant text-body-md">Accédez à votre espace de gestion des stages académiques.</p>
+</div>
+<div class="flex p-1 bg-surface-container rounded-xl gap-1">
+
+
+
+</div>
+<form class="space-y-6">
+<div class="space-y-5">
+<div class="space-y-2">
+<label class="block text-sm font-semibold text-on-surface-variant" for="email">Email Institutionnel</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-lg">alternate_email</span>
+<input class="w-full pl-10 pr-4 py-3 bg-surface-container-lowest ghost-border rounded-lg text-on-surface placeholder:text-outline/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" id="email" name="email" placeholder="nom@universite.edu" type="email">
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-center">
+<label class="block text-sm font-semibold text-on-surface-variant" for="password">Mot de passe</label>
+<a class="text-xs font-bold text-primary hover:underline" href="#">Mot de passe oublié ?</a>
+</div>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-lg">lock</span>
+<input class="w-full pl-10 pr-10 py-3 bg-surface-container-lowest ghost-border rounded-lg text-on-surface placeholder:text-outline/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" id="password" name="password" placeholder="••••••••" type="password">
+<button class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-primary transition-colors" type="button">
+<span class="material-symbols-outlined text-lg">visibility</span>
+</button>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<input class="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary/20" id="remember" type="checkbox">
+<label class="text-sm text-on-surface-variant font-medium" for="remember">Se souvenir pendant 30 jours</label>
+</div>
+<button class="w-full editorial-gradient text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl active:scale-[0.98] transition-all" type="submit">Se connecter au portail</button>
+</form>
+<div class="relative py-4">
+<div class="absolute inset-0 flex items-center">
+<div class="w-full border-t border-outline-variant/30"></div>
+</div>
+<div class="relative flex justify-center text-xs uppercase tracking-widest font-bold">
+
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+
+
+</div>
+
+</div>
+</div>
+</div>
+<div class="fixed bottom-8 right-8 z-50">
+
+</div>
+
+
+</body></html>

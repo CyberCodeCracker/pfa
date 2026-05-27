@@ -1,0 +1,112 @@
+<div class="page-container">
+  <!-- Welcome header -->
+  <div class="flex items-start justify-between mb-8">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">
+        Bonjour, <span *ngIf="user$ | async as u">{{ u.prenom }}</span> 👋
+      </h1>
+      <p class="text-gray-500 mt-1">Voici un aperçu de votre activité sur ScholarFlow.</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="createStage()">
+      <mat-icon>add</mat-icon>
+      Nouveau stage
+    </button>
+  </div>
+
+  <!-- Stats cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+    <div class="stat-card bg-white rounded-xl border border-gray-200 p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-500">Stages actifs</p>
+          <p class="text-3xl font-bold text-blue-600 mt-1">{{ stagesActifs }}</p>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center">
+          <mat-icon class="text-blue-500">work_outline</mat-icon>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-card bg-white rounded-xl border border-gray-200 p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-500">Brouillons</p>
+          <p class="text-3xl font-bold text-yellow-500 mt-1">{{ stagesBrouillon }}</p>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-yellow-50 flex items-center justify-center">
+          <mat-icon class="text-yellow-500">edit_note</mat-icon>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-card bg-white rounded-xl border border-gray-200 p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-500">Actions rapides</p>
+          <p class="text-sm text-gray-400 mt-1">Gérez vos stages</p>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-teal-50 flex items-center justify-center">
+          <mat-icon class="text-teal-500">bolt</mat-icon>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick actions -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+    <button mat-stroked-button routerLink="/stages" class="quick-action-btn h-16 flex-col gap-1">
+      <mat-icon>list</mat-icon>
+      <span class="text-xs">Tous les stages</span>
+    </button>
+    <button mat-stroked-button routerLink="/etudiants" class="quick-action-btn h-16 flex-col gap-1">
+      <mat-icon>group</mat-icon>
+      <span class="text-xs">Étudiants</span>
+    </button>
+    <button mat-stroked-button routerLink="/reunions" class="quick-action-btn h-16 flex-col gap-1">
+      <mat-icon>event</mat-icon>
+      <span class="text-xs">Réunions</span>
+    </button>
+    <button mat-stroked-button routerLink="/messagerie" class="quick-action-btn h-16 flex-col gap-1">
+      <mat-icon>chat_bubble_outline</mat-icon>
+      <span class="text-xs">Messagerie</span>
+    </button>
+  </div>
+
+  <!-- Recent stages -->
+  <div class="bg-white rounded-xl border border-gray-200 p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="font-semibold text-gray-900">Stages récents</h2>
+      <a routerLink="/stages" class="text-sm text-blue-600 hover:underline">Voir tous</a>
+    </div>
+
+    <div *ngIf="loading" class="flex justify-center py-8">
+      <mat-spinner diameter="36"></mat-spinner>
+    </div>
+
+    <div *ngIf="!loading && recentStages.length === 0" class="text-center py-8 text-gray-400">
+      <mat-icon class="!text-4xl mb-2">school</mat-icon>
+      <p class="text-sm">Aucun stage créé pour l'instant.</p>
+      <button mat-raised-button color="primary" class="mt-3" (click)="createStage()">
+        Créer mon premier stage
+      </button>
+    </div>
+
+    <div *ngIf="!loading && recentStages.length > 0" class="space-y-2">
+      <div *ngFor="let s of recentStages"
+           class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+           (click)="goToStage(s.id)">
+        <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+          <mat-icon class="text-blue-500 !text-base">work_outline</mat-icon>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium text-gray-900 truncate">{{ s.titre }}</p>
+          <p class="text-xs text-gray-500">
+            {{ s.etablissement?.nom ?? '—' }} · {{ s.date_debut | date:'dd/MM/yyyy' }}
+          </p>
+        </div>
+        <span [class]="'chip ' + getStatutClass(s.statut)">{{ s.statut }}</span>
+        <mat-icon class="text-gray-300 !text-base">chevron_right</mat-icon>
+      </div>
+    </div>
+  </div>
+</div>

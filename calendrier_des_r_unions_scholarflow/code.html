@@ -1,0 +1,370 @@
+<!DOCTYPE html><html class="light" lang="fr"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>ScholarFlow - Calendrier Académique</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet">
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed-dim": "#6bd8cb",
+                        "primary-container": "#1a365d",
+                        "tertiary-fixed": "#89f5e7",
+                        "primary-fixed-dim": "#adc7f7",
+                        "inverse-primary": "#adc7f7",
+                        "primary": "#002045",
+                        "surface-container": "#eceef0",
+                        "secondary-container": "#d5e3fc",
+                        "on-primary-fixed-variant": "#2d476f",
+                        "on-secondary-fixed": "#0d1c2e",
+                        "background": "#f7f9fb",
+                        "surface": "#f7f9fb",
+                        "on-surface": "#191c1e",
+                        "surface-tint": "#455f88",
+                        "on-background": "#191c1e",
+                        "tertiary-container": "#003d37",
+                        "error": "#ba1a1a",
+                        "surface-bright": "#f7f9fb",
+                        "surface-container-low": "#f2f4f6",
+                        "on-secondary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed": "#d6e3ff",
+                        "on-secondary-container": "#57657a",
+                        "surface-dim": "#d8dadc",
+                        "surface-variant": "#e0e3e5",
+                        "on-tertiary-container": "#3cafa2",
+                        "on-surface-variant": "#43474e",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#005049",
+                        "outline-variant": "#c4c6cf",
+                        "on-tertiary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "inverse-surface": "#2d3133",
+                        "on-primary-fixed": "#001b3c",
+                        "surface-container-highest": "#e0e3e5",
+                        "surface-container-high": "#e6e8ea",
+                        "secondary-fixed": "#d5e3fc",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-fixed": "#00201d",
+                        "on-primary-container": "#86a0cd",
+                        "inverse-on-surface": "#eff1f3",
+                        "on-secondary-fixed-variant": "#3a485b",
+                        "tertiary": "#002522",
+                        "secondary-fixed-dim": "#b9c7df",
+                        "on-error": "#ffffff",
+                        "secondary": "#515f74",
+                        "outline": "#74777f"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "display": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            border-top: 1px solid rgba(196, 198, 207, 0.2);
+            border-left: 1px solid rgba(196, 198, 207, 0.2);
+        }
+        .calendar-cell {
+            min-height: 120px;
+            border-right: 1px solid rgba(196, 198, 207, 0.2);
+            border-bottom: 1px solid rgba(196, 198, 207, 0.2);
+            padding: 12px;
+            transition: background-color 0.2s ease;
+        }
+        .calendar-cell:hover {
+            background-color: #f2f4f6;
+        }
+        .glass-nav {
+            background: rgba(247, 249, 251, 0.8);
+            backdrop-filter: blur(20px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body antialiased">
+<!-- Sidebar Navigation (SideNavBar) -->
+<aside class="h-screen w-64 fixed left-0 top-0 bg-surface-container/80 backdrop-blur-xl flex flex-col py-8 px-6 space-y-4 z-50">
+<div class="mb-8 px-2 flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-fixed-dim" style="font-variation-settings: 'FILL' 1;">school</span>
+</div>
+<div>
+<h1 class="font-headline text-xl font-bold text-primary tracking-tighter">ScholarFlow</h1>
+<p class="text-[10px] font-bold text-on-surface-variant/60 tracking-widest uppercase">Portail Admin</p>
+</div>
+</div>
+<nav class="flex-1 space-y-2">
+<!-- Navigation Items Mapping -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label text-label-md">Tableau de bord</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="work">work</span>
+<span class="font-label text-label-md">Stages</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="school">school</span>
+<span class="font-label text-label-md">Étudiants</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-primary font-bold border-r-4 border-primary bg-surface-container-high" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_today" style="font-variation-settings: 'FILL' 1;">calendar_today</span>
+<span class="font-label text-label-md">Calendrier</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label text-label-md">Paramètres</span>
+</a>
+</nav>
+<div class="pt-4 border-t border-outline-variant/20">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:text-error hover:bg-error-container/10 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="font-label text-label-md">Déconnexion</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 min-h-screen">
+<!-- Top Navigation Bar -->
+<header class="flex justify-between items-center w-full px-8 py-4 sticky top-0 z-40 bg-background/80 backdrop-blur-md">
+<div class="flex items-center gap-4">
+<h2 class="font-headline text-headline-sm font-bold text-primary">Octobre 2024</h2>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex bg-surface-container p-1 rounded-xl">
+<button class="px-4 py-1.5 text-label-sm font-semibold bg-surface-container-lowest text-primary rounded-lg shadow-sm">Month</button>
+<button class="px-4 py-1.5 text-label-sm font-medium text-on-surface-variant hover:text-primary">Week</button>
+<button class="px-4 py-1.5 text-label-sm font-medium text-on-surface-variant hover:text-primary">Day</button>
+</div>
+<div class="flex items-center gap-2 border-l border-outline-variant/30 pl-6">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-all">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="search">search</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-all">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="tune">tune</span>
+</button>
+<button class="ml-2 px-6 py-2 bg-surface-container-lowest border border-outline-variant/30 text-label-sm font-bold text-primary rounded-xl hover:bg-surface-container-low transition-all">Today</button>
+</div>
+<div class="flex items-center gap-3 ml-4">
+<div class="relative">
+<span class="material-symbols-outlined p-2 text-on-surface-variant" data-icon="notifications">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full ring-2 ring-background"></span>
+</div>
+<img alt="Teacher Profile" class="w-10 h-10 rounded-full object-cover border-2 border-surface-container-high" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdbHXex8k_fkl-tT8KKj-xzoXtKi9OYxNFLflwmRl4bAidg8PD61K8GQLqQPeKEk7cDO5S8XSw9e_d6SOpL5hV-px_rmNKSxtO00vTKyyhRkVK5Tz3DKuc6aWlI1lYo9rXVpPyRPTBK3dAHe1nf3vdqeqbqF6lG9wPpf4X3zybBn-695gDtPbAvWU4XFqL4aIOGhFGgRHpPdBv_sckRiHSplhd4dtKvkfNwg5gC52SwGDah_5g-UgKevSk2muuZuExF4KrlD7kDWSI">
+</div>
+</div>
+</header>
+<!-- Calendar Container -->
+<div class="px-8 pb-8">
+<div class="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-[0px_12px_32px_rgba(25,28,30,0.04)]">
+<!-- Day Headers -->
+<div class="grid grid-cols-7 bg-surface-container/30 border-b border-outline-variant/20">
+<div class="py-4 text-center text-label-sm font-bold text-on-surface-variant/60 tracking-widest">SUNDAY</div>
+<div class="py-4 text-center text-label-sm font-bold text-on-surface-variant/60 tracking-widest">MONDAY</div>
+<div class="py-4 text-center text-label-sm font-bold text-on-surface-variant/60 tracking-widest">TUESDAY</div>
+<div class="py-4 text-center text-label-sm font-bold text-on-surface-variant/60 tracking-widest">WEDNESDAY</div>
+<div class="py-4 text-center text-label-sm font-bold text-on-surface-variant/60 tracking-widest">THURSDAY</div>
+<div class="py-4 text-center text-label-sm font-bold text-on-surface-variant/60 tracking-widest">FRIDAY</div>
+<div class="py-4 text-center text-label-sm font-bold text-on-surface-variant/60 tracking-widest">SATURDAY</div>
+</div>
+<!-- Calendar Grid -->
+<div class="calendar-grid">
+<!-- Week 1 -->
+<div class="calendar-cell opacity-40" style="transform: translateY(0px); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);"><span class="text-label-md font-semibold">29</span></div>
+<div class="calendar-cell opacity-40" style="transform: translateY(0px); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);"><span class="text-label-md font-semibold">30</span></div>
+<div class="calendar-cell" style="transform: translateY(0px); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);"><span class="text-label-md font-semibold text-on-surface">1</span></div>
+<div class="calendar-cell"><span class="text-label-md font-semibold text-on-surface">2</span></div>
+<div class="calendar-cell" style="transform: translateY(0px); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+<span class="text-label-md font-semibold text-on-surface">3</span>
+<div class="mt-2 p-2 rounded-lg bg-[#ccfbf1] text-[#006a60] border-l-4 border-[#006a60] text-[10px] leading-tight font-bold">
+                            9:00 AM • <br>Sarah Jenkins Check-in
+                        </div>
+</div>
+<div class="calendar-cell"><span class="text-label-md font-semibold text-on-surface">4</span></div>
+<div class="calendar-cell"><span class="text-label-md font-semibold text-on-surface">5</span></div>
+<!-- Week 2 -->
+<div class="calendar-cell" style="transform: translateY(0px); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);"><span class="text-label-md font-semibold text-on-surface">6</span></div>
+<div class="calendar-cell" style="transform: translateY(0px); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+<span class="text-label-md font-semibold text-on-surface">7</span>
+<div class="mt-2 p-2 rounded-lg bg-secondary-container/50 text-on-secondary-container text-[10px] leading-tight font-bold border-l-4 border-secondary">
+                            2:00 PM • <br>Adobe Mid-term Review
+                        </div>
+</div>
+<div class="calendar-cell" style="transform: translateY(0px); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);"><span class="text-label-md font-semibold text-on-surface">8</span></div>
+<div class="calendar-cell" style="transform: translateY(0px); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);"><span class="text-label-md font-semibold text-on-surface">9</span></div>
+<div class="calendar-cell" style="transform: translateY(0px); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+<span class="text-label-md font-bold text-primary flex items-center justify-between">10 <span class="w-1.5 h-1.5 bg-primary rounded-full"></span></span>
+<div class="mt-2 space-y-2">
+<div class="p-2 rounded-lg bg-[#ccfbf1] text-[#006a60] border-l-4 border-[#006a60] text-[10px] leading-tight font-bold">
+                                10:30 AM • <br>Marcus Wu Feedback
+                            </div>
+<div class="p-2 rounded-lg bg-error-container/50 text-on-error-container border-l-4 border-error text-[10px] leading-tight font-bold">
+                                4:00 PM • <br>URGENT: Site Visit
+                            </div>
+</div>
+</div>
+<div class="calendar-cell" style="transform: translateY(0px); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+<span class="text-label-md font-semibold text-on-surface">11</span>
+<div class="mt-2 p-2 rounded-lg bg-secondary-container/50 text-on-secondary-container text-[10px] leading-tight font-bold border-l-4 border-secondary">
+                            1:00 PM • <br>Tech Mixer Prep
+                        </div>
+</div>
+<div class="calendar-cell"><span class="text-label-md font-semibold text-on-surface">12</span></div>
+<!-- Week 3 -->
+<div class="calendar-cell" style="transform: translateY(0px); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);"><span class="text-label-md font-semibold text-on-surface">13</span></div>
+<div class="calendar-cell" style="transform: translateY(0px); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);"><span class="text-label-md font-semibold text-on-surface">14</span></div>
+<div class="calendar-cell" style="transform: translateY(0px); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+<span class="text-label-md font-semibold text-on-surface">15</span>
+<div class="mt-2 p-2 rounded-lg bg-secondary-container/50 text-on-secondary-container text-[10px] leading-tight font-bold border-l-4 border-secondary">
+                            11:00 AM • <br>Google Intern Panel
+                        </div>
+</div>
+<div class="calendar-cell" style="transform: translateY(0px); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);"><span class="text-label-md font-semibold text-on-surface">16</span></div>
+<div class="calendar-cell">
+<span class="text-label-md font-semibold text-on-surface">17</span>
+<div class="mt-2 p-2 rounded-lg bg-[#ccfbf1] text-[#006a60] border-l-4 border-[#006a60] text-[10px] leading-tight font-bold">
+                            9:30 AM • <br>Elena Vance Check-in
+                        </div>
+</div>
+<div class="calendar-cell" style="transform: translateY(0px); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);"><span class="text-label-md font-semibold text-on-surface">18</span></div>
+<div class="calendar-cell"><span class="text-label-md font-semibold text-on-surface">19</span></div>
+<!-- Week 4 -->
+<div class="calendar-cell" style="transform: translateY(0px); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);"><span class="text-label-md font-semibold text-on-surface">20</span></div>
+<div class="calendar-cell" style="transform: translateY(0px); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+<span class="text-label-md font-semibold text-on-surface">21</span>
+<div class="mt-2 p-2 rounded-lg bg-primary-container text-on-primary-fixed border-l-4 border-primary text-[10px] leading-tight font-bold">
+                            10:00 AM • <br>Sync Éthique ML
+                        </div>
+</div>
+<div class="calendar-cell" style="transform: translateY(0px); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);"><span class="text-label-md font-semibold text-on-surface">22</span></div>
+<div class="calendar-cell" style="transform: translateY(0px); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+<span class="text-label-md font-semibold text-on-surface">23</span>
+<div class="mt-2 p-2 rounded-lg bg-secondary-container/50 text-on-secondary-container text-[10px] leading-tight font-bold border-l-4 border-secondary">
+                            2:00 PM • <br>Conseil en Recherche
+                        </div>
+</div>
+<div class="calendar-cell" style="transform: translateY(0px); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);"><span class="text-label-md font-semibold text-on-surface">24</span></div>
+<div class="calendar-cell" style="transform: translateY(0px); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);"><span class="text-label-md font-semibold text-on-surface">25</span></div>
+<div class="calendar-cell"><span class="text-label-md font-semibold text-on-surface">26</span></div>
+<!-- Week 5 -->
+<div class="calendar-cell" style="transform: translateY(0px); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);"><span class="text-label-md font-semibold text-on-surface">27</span></div>
+<div class="calendar-cell" style="transform: translateY(-2px); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);"><span class="text-label-md font-semibold text-on-surface">28</span></div>
+<div class="calendar-cell" style="transform: translateY(0px); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);"><span class="text-label-md font-semibold text-on-surface">29</span></div>
+<div class="calendar-cell" style="transform: translateY(0px); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);"><span class="text-label-md font-semibold text-on-surface">30</span></div>
+<div class="calendar-cell" style="transform: translateY(0px); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);"><span class="text-label-md font-semibold text-on-surface">31</span></div>
+<div class="calendar-cell opacity-40" style="transform: translateY(0px); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);"><span class="text-label-md font-semibold">1</span></div>
+<div class="calendar-cell opacity-40"><span class="text-label-md font-semibold">2</span></div>
+</div>
+</div>
+<!-- Contextual FAB (Restricted to Calendar/Home) -->
+
+</div>
+<!-- Secondary Info Area (Asymmetric Layout) -->
+<div class="px-8 grid grid-cols-3 gap-6 pb-12">
+<div class="col-span-2 p-6 bg-surface-container-lowest rounded-2xl">
+<h3 class="font-headline text-headline-sm mb-4">Aperçu de la semaine prochaine</h3>
+<div class="space-y-4">
+<div class="flex items-center gap-4 p-4 rounded-xl bg-surface-container-low border-l-4 border-tertiary">
+<div class="flex flex-col items-center justify-center bg-surface-container-lowest w-14 h-14 rounded-lg shadow-sm">
+<span class="text-[10px] font-bold text-on-surface-variant">LUN</span>
+<span class="text-lg font-extrabold text-primary">21</span>
+</div>
+<div class="flex-1">
+<p class="font-bold text-on-surface">Sync Éthique ML</p>
+<p class="text-sm text-on-surface-variant">Conférence Salle A • 10:00 - 11:30</p>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="more_vert">more_vert</span>
+</div>
+<div class="flex items-center gap-4 p-4 rounded-xl bg-surface-container-low border-l-4 border-primary">
+<div class="flex flex-col items-center justify-center bg-surface-container-lowest w-14 h-14 rounded-lg shadow-sm">
+<span class="text-[10px] font-bold text-on-surface-variant">MER</span>
+<span class="text-lg font-extrabold text-primary">23</span>
+</div>
+<div class="flex-1">
+<p class="font-bold text-on-surface">Conseil en Recherche</p>
+<p class="text-sm text-on-surface-variant">Bureau 304 • 14:00 - 15:00</p>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="more_vert">more_vert</span>
+</div>
+</div>
+</div>
+<div class="p-6 bg-primary-container text-white rounded-2xl flex flex-col justify-between relative overflow-hidden">
+<div class="relative z-10">
+<h3 class="font-headline text-headline-sm font-bold opacity-90 tracking-tight">Statistiques Hebdo</h3>
+<div class="mt-8 space-y-6">
+<div>
+<p class="text-xs font-bold uppercase tracking-widest text-on-primary-container">Total Réunions</p>
+<p class="text-4xl font-extrabold mt-1">12</p>
+</div>
+<div>
+<p class="text-xs font-bold uppercase tracking-widest text-on-primary-container">Check-ins Complétés</p>
+<p class="text-4xl font-extrabold mt-1">8/10</p>
+</div>
+</div>
+</div>
+<!-- Abstract Texture -->
+<div class="absolute -right-4 -bottom-4 opacity-10">
+<span class="material-symbols-outlined text-[120px]" data-icon="analytics" style="font-variation-settings: 'FILL' 1;">analytics</span>
+</div>
+<div class="mt-auto relative z-10">
+<button class="w-full py-3 bg-white/10 hover:bg-white/20 rounded-xl text-label-md font-bold transition-all backdrop-blur-sm">Rapport Complet</button>
+</div>
+</div>
+</div>
+</main>
+<script>
+        // Micro-interactions
+        document.querySelectorAll('.calendar-cell').forEach(cell => {
+            cell.addEventListener('mouseenter', () => {
+                cell.style.transform = 'translateY(-2px)';
+                cell.style.transition = 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            });
+            cell.addEventListener('mouseleave', () => {
+                cell.style.transform = 'translateY(0px)';
+            });
+        });
+
+        // Simple Toggle logic
+        const toggleButtons = document.querySelectorAll('.bg-surface-container button');
+        toggleButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                toggleButtons.forEach(b => {
+                    b.classList.remove('bg-surface-container-lowest', 'text-primary', 'shadow-sm', 'font-semibold');
+                    b.classList.add('text-on-surface-variant', 'font-medium');
+                });
+                btn.classList.add('bg-surface-container-lowest', 'text-primary', 'shadow-sm', 'font-semibold');
+                btn.classList.remove('text-on-surface-variant', 'font-medium');
+            });
+        });
+    </script>
+
+
+</body></html>

@@ -1,0 +1,28 @@
+.page-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.quick-action-btn {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: capitalize;
+  flex-shrink: 0;
+}
+
+.chip-draft    { background: #f3f4f6; color: #6b7280; }
+.chip-active   { background: #d1fae5; color: #065f46; }
+.chip-archived { background: #fef3c7; color: #92400e; }
+.chip-done     { background: #dbeafe; color: #1e40af; }

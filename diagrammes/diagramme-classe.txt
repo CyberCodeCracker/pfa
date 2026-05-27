@@ -1,0 +1,210 @@
+@startuml
+
+title Plateforme de gestion et suivi des stages académiques
+
+' =========================
+' INTERFACES (SOLID)
+' =========================
+interface IAuthService {
+  + login(email : String, password : String)
+  + logout()
+}
+
+interface IStageService {
+  + creerStage()
+  + modifierStage()
+  + supprimerStage()
+  + affecterEtudiant()
+}
+
+interface IDocumentService {
+  + uploadDocument()
+  + deleteDocument()
+}
+
+interface IRapportService {
+  + validerRapport(documentId : int)
+  + refuserRapport(documentId : int)
+}
+
+interface IFeedbackService {
+  + ajouterFeedback()
+}
+
+interface IReunionService {
+  + planifierReunion()
+  + annulerReunion()
+}
+
+interface IChatService {
+  + sendMessage()
+  + getMessages()
+}
+
+' =========================
+' USER (SRP)
+' =========================
+abstract class User {
+  - id : int
+  - nom : String
+  - prenom : String
+  - email : String
+  - password : String
+  - created_at : DateTime
+  - updated_at : DateTime
+
+  + getNom() : String
+}
+
+' =========================
+' ROLES
+' =========================
+class Enseignant {
+  - grade : String
+  - specialite : String
+}
+
+class Etudiant {
+  - niveau : String
+  - specialite : String
+  - groupe : String
+}
+
+User <|-- Enseignant
+User <|-- Etudiant
+
+' =========================
+' ETABLISSEMENT
+' =========================
+class Etablissement {
+  - id : int
+  - nom : String
+}
+
+' Teacher ↔ Etablissement (M:N)
+Enseignant "0..*" -- "0..*" Etablissement : appartient >
+
+' Stage ↔ Etablissement (1:N)
+Etablissement "1" -- "0..*" Stage : contient >
+Stage "1" -- "1" Etablissement
+
+' =========================
+' STAGE DOMAIN
+' =========================
+class Stage {
+  - id : int
+  - titre : String
+  - description : Text
+  - dateDebut : Date
+  - dateFin : Date
+  - statut : String
+}
+
+class Affectation {
+  - id : int
+  - dateAffectation : Date
+  - statut : String
+}
+
+class Document {
+  - id : int
+  - nom : String
+  - fichier : String
+  - statut : String
+  - commentaire : String
+  - dateUpload : DateTime
+}
+
+class Feedback {
+  - id : int
+  - contenu : Text
+  - note : float
+  - date : DateTime
+}
+
+class Reunion {
+  - id : int
+  - date : DateTime
+  - sujet : String
+  - statut : String
+}
+
+' =========================
+' RELATIONS STAGE
+' =========================
+Enseignant "1" -- "0..*" Stage : gere >
+
+Etudiant "1" -- "0..*" Affectation
+Stage "1" -- "0..*" Affectation
+
+Etudiant "1" -- "0..*" Document
+Stage "1" -- "0..*" Document
+
+Stage "1" -- "0..*" Reunion
+Enseignant "1" -- "0..*" Reunion
+
+Etudiant "1" -- "0..*" Feedback
+Enseignant "1" -- "0..*" Feedback
+Stage "1" -- "0..*" Feedback
+
+' =========================
+' CHAT SYSTEM
+' =========================
+class Message {
+  - id : int
+  - contenu : String
+  - date : DateTime
+}
+
+' PRIVATE CHAT (Enseignant - Etudiant)
+class PrivateChat {
+  - id : int
+}
+
+Enseignant "1" -- "0..*" PrivateChat
+Etudiant "1" -- "0..*" PrivateChat
+PrivateChat "1" -- "0..*" Message
+
+' PUBLIC CHAT (Stage Group Chat)
+class PublicChat {
+  - id : int
+}
+
+Stage "1" -- "1" PublicChat
+PublicChat "1" -- "0..*" Message
+
+Enseignant "1" -- "0..*" Message : envoie >
+Etudiant "1" -- "0..*" Message : envoie >
+
+' =========================
+' SERVICES (SOLID)
+' =========================
+class AuthService
+class StageService
+class DocumentService
+class RapportService
+class FeedbackService
+class ReunionService
+class ChatService
+
+AuthService ..|> IAuthService
+StageService ..|> IStageService
+DocumentService ..|> IDocumentService
+RapportService ..|> IRapportService
+FeedbackService ..|> IFeedbackService
+ReunionService ..|> IReunionService
+ChatService ..|> IChatService
+
+' =========================
+' DEPENDENCIES (DIP)
+' =========================
+Enseignant --> IStageService
+Enseignant --> IRapportService
+Enseignant --> IFeedbackService
+Enseignant --> IReunionService
+Enseignant --> IChatService
+
+Etudiant --> IDocumentService
+Etudiant --> IChatService
+
+@enduml

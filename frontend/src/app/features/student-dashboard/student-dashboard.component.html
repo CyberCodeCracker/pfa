@@ -1,0 +1,66 @@
+<div class="page-container">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900">
+      Mes stages
+    </h1>
+    <p class="text-gray-500 mt-1" *ngIf="user$ | async as u">
+      Bienvenue, {{ u.prenom }}. Voici vos stages affectés.
+    </p>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex justify-center py-16">
+    <mat-spinner diameter="48"></mat-spinner>
+  </div>
+
+  <!-- Empty -->
+  <div *ngIf="!loading && stages.length === 0"
+       class="text-center py-16 bg-white rounded-xl border border-gray-200">
+    <mat-icon class="!text-6xl text-gray-300 mb-4">school</mat-icon>
+    <h3 class="text-lg font-medium text-gray-500">Aucun stage pour le moment</h3>
+    <p class="text-gray-400 text-sm mt-1">
+      Votre enseignant vous enverra une invitation par email lorsqu'un stage vous sera affecté.
+    </p>
+  </div>
+
+  <!-- Stages grid -->
+  <div *ngIf="!loading && stages.length > 0"
+       class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div *ngFor="let s of stages"
+         class="bg-white rounded-xl border border-gray-200 p-5 cursor-pointer hover:shadow-md hover:border-blue-300 transition-all"
+         (click)="goToStage(s.id)">
+
+      <div class="flex items-start justify-between mb-3">
+        <span [class]="'chip ' + getStatutClass(s.statut)">{{ s.statut }}</span>
+        <span *ngIf="s.niveau" class="text-xs text-gray-400">{{ s.niveau }}</span>
+      </div>
+
+      <h3 class="font-semibold text-gray-900 text-sm leading-snug mb-3 line-clamp-2">
+        {{ s.titre }}
+      </h3>
+
+      <div class="space-y-1 text-xs text-gray-500">
+        <div *ngIf="s.etablissement" class="flex items-center gap-1">
+          <mat-icon class="!text-sm">business</mat-icon>
+          {{ s.etablissement.nom }}
+        </div>
+        <div *ngIf="s.enseignant" class="flex items-center gap-1">
+          <mat-icon class="!text-sm">person_outline</mat-icon>
+          {{ s.enseignant.prenom }} {{ s.enseignant.nom }}
+        </div>
+        <div class="flex items-center gap-1">
+          <mat-icon class="!text-sm">calendar_today</mat-icon>
+          {{ s.date_debut | date:'dd/MM/yyyy' }} → {{ s.date_fin | date:'dd/MM/yyyy' }}
+        </div>
+        <div *ngIf="getDaysRemaining(s.date_fin) > 0"
+             [class.text-red-500]="getDaysRemaining(s.date_fin) < 7"
+             [class.text-yellow-600]="getDaysRemaining(s.date_fin) >= 7 && getDaysRemaining(s.date_fin) < 30"
+             class="flex items-center gap-1 font-medium">
+          <mat-icon class="!text-sm">timer</mat-icon>
+          {{ getDaysRemaining(s.date_fin) }} jours restants
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

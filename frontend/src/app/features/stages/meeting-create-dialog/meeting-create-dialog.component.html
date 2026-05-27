@@ -1,0 +1,108 @@
+<h2 mat-dialog-title class="!text-xl !font-bold">Créer une réunion</h2>
+
+<mat-dialog-content class="!pt-2">
+  <p *ngIf="error" class="text-red-600 text-sm mb-3">{{ error }}</p>
+
+  <form [formGroup]="form" class="space-y-4" (ngSubmit)="onSubmit()">
+    <!-- Sujet -->
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Sujet de la réunion</mat-label>
+      <input matInput formControlName="sujet" placeholder="Ex: Point d'avancement mi-stage">
+      <mat-error *ngIf="form.get('sujet')?.hasError('required')">Requis</mat-error>
+    </mat-form-field>
+
+    <!-- Description -->
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Description (optionnel)</mat-label>
+      <textarea matInput formControlName="description" rows="2"></textarea>
+    </mat-form-field>
+
+    <!-- Date + Durée -->
+    <div class="grid grid-cols-2 gap-3">
+      <mat-form-field appearance="outline">
+        <mat-label>Date et heure</mat-label>
+        <input matInput type="datetime-local" formControlName="scheduled_at">
+        <mat-error *ngIf="form.get('scheduled_at')?.hasError('required')">Requis</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Durée (minutes)</mat-label>
+        <input matInput type="number" formControlName="duration_minutes" min="15" max="480">
+        <mat-error>15–480 min</mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Meet URL -->
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Lien Google Meet (optionnel)</mat-label>
+      <mat-icon matPrefix>videocam</mat-icon>
+      <input matInput formControlName="meet_url" placeholder="https://meet.google.com/xxx-xxxx-xxx">
+      <mat-hint>Collez le lien généré depuis Google Meet</mat-hint>
+    </mat-form-field>
+
+    <!-- Participants -->
+    <div>
+      <p class="text-sm font-medium text-gray-700 mb-2">
+        Participants
+        <span *ngIf="loadingStudents" class="text-gray-400 font-normal ml-1">Chargement...</span>
+      </p>
+
+      <div *ngIf="!loadingStudents && students.length === 0" class="text-sm text-gray-400">
+        Aucun étudiant actif dans ce stage.
+      </div>
+
+      <div *ngIf="!loadingStudents && students.length > 0" class="flex flex-wrap gap-2">
+        <button *ngFor="let s of students" type="button"
+                (click)="toggleParticipant(s.id)"
+                class="participant-chip"
+                [class.selected]="isSelected(s.id)">
+          <span class="initials">{{ s.prenom[0] }}{{ s.nom[0] }}</span>
+          {{ s.prenom }} {{ s.nom }}
+        </button>
+      </div>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="!px-6 !pb-4 gap-2">
+  <button mat-stroked-button type="button" (click)="cancel()">Annuler</button>
+  <button mat-raised-button color="primary" type="button"
+          [disabled]="form.invalid || loading"
+          (click)="onSubmit()">
+    <mat-spinner *ngIf="loading" diameter="16" class="inline mr-1"></mat-spinner>
+    Créer la réunion
+  </button>
+</mat-dialog-actions>
+
+<style>
+.participant-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.participant-chip.selected {
+  background: #dbeafe;
+  border-color: #93c5fd;
+  color: #1e40af;
+}
+.participant-chip .initials {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #bfdbfe;
+  color: #1d4ed8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+}
+</style>

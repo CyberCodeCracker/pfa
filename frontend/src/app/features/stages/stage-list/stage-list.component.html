@@ -1,0 +1,113 @@
+<div class="page-container">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Mes Stages</h1>
+      <p class="text-gray-500 text-sm mt-1">{{ total }} stage(s) au total</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="createStage()" class="flex items-center gap-2">
+      <mat-icon>add</mat-icon>
+      Nouveau stage
+    </button>
+  </div>
+
+  <!-- Filters bar -->
+  <div class="bg-white rounded-xl border border-gray-200 p-4 mb-6 flex flex-wrap gap-4 items-center">
+    <mat-form-field appearance="outline" class="flex-1 min-w-[200px]" subscriptSizing="dynamic">
+      <mat-label>Rechercher</mat-label>
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput [(ngModel)]="search" (keyup.enter)="onSearch()" placeholder="Titre du stage...">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-48" subscriptSizing="dynamic">
+      <mat-label>Statut</mat-label>
+      <mat-select [(ngModel)]="filterStatut" (ngModelChange)="onFilterChange()">
+        <mat-option *ngFor="let s of statuts" [value]="s.value">{{ s.label }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <button mat-stroked-button (click)="onSearch()" color="primary">
+      <mat-icon>search</mat-icon>
+      Rechercher
+    </button>
+  </div>
+
+  <!-- Loading state -->
+  <div *ngIf="loading" class="flex justify-center py-16">
+    <mat-spinner diameter="48"></mat-spinner>
+  </div>
+
+  <!-- Error state -->
+  <div *ngIf="error && !loading" class="bg-red-50 border border-red-200 rounded-xl p-6 text-center text-red-700">
+    <mat-icon class="text-red-400 text-4xl mb-2">error_outline</mat-icon>
+    <p>{{ error }}</p>
+    <button mat-stroked-button color="warn" class="mt-3" (click)="load()">Réessayer</button>
+  </div>
+
+  <!-- Empty state -->
+  <div *ngIf="!loading && !error && stages.length === 0" class="text-center py-16">
+    <mat-icon class="text-gray-300 !text-6xl">school</mat-icon>
+    <h3 class="text-lg font-medium text-gray-500 mt-4">Aucun stage trouvé</h3>
+    <p class="text-gray-400 text-sm mt-1">Créez votre premier sujet de stage pour commencer.</p>
+    <button mat-raised-button color="primary" class="mt-4" (click)="createStage()">
+      <mat-icon>add</mat-icon>
+      Nouveau stage
+    </button>
+  </div>
+
+  <!-- Grid -->
+  <div *ngIf="!loading && !error && stages.length > 0"
+       class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+    <div *ngFor="let stage of stages; trackBy: trackById"
+         class="stage-card bg-white rounded-xl border border-gray-200 p-5 cursor-pointer hover:shadow-md hover:border-blue-300 transition-all"
+         (click)="viewStage(stage.id)">
+
+      <!-- Status badge + menu -->
+      <div class="flex items-start justify-between mb-3">
+        <span [class]="'status-badge ' + getStatutClass(stage.statut)">
+          {{ getStatutLabel(stage.statut) }}
+        </span>
+        <button mat-icon-button class="!w-7 !h-7" (click)="editStage($event, stage.id)" matTooltip="Modifier">
+          <mat-icon class="!text-base text-gray-400">edit</mat-icon>
+        </button>
+      </div>
+
+      <!-- Title -->
+      <h3 class="font-semibold text-gray-900 text-sm leading-snug mb-2 line-clamp-2">
+        {{ stage.titre }}
+      </h3>
+
+      <!-- Description -->
+      <p *ngIf="stage.description" class="text-gray-500 text-xs line-clamp-2 mb-3">
+        {{ stage.description }}
+      </p>
+
+      <!-- Meta -->
+      <div class="space-y-1 mt-auto">
+        <div *ngIf="stage.etablissement" class="flex items-center gap-1 text-xs text-gray-500">
+          <mat-icon class="!text-sm">business</mat-icon>
+          {{ stage.etablissement.nom }}
+        </div>
+        <div class="flex items-center gap-1 text-xs text-gray-500">
+          <mat-icon class="!text-sm">calendar_today</mat-icon>
+          {{ stage.date_debut | date:'dd/MM/yyyy' }} → {{ stage.date_fin | date:'dd/MM/yyyy' }}
+        </div>
+        <div *ngIf="stage.etudiants_count !== undefined" class="flex items-center gap-1 text-xs text-gray-500">
+          <mat-icon class="!text-sm">people</mat-icon>
+          {{ stage.etudiants_count }} étudiant(s)
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="lastPage > 1" class="flex justify-center items-center gap-2 mt-8">
+    <button mat-icon-button [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+    <span class="text-sm text-gray-600">Page {{ currentPage }} / {{ lastPage }}</span>
+    <button mat-icon-button [disabled]="currentPage === lastPage" (click)="goToPage(currentPage + 1)">
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+  </div>
+</div>

@@ -1,0 +1,104 @@
+@startuml
+
+title Use Case Diagram - Plateforme de gestion des stages
+
+left to right direction
+
+' =========================
+' ACTEURS
+' =========================
+actor Enseignant
+actor Etudiant
+
+' =========================
+' SYSTEM BOUNDARY
+' =========================
+rectangle "Plateforme de gestion des stages" {
+
+  ' AUTH
+  usecase "Se connecter" as UC1
+  usecase "Se déconnecter" as UC2
+
+  ' ETABLISSEMENT / STAGE
+  usecase "Consulter établissements" as UC3
+  usecase "Gérer stages" as UC4
+  usecase "Créer stage" as UC4a
+  usecase "Modifier stage" as UC4b
+  usecase "Supprimer stage" as UC4c
+  usecase "Affecter étudiant au stage" as UC4d
+
+  ' DOCUMENTS
+  usecase "Gérer documents" as UC5
+  usecase "Uploader document" as UC5a
+  usecase "Supprimer document" as UC5b
+
+  ' RAPPORT
+  usecase "Gérer rapports" as UC6
+  usecase "Valider rapport" as UC6a
+  usecase "Refuser rapport" as UC6b
+
+  ' FEEDBACK
+  usecase "Ajouter feedback" as UC7
+
+  ' REUNION
+  usecase "Gérer réunions" as UC8
+  usecase "Planifier réunion" as UC8a
+  usecase "Annuler réunion" as UC8b
+
+  ' CHAT
+  usecase "Chat privé enseignant-étudiant" as UC9
+  usecase "Envoyer message privé" as UC9a
+  usecase "Consulter messages privés" as UC9b
+
+  usecase "Chat de groupe du stage" as UC10
+  usecase "Envoyer message groupe" as UC10a
+  usecase "Consulter messages groupe" as UC10b
+}
+
+' =========================
+' ASSOCIATIONS ACTEURS
+' =========================
+
+Enseignant --> UC1
+Enseignant --> UC2
+Etudiant --> UC1
+Etudiant --> UC2
+
+Enseignant --> UC3
+Enseignant --> UC4
+Enseignant --> UC5
+Enseignant --> UC6
+Enseignant --> UC8
+Enseignant --> UC9
+Enseignant --> UC10
+
+Etudiant --> UC5
+Etudiant --> UC7
+Etudiant --> UC9
+Etudiant --> UC10
+
+' =========================
+' INCLUDE RELATIONS
+' =========================
+
+UC4 --> UC4a : <<include>>
+UC4 --> UC4b : <<include>>
+UC4 --> UC4c : <<include>>
+UC4 --> UC4d : <<include>>
+
+UC5 --> UC5a : <<include>>
+UC5 --> UC5b : <<include>>
+
+UC6 --> UC6a : <<include>>
+UC6 --> UC6b : <<include>>
+
+UC8 --> UC8a : <<include>>
+UC8 --> UC8b : <<include>>
+
+UC9 --> UC9a : <<include>>
+UC9 --> UC9b : <<include>>
+
+UC10 --> UC10a : <<include>>
+UC10 --> UC10b : <<include>>
+
+@enduml

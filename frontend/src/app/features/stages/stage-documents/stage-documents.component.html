@@ -1,0 +1,109 @@
+<div class="bg-white rounded-xl border border-gray-200 p-6">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="font-semibold text-gray-900">
+      Documents
+      <span class="ml-2 text-sm font-normal text-gray-500">({{ documents.length }})</span>
+    </h3>
+    <label class="cursor-pointer">
+      <input type="file" class="hidden"
+             accept=".pdf,.doc,.docx,.zip,.png,.jpg,.jpeg,.csv,.xlsx"
+             (change)="onFileSelected($event)">
+      <span mat-stroked-button class="mat-stroked-button mat-primary inline-flex items-center gap-1 px-4 py-2 rounded border border-blue-600 text-blue-600 text-sm font-medium hover:bg-blue-50 transition-colors">
+        <mat-icon class="!text-base">upload</mat-icon>
+        <span *ngIf="!uploading">Envoyer un document</span>
+        <span *ngIf="uploading">Envoi en cours...</span>
+      </span>
+    </label>
+  </div>
+
+  <!-- Upload error -->
+  <p *ngIf="uploadError" class="text-red-600 text-sm mb-3">{{ uploadError }}</p>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex justify-center py-8">
+    <mat-spinner diameter="32"></mat-spinner>
+  </div>
+
+  <!-- Empty -->
+  <div *ngIf="!loading && documents.length === 0" class="text-center py-10 text-gray-400">
+    <mat-icon class="!text-5xl mb-2">folder_open</mat-icon>
+    <p class="text-sm">Aucun document déposé.</p>
+  </div>
+
+  <!-- Document list -->
+  <div *ngIf="!loading && documents.length > 0" class="space-y-3">
+    <div *ngFor="let doc of documents; trackBy: trackById"
+         class="doc-row flex items-start gap-3 p-3 rounded-xl border border-gray-100 hover:border-gray-200 transition-colors">
+
+      <!-- Icon -->
+      <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+        <mat-icon class="text-gray-500 !text-xl">{{ getMimeIcon(doc.mime) }}</mat-icon>
+      </div>
+
+      <!-- Info -->
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 mb-0.5">
+          <p class="font-medium text-sm text-gray-900 truncate">{{ doc.nom }}</p>
+          <span class="text-xs text-gray-400 flex-shrink-0">v{{ doc.version }}</span>
+        </div>
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-400">
+          <span>{{ formatSize(doc.taille) }}</span>
+          <span *ngIf="doc.uploader">{{ doc.uploader.prenom }} {{ doc.uploader.nom }}</span>
+          <span>{{ doc.date_upload | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        <!-- Commentaire refus -->
+        <p *ngIf="doc.statut === 'refusé' && doc.commentaire"
+           class="text-xs text-red-600 mt-1 italic">
+          Motif : {{ doc.commentaire }}
+        </p>
+      </div>
+
+      <!-- Status -->
+      <span [class]="'chip ' + getStatutClass(doc.statut)" class="flex-shrink-0">
+        {{ getStatutLabel(doc.statut) }}
+      </span>
+
+      <!-- Actions -->
+      <div class="flex items-center gap-1 flex-shrink-0">
+        <a *ngIf="doc.download_url" [href]="doc.download_url" target="_blank"
+           mat-icon-button matTooltip="Télécharger">
+          <mat-icon class="text-gray-400 !text-base">download</mat-icon>
+        </a>
+
+        <ng-container *ngIf="isEnseignant && doc.statut === 'en_attente'">
+          <button mat-icon-button color="primary" matTooltip="Valider"
+                  (click)="valider(doc)">
+            <mat-icon class="!text-base">check_circle</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" matTooltip="Refuser"
+                  (click)="showRefuseForm(doc.id)">
+            <mat-icon class="!text-base">cancel</mat-icon>
+          </button>
+        </ng-container>
+
+        <button *ngIf="isEnseignant" mat-icon-button matTooltip="Supprimer"
+                (click)="deleteDoc(doc)">
+          <mat-icon class="text-gray-300 !text-base">delete_outline</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Refuse comment form -->
+    <div *ngIf="confirmRefuseId !== null"
+         class="mt-3 p-4 bg-red-50 border border-red-200 rounded-xl">
+      <p class="text-sm font-medium text-red-800 mb-2">Motif du refus</p>
+      <textarea [(ngModel)]="refusComment[confirmRefuseId!]"
+                class="w-full border border-red-300 rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-red-400"
+                rows="2" placeholder="Expliquez la raison du refus..."></textarea>
+      <div class="flex gap-2 mt-2">
+        <button mat-raised-button color="warn"
+                [disabled]="!(refusComment[confirmRefuseId!] || '').trim()"
+                (click)="submitRefus(getDocById(confirmRefuseId!)!)">
+          Confirmer le refus
+        </button>
+        <button mat-stroked-button (click)="confirmRefuseId = null">Annuler</button>
+      </div>
+    </div>
+  </div>
+</div>
