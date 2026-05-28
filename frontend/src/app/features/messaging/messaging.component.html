@@ -1,100 +1,111 @@
-<div class="messaging-container">
+<div class="flex gap-6 h-[calc(100vh-9rem)]">
+
   <!-- Sidebar: conversation list -->
-  <aside class="conversations-sidebar">
-    <div class="p-4 border-b border-gray-200">
-      <h2 class="font-semibold text-gray-900">Messagerie</h2>
+  <aside class="w-80 bg-surface-container-lowest rounded-3xl border border-outline-variant/10 shadow-sm flex flex-col overflow-hidden">
+    <div class="p-5 border-b border-outline-variant/10">
+      <h2 class="font-headline text-xl font-extrabold text-primary tracking-tight">Messagerie</h2>
+      <p class="text-xs text-on-surface-variant mt-1">{{ chats.length }} conversation(s)</p>
     </div>
 
-    <div *ngIf="loadingChats" class="flex justify-center p-6">
-      <mat-spinner diameter="28"></mat-spinner>
+    <div *ngIf="loadingChats" class="p-12 text-center text-on-surface-variant">
+      <span class="material-symbols-outlined animate-spin">progress_activity</span>
     </div>
 
-    <div *ngIf="!loadingChats && chats.length === 0" class="p-6 text-center text-gray-400">
-      <mat-icon class="!text-3xl mb-2">chat_bubble_outline</mat-icon>
-      <p class="text-sm">Aucune conversation.</p>
+    <div *ngIf="!loadingChats && chats.length === 0" class="p-8 text-center text-on-surface-variant">
+      <span class="material-symbols-outlined text-outline" style="font-size:40px;">forum</span>
+      <p class="text-sm mt-2">Aucune conversation.</p>
     </div>
 
-    <div *ngFor="let chat of chats"
-         class="chat-item p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors"
-         [class.bg-blue-50]="activeChat?.id === chat.id"
-         (click)="selectChat(chat)">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-bold flex-shrink-0">
+    <div *ngIf="!loadingChats" class="flex-1 overflow-y-auto no-scrollbar">
+      <button *ngFor="let chat of chats" (click)="selectChat(chat)"
+              [class.bg-surface-container]="activeChat?.id === chat.id"
+              class="w-full flex items-center gap-3 p-4 hover:bg-surface-container-low transition-colors text-left border-b border-outline-variant/10">
+        <div class="w-10 h-10 rounded-xl bg-primary-fixed text-on-primary-fixed flex items-center justify-center font-bold text-xs flex-shrink-0">
           {{ getInitials(getChatPartner(chat)) }}
         </div>
-        <div class="min-w-0">
-          <p class="text-sm font-medium text-gray-900 truncate">
-            {{ getChatPartner(chat)?.prenom }} {{ getChatPartner(chat)?.nom }}
-          </p>
-          <p class="text-xs text-gray-400 truncate">
-            {{ getChatPartner(chat)?.role === 'etudiant' ? 'Étudiant' : 'Enseignant' }}
-          </p>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-bold text-on-surface truncate">{{ getChatPartner(chat)?.nom_complet }}</p>
+          <p class="text-xs text-on-surface-variant truncate">{{ getChatPartner(chat)?.email }}</p>
         </div>
-      </div>
+      </button>
     </div>
   </aside>
 
-  <!-- Main chat area -->
-  <main class="chat-main">
-    <!-- No chat selected -->
-    <div *ngIf="!activeChat" class="flex flex-col items-center justify-center h-full text-gray-400">
-      <mat-icon class="!text-6xl mb-4">forum</mat-icon>
-      <p class="text-lg font-medium">Sélectionnez une conversation</p>
-      <p class="text-sm mt-1">Choisissez une conversation dans la liste à gauche.</p>
+  <!-- Main: messages window -->
+  <section class="flex-1 flex flex-col bg-surface-container-lowest rounded-3xl shadow-sm border border-outline-variant/10 overflow-hidden">
+
+    <!-- Empty state -->
+    <div *ngIf="!activeChat" class="flex-1 flex flex-col items-center justify-center text-on-surface-variant">
+      <span class="material-symbols-outlined text-outline" style="font-size:64px;">chat</span>
+      <p class="mt-4 font-headline font-bold text-on-surface">Sélectionnez une conversation</p>
+      <p class="text-sm">Choisissez un contact pour commencer à discuter</p>
     </div>
 
+    <!-- Active conversation -->
     <ng-container *ngIf="activeChat">
       <!-- Chat header -->
-      <div class="chat-header px-6 py-4 border-b border-gray-200 bg-white flex items-center gap-3">
-        <div class="w-9 h-9 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm">
-          {{ getInitials(getChatPartner(activeChat)) }}
-        </div>
-        <div>
-          <p class="font-semibold text-gray-900">
-            {{ getChatPartner(activeChat)?.prenom }} {{ getChatPartner(activeChat)?.nom }}
-          </p>
-          <p class="text-xs text-gray-500">
-            {{ getChatPartner(activeChat)?.role === 'etudiant' ? 'Étudiant' : 'Enseignant' }}
-          </p>
-        </div>
-      </div>
-
-      <!-- Messages -->
-      <div class="messages-area" #messagesContainer>
-        <div *ngIf="loadingMessages" class="flex justify-center p-6">
-          <mat-spinner diameter="32"></mat-spinner>
-        </div>
-
-        <div *ngIf="!loadingMessages && messages.length === 0"
-             class="text-center py-8 text-gray-400">
-          <p class="text-sm">Aucun message. Démarrez la conversation !</p>
-        </div>
-
-        <div *ngFor="let msg of messages" class="message-row px-6 py-2"
-             [class.own]="isOwnMessage(msg)">
-          <div class="message-bubble" [class.own-bubble]="isOwnMessage(msg)">
-            <p class="text-sm whitespace-pre-wrap">{{ msg.contenu }}</p>
-            <span class="text-xs opacity-60 mt-1 block">{{ msg.created_at | date:'HH:mm' }}</span>
+      <header class="p-5 flex items-center justify-between border-b border-surface-container">
+        <div class="flex items-center gap-4">
+          <div class="w-10 h-10 rounded-xl bg-primary-fixed text-on-primary-fixed flex items-center justify-center font-bold text-xs">
+            {{ getInitials(getChatPartner(activeChat)) }}
+          </div>
+          <div>
+            <h3 class="font-headline font-bold text-on-surface leading-tight">{{ getChatPartner(activeChat)?.nom_complet }}</h3>
+            <p class="text-xs text-on-surface-variant">{{ getChatPartner(activeChat)?.email }}</p>
           </div>
         </div>
+      </header>
+
+      <!-- Messages -->
+      <div #messagesContainer class="flex-1 overflow-y-auto p-6 flex flex-col gap-4 bg-surface/30 no-scrollbar">
+
+        <div *ngIf="loadingMessages" class="text-center text-on-surface-variant py-8">
+          <span class="material-symbols-outlined animate-spin">progress_activity</span>
+        </div>
+
+        <ng-container *ngFor="let msg of messages">
+
+          <!-- Received -->
+          <div *ngIf="!isOwnMessage(msg)" class="flex gap-3 max-w-[80%]">
+            <div class="w-8 h-8 rounded-lg bg-primary-fixed text-on-primary-fixed flex items-center justify-center font-bold text-[10px] mt-1 shrink-0">
+              {{ getInitials(msg.sender) }}
+            </div>
+            <div class="flex flex-col gap-1">
+              <div class="p-4 bg-surface-container text-on-surface rounded-2xl rounded-tl-none shadow-sm text-sm leading-relaxed">
+                {{ msg.contenu }}
+              </div>
+              <span class="text-[10px] text-on-surface-variant ml-1">{{ msg.created_at | date:'HH:mm' }}</span>
+            </div>
+          </div>
+
+          <!-- Sent -->
+          <div *ngIf="isOwnMessage(msg)" class="flex flex-col items-end gap-1 self-end max-w-[80%]">
+            <div class="p-4 bg-primary text-white rounded-2xl rounded-tr-none shadow-md text-sm leading-relaxed shadow-primary/10">
+              {{ msg.contenu }}
+            </div>
+            <div class="flex items-center gap-1.5 mr-1">
+              <span class="text-[10px] text-on-surface-variant">{{ msg.created_at | date:'HH:mm' }}</span>
+              <span class="material-symbols-outlined text-on-primary-container" style="font-size:14px;">done_all</span>
+            </div>
+          </div>
+        </ng-container>
       </div>
 
       <!-- Input -->
-      <div class="chat-input px-4 py-3 border-t border-gray-200 bg-white flex items-end gap-2">
-        <mat-form-field appearance="outline" class="flex-1" subscriptSizing="dynamic">
-          <textarea matInput [formControl]="messageCtrl"
-                    placeholder="Votre message... (Entrée pour envoyer)"
-                    rows="1"
-                    (keydown)="onKeyDown($event)"
-                    class="resize-none"></textarea>
-        </mat-form-field>
-        <button mat-icon-button color="primary"
-                [disabled]="messageCtrl.invalid || sendingMessage"
-                (click)="sendMessage()"
-                class="!mb-1">
-          <mat-icon>send</mat-icon>
-        </button>
-      </div>
+      <footer class="p-5 bg-surface-container-lowest border-t border-surface-container">
+        <div class="flex items-center gap-3">
+          <div class="flex-grow relative">
+            <input [formControl]="messageCtrl" (keydown)="onKeyDown($event)"
+                   placeholder="Écrivez votre message…" type="text"
+                   class="w-full py-3 px-5 bg-surface-container-low border-none rounded-2xl text-sm focus:ring-2 focus:ring-primary/10 focus:outline-none placeholder:text-on-surface-variant/50">
+          </div>
+          <button (click)="sendMessage()"
+                  [disabled]="messageCtrl.invalid || sendingMessage"
+                  class="bg-primary hover:bg-primary-container text-white p-3 rounded-2xl shadow-lg shadow-primary/20 transition-all active:scale-95 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed">
+            <span class="material-symbols-outlined">{{ sendingMessage ? 'progress_activity' : 'send' }}</span>
+          </button>
+        </div>
+      </footer>
     </ng-container>
-  </main>
+  </section>
 </div>

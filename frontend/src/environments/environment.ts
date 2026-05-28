@@ -5,7 +5,7 @@ export const environment = {
   reverb: {
     key: 'scholarflow-key',
     host: 'localhost',
-    port: 6001,
+    port: 8080,
     scheme: 'http',
   },
 };

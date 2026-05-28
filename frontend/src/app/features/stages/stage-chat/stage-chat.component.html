@@ -1,46 +1,62 @@
-<div class="chat-wrapper bg-white rounded-xl border border-gray-200 overflow-hidden mt-4">
+<div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/10 overflow-hidden flex flex-col h-[500px]">
+
   <!-- Header -->
-  <div class="px-5 py-3 border-b border-gray-100 flex items-center gap-2">
-    <mat-icon class="text-blue-500">forum</mat-icon>
-    <span class="font-semibold text-gray-900 text-sm">Discussion du groupe</span>
-  </div>
+  <header class="px-5 py-4 border-b border-outline-variant/10 flex items-center gap-2">
+    <span class="material-symbols-outlined text-primary" style="font-size:20px;">forum</span>
+    <span class="font-headline font-bold text-on-surface text-sm">Discussion du groupe</span>
+  </header>
 
   <!-- Messages -->
-  <div class="messages-area" #msgContainer>
-    <div *ngIf="loading" class="flex justify-center py-6">
-      <mat-spinner diameter="28"></mat-spinner>
+  <div #msgContainer class="flex-1 overflow-y-auto p-5 flex flex-col gap-4 bg-surface/30 no-scrollbar">
+    <div *ngIf="loading" class="flex justify-center py-6 text-on-surface-variant">
+      <span class="material-symbols-outlined animate-spin">progress_activity</span>
     </div>
 
-    <div *ngIf="!loading && messages.length === 0" class="text-center py-8 text-gray-400">
-      <p class="text-sm">Aucun message. Soyez le premier à écrire !</p>
+    <div *ngIf="!loading && messages.length === 0" class="text-center py-12 text-on-surface-variant">
+      <span class="material-symbols-outlined text-outline" style="font-size:40px;">chat_bubble_outline</span>
+      <p class="text-sm mt-2">Aucun message. Soyez le premier à écrire !</p>
     </div>
 
-    <div *ngFor="let msg of messages" class="msg-row" [class.own]="isOwn(msg)">
-      <div *ngIf="!isOwn(msg)" class="avatar">{{ getInitials(msg.sender) }}</div>
-      <div class="bubble-wrap">
-        <span *ngIf="!isOwn(msg)" class="sender-name">
-          {{ msg.sender?.prenom }} {{ msg.sender?.nom }}
-        </span>
-        <div class="bubble" [class.own-bubble]="isOwn(msg)">
-          <p>{{ msg.contenu }}</p>
-          <span class="time">{{ msg.created_at | date:'HH:mm' }}</span>
+    <ng-container *ngFor="let msg of messages">
+      <!-- Received -->
+      <div *ngIf="!isOwn(msg)" class="flex gap-3 max-w-[80%]">
+        <div class="w-8 h-8 rounded-lg bg-primary-fixed text-on-primary-fixed flex items-center justify-center font-bold text-[10px] mt-1 shrink-0">
+          {{ getInitials(msg.sender) }}
+        </div>
+        <div class="flex flex-col gap-1">
+          <span class="text-[10px] text-on-surface-variant font-bold ml-1">{{ msg.sender?.prenom }} {{ msg.sender?.nom }}</span>
+          <div class="p-3 bg-surface-container text-on-surface rounded-2xl rounded-tl-none shadow-sm text-sm leading-relaxed">
+            {{ msg.contenu }}
+          </div>
+          <span class="text-[10px] text-on-surface-variant ml-1">{{ msg.created_at | date:'HH:mm' }}</span>
         </div>
       </div>
-    </div>
+
+      <!-- Sent -->
+      <div *ngIf="isOwn(msg)" class="flex flex-col items-end gap-1 self-end max-w-[80%]">
+        <div class="p-3 bg-primary text-white rounded-2xl rounded-tr-none shadow-md text-sm leading-relaxed shadow-primary/10">
+          {{ msg.contenu }}
+        </div>
+        <div class="flex items-center gap-1.5 mr-1">
+          <span class="text-[10px] text-on-surface-variant">{{ msg.created_at | date:'HH:mm' }}</span>
+          <span class="material-symbols-outlined text-on-primary-container" style="font-size:14px;">done_all</span>
+        </div>
+      </div>
+    </ng-container>
   </div>
 
   <!-- Input -->
-  <div class="input-area">
-    <mat-form-field appearance="outline" class="flex-1" subscriptSizing="dynamic">
-      <textarea matInput [formControl]="messageCtrl"
-                placeholder="Votre message..."
-                rows="1" (keydown)="onKeyDown($event)"
-                class="resize-none"></textarea>
-    </mat-form-field>
-    <button mat-icon-button color="primary"
-            [disabled]="messageCtrl.invalid || sending"
-            (click)="sendMessage()">
-      <mat-icon>send</mat-icon>
-    </button>
-  </div>
+  <footer class="p-4 border-t border-outline-variant/10 bg-surface-container-lowest">
+    <div class="flex items-center gap-3">
+      <div class="flex-grow">
+        <textarea [formControl]="messageCtrl" (keydown)="onKeyDown($event)" rows="1"
+                  placeholder="Votre message…"
+                  class="w-full py-2.5 px-4 bg-surface-container-low border-none rounded-2xl text-sm focus:ring-2 focus:ring-primary/10 focus:outline-none placeholder:text-on-surface-variant/50 resize-none"></textarea>
+      </div>
+      <button (click)="sendMessage()" [disabled]="messageCtrl.invalid || sending"
+              class="bg-primary hover:bg-primary-container text-white p-3 rounded-2xl shadow-lg shadow-primary/20 transition-all active:scale-95 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed">
+        <span class="material-symbols-outlined">{{ sending ? 'progress_activity' : 'send' }}</span>
+      </button>
+    </div>
+  </footer>
 </div>

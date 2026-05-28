@@ -1,112 +1,160 @@
-<div class="page-container">
-  <!-- Welcome header -->
-  <div class="flex items-start justify-between mb-8">
+<ng-container *ngIf="user$ | async as user">
+  <header class="flex justify-between items-start mb-10">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900">
-        Bonjour, <span *ngIf="user$ | async as u">{{ u.prenom }}</span> 👋
-      </h1>
-      <p class="text-gray-500 mt-1">Voici un aperçu de votre activité sur ScholarFlow.</p>
+      <h1 class="font-headline text-3xl font-extrabold tracking-tight text-primary">Excellence Académique</h1>
+      <p class="text-on-surface-variant font-medium mt-1">Ravi de vous revoir, {{ user.nom_complet }}</p>
     </div>
-    <button mat-raised-button color="primary" (click)="createStage()">
-      <mat-icon>add</mat-icon>
-      Nouveau stage
-    </button>
-  </div>
+  </header>
+</ng-container>
 
-  <!-- Stats cards -->
-  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-    <div class="stat-card bg-white rounded-xl border border-gray-200 p-6">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-sm text-gray-500">Stages actifs</p>
-          <p class="text-3xl font-bold text-blue-600 mt-1">{{ stagesActifs }}</p>
+<div class="grid grid-cols-12 gap-8">
+
+  <!-- Hero analytics card -->
+  <section class="col-span-12">
+    <div class="bg-gradient-to-br from-primary to-primary/90 rounded-3xl p-10 text-white relative overflow-hidden shadow-xl shadow-primary/10">
+      <div class="relative z-10 max-w-2xl">
+        <h2 class="text-primary-fixed-dim font-bold text-xs tracking-widest uppercase mb-4 opacity-80">Analyses d'Impact</h2>
+        <div class="flex items-baseline gap-4 mb-6">
+          <span class="text-7xl font-extrabold tracking-tighter">{{ stagesActifs }}</span>
+          <span class="text-2xl font-semibold text-primary-fixed-dim">Stages Actifs</span>
         </div>
-        <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center">
-          <mat-icon class="text-blue-500">work_outline</mat-icon>
+        <div class="flex gap-8 mt-4">
+          <div>
+            <div class="text-3xl font-bold">{{ stagesBrouillon }}</div>
+            <div class="text-primary-fixed-dim text-sm">Brouillons</div>
+          </div>
+          <div>
+            <div class="text-3xl font-bold">{{ recentStages.length }}</div>
+            <div class="text-primary-fixed-dim text-sm">Récents</div>
+          </div>
+        </div>
+      </div>
+      <div class="absolute right-0 top-0 h-full w-1/3 flex items-center justify-center opacity-10">
+        <span class="material-symbols-outlined" style="font-size:240px;">auto_awesome</span>
+      </div>
+      <div class="absolute -bottom-12 -right-12 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
+    </div>
+  </section>
+
+  <!-- Context cards -->
+  <section class="col-span-12">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/20 shadow-sm flex items-center gap-5 group hover:border-primary/30 transition-colors">
+        <div class="bg-primary/5 p-3 rounded-xl group-hover:bg-primary/10 transition-colors">
+          <span class="material-symbols-outlined text-primary">calendar_month</span>
+        </div>
+        <div>
+          <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest block mb-1">Année Académique</span>
+          <span class="text-xl font-black text-primary">2026</span>
+        </div>
+      </div>
+      <div class="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/20 shadow-sm flex items-center gap-5 group hover:border-primary/30 transition-colors">
+        <div class="bg-primary/5 p-3 rounded-xl group-hover:bg-primary/10 transition-colors">
+          <span class="material-symbols-outlined text-primary">apartment</span>
+        </div>
+        <div>
+          <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest block mb-1">Stages Récents</span>
+          <span class="text-xl font-black text-primary">{{ recentStages.length }}</span>
         </div>
       </div>
     </div>
+  </section>
 
-    <div class="stat-card bg-white rounded-xl border border-gray-200 p-6">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-sm text-gray-500">Brouillons</p>
-          <p class="text-3xl font-bold text-yellow-500 mt-1">{{ stagesBrouillon }}</p>
-        </div>
-        <div class="w-12 h-12 rounded-xl bg-yellow-50 flex items-center justify-center">
-          <mat-icon class="text-yellow-500">edit_note</mat-icon>
+  <!-- Main column — internships list -->
+  <div class="col-span-12 lg:col-span-8 space-y-8">
+    <section class="space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-1">
+        <h3 class="font-headline text-xl font-extrabold text-primary flex items-center gap-2">
+          Mes Stages
+          <span class="px-2 py-0.5 bg-surface-container-high rounded text-xs font-bold text-on-surface-variant">{{ recentStages.length }}</span>
+        </h3>
+        <a routerLink="/stages" class="text-xs font-bold text-primary hover:underline">Voir tout →</a>
+      </div>
+
+      <div *ngIf="loading" class="text-center py-12 text-on-surface-variant">
+        <span class="material-symbols-outlined animate-spin">progress_activity</span>
+      </div>
+
+      <div *ngIf="!loading && recentStages.length === 0"
+           class="bg-surface-container-lowest border border-outline-variant/20 rounded-2xl p-12 text-center">
+        <span class="material-symbols-outlined text-outline" style="font-size:48px;">work_off</span>
+        <p class="text-on-surface-variant mt-3 mb-6">Aucun stage pour le moment.</p>
+        <button (click)="createStage()"
+                class="bg-primary text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all">
+          Créer un nouveau stage
+        </button>
+      </div>
+
+      <div class="space-y-4" *ngIf="!loading && recentStages.length > 0">
+        <div *ngFor="let stage of recentStages"
+             (click)="goToStage(stage.id)"
+             class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-outline-variant/20 hover:border-primary/40 hover:shadow-md transition-all cursor-pointer group relative">
+          <div class="absolute left-0 top-0 bottom-0 w-1.5 rounded-l-2xl"
+               [class.bg-tertiary-fixed]="stage.statut === 'actif'"
+               [class.bg-outline-variant]="stage.statut !== 'actif'"></div>
+
+          <div class="flex justify-between items-start mb-4 pl-2">
+            <div>
+              <span class="text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest"
+                    [class.bg-tertiary-container]="stage.statut === 'actif'"
+                    [class.text-on-tertiary-container]="stage.statut === 'actif'"
+                    [class.bg-surface-container]="stage.statut !== 'actif'"
+                    [class.text-on-surface-variant]="stage.statut !== 'actif'">
+                {{ stage.statut }}
+              </span>
+              <h4 class="font-headline text-lg font-bold mt-2 text-primary group-hover:text-primary transition-colors">{{ stage.titre }}</h4>
+            </div>
+            <button class="p-1 hover:bg-surface-container rounded-lg transition-colors" (click)="$event.stopPropagation()">
+              <span class="material-symbols-outlined text-outline" style="font-size:20px;">more_vert</span>
+            </button>
+          </div>
+
+          <p class="text-sm text-on-surface-variant mb-6 line-clamp-2 pl-2">{{ stage.description || 'Aucune description.' }}</p>
+
+          <div class="flex items-center justify-between pt-5 border-t border-outline-variant/10 ml-2">
+            <div class="flex items-center gap-6">
+              <div class="flex items-center gap-2 text-[11px] font-bold text-on-surface-variant">
+                <span class="material-symbols-outlined" style="font-size:14px;">group</span>
+                {{ stage.etudiants_count || 0 }} Étudiants
+              </div>
+              <div class="flex items-center gap-2 text-[11px] font-bold text-on-surface-variant">
+                <span class="material-symbols-outlined" style="font-size:14px;">event</span>
+                {{ stage.date_fin | date:'dd MMM yyyy' }}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
+  </div>
 
-    <div class="stat-card bg-white rounded-xl border border-gray-200 p-6">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-sm text-gray-500">Actions rapides</p>
-          <p class="text-sm text-gray-400 mt-1">Gérez vos stages</p>
+  <!-- Sidebar column — actions -->
+  <aside class="col-span-12 lg:col-span-4 space-y-6">
+    <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/20 shadow-sm">
+      <div class="flex items-center gap-4 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-primary-container/20 flex items-center justify-center text-primary">
+          <span class="material-symbols-outlined">school</span>
         </div>
-        <div class="w-12 h-12 rounded-xl bg-teal-50 flex items-center justify-center">
-          <mat-icon class="text-teal-500">bolt</mat-icon>
-        </div>
+        <h3 class="font-headline font-extrabold text-primary">Développez votre programme</h3>
       </div>
-    </div>
-  </div>
-
-  <!-- Quick actions -->
-  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-    <button mat-stroked-button routerLink="/stages" class="quick-action-btn h-16 flex-col gap-1">
-      <mat-icon>list</mat-icon>
-      <span class="text-xs">Tous les stages</span>
-    </button>
-    <button mat-stroked-button routerLink="/etudiants" class="quick-action-btn h-16 flex-col gap-1">
-      <mat-icon>group</mat-icon>
-      <span class="text-xs">Étudiants</span>
-    </button>
-    <button mat-stroked-button routerLink="/reunions" class="quick-action-btn h-16 flex-col gap-1">
-      <mat-icon>event</mat-icon>
-      <span class="text-xs">Réunions</span>
-    </button>
-    <button mat-stroked-button routerLink="/messagerie" class="quick-action-btn h-16 flex-col gap-1">
-      <mat-icon>chat_bubble_outline</mat-icon>
-      <span class="text-xs">Messagerie</span>
-    </button>
-  </div>
-
-  <!-- Recent stages -->
-  <div class="bg-white rounded-xl border border-gray-200 p-6">
-    <div class="flex items-center justify-between mb-4">
-      <h2 class="font-semibold text-gray-900">Stages récents</h2>
-      <a routerLink="/stages" class="text-sm text-blue-600 hover:underline">Voir tous</a>
-    </div>
-
-    <div *ngIf="loading" class="flex justify-center py-8">
-      <mat-spinner diameter="36"></mat-spinner>
-    </div>
-
-    <div *ngIf="!loading && recentStages.length === 0" class="text-center py-8 text-gray-400">
-      <mat-icon class="!text-4xl mb-2">school</mat-icon>
-      <p class="text-sm">Aucun stage créé pour l'instant.</p>
-      <button mat-raised-button color="primary" class="mt-3" (click)="createStage()">
-        Créer mon premier stage
+      <p class="text-xs text-on-surface-variant font-medium leading-relaxed mb-6">Initiez une nouvelle opportunité de stage pour élargir vos frontières de recherche.</p>
+      <button (click)="createStage()"
+              class="w-full bg-primary text-white py-3.5 rounded-xl font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined" style="font-size:18px;">add</span>
+        <span class="text-sm">Nouveau Stage</span>
       </button>
     </div>
 
-    <div *ngIf="!loading && recentStages.length > 0" class="space-y-2">
-      <div *ngFor="let s of recentStages"
-           class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-           (click)="goToStage(s.id)">
-        <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
-          <mat-icon class="text-blue-500 !text-base">work_outline</mat-icon>
-        </div>
-        <div class="flex-1 min-w-0">
-          <p class="text-sm font-medium text-gray-900 truncate">{{ s.titre }}</p>
-          <p class="text-xs text-gray-500">
-            {{ s.etablissement?.nom ?? '—' }} · {{ s.date_debut | date:'dd/MM/yyyy' }}
-          </p>
-        </div>
-        <span [class]="'chip ' + getStatutClass(s.statut)">{{ s.statut }}</span>
-        <mat-icon class="text-gray-300 !text-base">chevron_right</mat-icon>
-      </div>
+    <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/20 shadow-sm">
+      <h3 class="font-headline font-extrabold text-primary mb-4 flex items-center gap-2">
+        Calendrier
+        <span class="w-2 h-2 rounded-full bg-error"></span>
+      </h3>
+      <p class="text-xs text-on-surface-variant mb-4">Consultez vos réunions à venir.</p>
+      <a routerLink="/reunions"
+         class="block w-full text-center py-3 bg-surface-container border border-outline-variant/20 text-primary text-xs font-bold rounded-xl hover:bg-primary/5 hover:border-primary/30 transition-all">
+        Voir le calendrier
+      </a>
     </div>
-  </div>
+  </aside>
 </div>

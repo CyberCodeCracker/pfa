@@ -1,119 +1,114 @@
-<div class="page-container">
-  <!-- Loading -->
-  <div *ngIf="loading" class="flex justify-center py-16">
-    <mat-spinner diameter="48"></mat-spinner>
-  </div>
+<!-- Loading -->
+<div *ngIf="loading" class="flex justify-center py-16">
+  <span class="material-symbols-outlined animate-spin text-primary" style="font-size:48px;">progress_activity</span>
+</div>
 
-  <!-- Error -->
-  <div *ngIf="error && !loading" class="bg-red-50 border border-red-200 rounded-xl p-8 text-center text-red-700">
-    <mat-icon class="!text-5xl text-red-300 mb-3">error_outline</mat-icon>
-    <p>{{ error }}</p>
-    <button mat-stroked-button color="warn" class="mt-3" (click)="goBack()">Retour aux stages</button>
-  </div>
+<!-- Error -->
+<div *ngIf="error" class="bg-error-container text-on-error-container rounded-xl p-4 text-sm flex items-center gap-2">
+  <span class="material-symbols-outlined">error</span>
+  {{ error }}
+</div>
 
-  <ng-container *ngIf="stage && !loading">
-    <!-- Header -->
-    <div class="flex items-start justify-between mb-6 gap-4 flex-wrap">
-      <div class="flex items-start gap-3">
-        <button mat-icon-button (click)="goBack()">
-          <mat-icon>arrow_back</mat-icon>
-        </button>
-        <div>
-          <div class="flex items-center gap-2 mb-1">
-            <span [class]="'status-badge ' + getStatutClass(stage.statut)">
-              {{ stage.statut | titlecase }}
-            </span>
-            <span *ngIf="stage.niveau" class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-              {{ stage.niveau }}
-            </span>
-          </div>
-          <h1 class="text-2xl font-bold text-gray-900">{{ stage.titre }}</h1>
-          <p *ngIf="stage.etablissement" class="text-gray-500 text-sm mt-1">
-            <mat-icon class="!text-sm align-middle">business</mat-icon>
-            {{ stage.etablissement.nom }}
-          </p>
+<!-- Detail -->
+<div *ngIf="stage && !loading">
+
+  <!-- Header -->
+  <header class="mb-8">
+    <button (click)="goBack()" class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors text-sm font-bold mb-4">
+      <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span>
+      Retour
+    </button>
+
+    <div class="flex justify-between items-start gap-4 mb-3">
+      <div>
+        <div class="flex items-center gap-3 mb-2">
+          <span class="px-3 py-1 text-xs font-bold rounded-full uppercase tracking-tighter"
+                [class.bg-tertiary-container]="stage.statut === 'actif'"
+                [class.text-on-tertiary-container]="stage.statut === 'actif'"
+                [class.bg-secondary-container]="stage.statut === 'brouillon'"
+                [class.text-on-secondary-container]="stage.statut === 'brouillon'"
+                [class.bg-surface-variant]="stage.statut === 'terminé' || stage.statut === 'archivé'"
+                [class.text-on-surface-variant]="stage.statut === 'terminé' || stage.statut === 'archivé'">
+            {{ stage.statut }}
+          </span>
+          <span *ngIf="stage.niveau" class="text-xs font-bold text-on-surface-variant">{{ stage.niveau }}</span>
         </div>
+        <h1 class="font-headline text-3xl font-extrabold text-primary tracking-tight">{{ stage.titre }}</h1>
+        <p *ngIf="stage.etablissement" class="text-on-surface-variant mt-1 flex items-center gap-2">
+          <span class="material-symbols-outlined" style="font-size:18px;">apartment</span>
+          {{ stage.etablissement.nom }}
+        </p>
       </div>
 
-      <!-- Action buttons (V1) — enseignant only -->
-      <div *ngIf="(currentUser$ | async)?.role === 'enseignant'" class="flex gap-2 flex-wrap">
-        <button mat-stroked-button color="primary" (click)="openCreateMeeting()">
-          <mat-icon>event</mat-icon>
+      <div class="flex items-center gap-2" *ngIf="(currentUser$ | async)?.role === 'enseignant'">
+        <button (click)="openCreateMeeting()"
+                class="bg-surface-container-high text-primary px-4 py-2.5 rounded-xl font-bold text-sm hover:bg-surface-container-highest transition-all flex items-center gap-2">
+          <span class="material-symbols-outlined" style="font-size:18px;">videocam</span>
           Créer Réunion
         </button>
-        <button mat-raised-button color="primary" (click)="editStage()">
-          <mat-icon>edit</mat-icon>
+        <button (click)="editStage()"
+                class="bg-primary text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all flex items-center gap-2">
+          <span class="material-symbols-outlined" style="font-size:18px;">edit</span>
           Modifier
         </button>
       </div>
     </div>
 
-    <!-- Stats row -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-      <div class="stat-card">
-        <div class="text-2xl font-bold text-blue-600">
-          {{ stage.etudiants_count ?? stage.affectations?.length ?? 0 }}
-        </div>
-        <div class="text-xs text-gray-500 mt-1">Étudiants</div>
+    <!-- Date range -->
+    <div class="flex flex-wrap items-center gap-6 mt-4 text-sm text-on-surface-variant">
+      <div class="flex items-center gap-1.5">
+        <span class="material-symbols-outlined" style="font-size:16px;">event</span>
+        <span>{{ stage.date_debut | date:'dd MMM yyyy' }} → {{ stage.date_fin | date:'dd MMM yyyy' }}</span>
       </div>
-      <div class="stat-card">
-        <div class="text-xl font-bold text-gray-700">{{ stage.date_debut | date:'dd/MM' }}</div>
-        <div class="text-xs text-gray-500 mt-1">Début</div>
-      </div>
-      <div class="stat-card">
-        <div class="text-xl font-bold text-gray-700">{{ stage.date_fin | date:'dd/MM/yy' }}</div>
-        <div class="text-xs text-gray-500 mt-1">Fin</div>
-      </div>
-      <div class="stat-card"
-           [class.border-red-200]="(getDaysRemaining() ?? 0) > 0 && (getDaysRemaining() ?? 0) < 7"
-           [class.border-yellow-200]="(getDaysRemaining() ?? 0) >= 7 && (getDaysRemaining() ?? 0) < 30">
-        <div class="text-2xl font-bold"
-             [class.text-red-600]="(getDaysRemaining() ?? 0) > 0 && (getDaysRemaining() ?? 0) < 7"
-             [class.text-yellow-600]="(getDaysRemaining() ?? 0) >= 7 && (getDaysRemaining() ?? 0) < 30"
-             [class.text-gray-700]="(getDaysRemaining() ?? 0) >= 30">
-          {{ getDaysRemaining() !== null && getDaysRemaining()! > 0 ? getDaysRemaining() : '—' }}
-        </div>
-        <div class="text-xs text-gray-500 mt-1">Jours restants</div>
+      <div *ngIf="getDaysRemaining() !== null && (getDaysRemaining() ?? 0) > 0" class="flex items-center gap-1.5">
+        <span class="material-symbols-outlined" style="font-size:16px;">hourglass_empty</span>
+        <span class="font-semibold">{{ getDaysRemaining() }} jour(s) restant(s)</span>
       </div>
     </div>
+  </header>
 
-    <!-- Tabs -->
-    <mat-tab-group [(selectedIndex)]="selectedTabIndex" animationDuration="150ms">
+  <!-- Custom tabs -->
+  <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/10 shadow-sm overflow-hidden">
+    <div class="flex border-b border-outline-variant/10 px-2 overflow-x-auto no-scrollbar">
+      <button *ngFor="let tab of [
+        { label: 'Aperçu', icon: 'info' },
+        { label: 'Étudiants', icon: 'group' },
+        { label: 'Documents', icon: 'description' },
+        { label: 'Réunions', icon: 'event' },
+        { label: 'Discussion', icon: 'chat' }
+      ]; let i = index"
+              (click)="selectedTabIndex = i"
+              [class.text-primary]="selectedTabIndex === i"
+              [class.border-primary]="selectedTabIndex === i"
+              [class.text-on-surface-variant]="selectedTabIndex !== i"
+              [class.border-transparent]="selectedTabIndex !== i"
+              class="flex items-center gap-2 px-5 py-4 text-sm font-bold border-b-2 transition-all whitespace-nowrap hover:text-primary">
+        <span class="material-symbols-outlined" style="font-size:18px;">{{ tab.icon }}</span>
+        {{ tab.label }}
+      </button>
+    </div>
 
+    <div class="p-6">
       <!-- Aperçu -->
-      <mat-tab label="Aperçu">
-        <div class="bg-white rounded-xl border border-gray-200 p-6 mt-4">
-          <h3 class="font-semibold text-gray-900 mb-3">Description</h3>
-          <p *ngIf="stage.description; else noDesc" class="text-gray-600 whitespace-pre-line leading-relaxed">
-            {{ stage.description }}
-          </p>
-          <ng-template #noDesc>
-            <p class="text-gray-400 italic text-sm">Aucune description fournie.</p>
-          </ng-template>
+      <div *ngIf="selectedTabIndex === 0" class="space-y-6">
+        <div>
+          <h3 class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2">Description</h3>
+          <p class="text-on-surface leading-relaxed">{{ stage.description || 'Aucune description.' }}</p>
         </div>
         <app-stage-feedback [stageId]="stage.id"></app-stage-feedback>
-      </mat-tab>
+      </div>
 
       <!-- Étudiants -->
-      <mat-tab label="Étudiants">
-        <app-stage-students [stageId]="stage.id" class="block mt-4"></app-stage-students>
-      </mat-tab>
+      <app-stage-students *ngIf="selectedTabIndex === 1" [stageId]="stage.id"></app-stage-students>
 
       <!-- Documents -->
-      <mat-tab label="Documents">
-        <app-stage-documents [stageId]="stage.id" class="block mt-4"></app-stage-documents>
-      </mat-tab>
+      <app-stage-documents *ngIf="selectedTabIndex === 2" [stageId]="stage.id"></app-stage-documents>
 
       <!-- Réunions -->
-      <mat-tab label="Réunions">
-        <app-stage-meetings [stageId]="stage.id" class="block mt-4"></app-stage-meetings>
-      </mat-tab>
+      <app-stage-meetings *ngIf="selectedTabIndex === 3" [stageId]="stage.id"></app-stage-meetings>
 
-      <!-- Chat de groupe -->
-      <mat-tab label="Discussion">
-        <app-stage-chat [stageId]="stage.id" class="block mt-4"></app-stage-chat>
-      </mat-tab>
-
-    </mat-tab-group>
-  </ng-container>
+      <!-- Discussion -->
+      <app-stage-chat *ngIf="selectedTabIndex === 4" [stageId]="stage.id"></app-stage-chat>
+    </div>
+  </div>
 </div>

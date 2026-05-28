@@ -40,7 +40,6 @@ class Reunion extends Model
     public function participants()
     {
         return $this->belongsToMany(User::class, 'reunion_participants', 'reunion_id', 'user_id')
-            ->withPivot('statut')
-            ->withTimestamps();
+            ->withPivot('statut');
     }
 }

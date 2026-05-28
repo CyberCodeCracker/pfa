@@ -1,100 +1,116 @@
-<div class="page-container">
-  <div class="max-w-2xl mx-auto">
-    <!-- Header -->
-    <div class="flex items-center gap-3 mb-6">
-      <button mat-icon-button (click)="cancel()">
-        <mat-icon>arrow_back</mat-icon>
-      </button>
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900">
-          {{ isEdit ? 'Modifier le stage' : 'Nouveau sujet de stage' }}
-        </h1>
-        <p class="text-gray-500 text-sm">Remplissez les informations du stage</p>
-      </div>
-    </div>
+<div class="flex gap-8 max-w-7xl mx-auto">
 
-    <!-- Loading -->
-    <div *ngIf="loading && isEdit" class="flex justify-center py-12">
-      <mat-spinner diameter="40"></mat-spinner>
-    </div>
+  <!-- Left column: form -->
+  <div class="flex-1 flex flex-col gap-8 pb-20">
 
-    <!-- Error -->
-    <div *ngIf="error" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4 text-red-700 text-sm">
-      {{ error }}
-    </div>
+    <header>
+      <h1 class="font-headline text-3xl font-extrabold text-primary tracking-tight mb-2">
+        {{ isEdit ? 'Modifier le Stage' : 'Nouveau Sujet de Stage' }}
+      </h1>
+      <p class="text-on-surface-variant max-w-2xl">Définissez une nouvelle opportunité de recherche et trouvez le match académique parfait.</p>
+    </header>
 
-    <!-- Form -->
-    <form *ngIf="!loading || !isEdit" [formGroup]="form" (ngSubmit)="onSubmit()"
-          class="bg-white rounded-xl border border-gray-200 p-6 space-y-5">
+    <div *ngIf="error" class="bg-error-container text-on-error-container rounded-lg p-4 text-sm">{{ error }}</div>
 
-      <!-- Titre -->
-      <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Titre du stage</mat-label>
-        <input matInput formControlName="titre" placeholder="Ex: Développement d'une application web...">
-        <mat-error *ngIf="form.get('titre')?.hasError('required')">Le titre est requis</mat-error>
-        <mat-error *ngIf="form.get('titre')?.hasError('maxlength')">Maximum 200 caractères</mat-error>
-      </mat-form-field>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-8">
 
-      <!-- Description -->
-      <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Description</mat-label>
-        <textarea matInput formControlName="description" rows="4"
-                  placeholder="Décrivez les objectifs et le contexte du stage..."></textarea>
-      </mat-form-field>
+      <!-- Informations Générales -->
+      <section class="bg-surface-container-lowest p-8 rounded-2xl border border-outline-variant/20 shadow-sm">
+        <div class="flex items-center gap-3 mb-6">
+          <span class="w-8 h-8 rounded-lg bg-primary-fixed flex items-center justify-center">
+            <span class="material-symbols-outlined filled text-primary" style="font-size:18px;">description</span>
+          </span>
+          <h2 class="font-headline text-xl font-bold text-primary">Informations Générales</h2>
+        </div>
+        <div class="space-y-6">
+          <div>
+            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 ml-1">Titre du Projet</label>
+            <input formControlName="titre" type="text"
+                   placeholder="Ex: Optimisation des Algorithmes de Deep Learning pour la Santé"
+                   class="w-full px-4 py-3 rounded-xl bg-surface-container-low border-transparent text-on-surface font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none transition-all">
+            <p *ngIf="form.get('titre')?.touched && form.get('titre')?.invalid" class="text-xs text-error mt-1 ml-1">Titre requis.</p>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 ml-1">Description Détaillée</label>
+            <textarea formControlName="description" rows="6"
+                      placeholder="Décrivez les objectifs, la méthodologie et les livrables attendus..."
+                      class="w-full px-4 py-3 rounded-xl bg-surface-container-low border-transparent text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none transition-all"></textarea>
+          </div>
+        </div>
+      </section>
 
       <!-- Dates -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <mat-form-field appearance="outline">
-          <mat-label>Date de début</mat-label>
-          <input matInput type="date" formControlName="date_debut">
-          <mat-error *ngIf="form.get('date_debut')?.hasError('required')">Requis</mat-error>
-        </mat-form-field>
+      <section class="bg-surface-container-lowest p-8 rounded-2xl border border-outline-variant/20 shadow-sm">
+        <div class="flex items-center gap-3 mb-6">
+          <span class="w-8 h-8 rounded-lg bg-primary-fixed flex items-center justify-center">
+            <span class="material-symbols-outlined filled text-primary" style="font-size:18px;">event</span>
+          </span>
+          <h2 class="font-headline text-xl font-bold text-primary">Dates du Stage</h2>
+        </div>
+        <div class="grid grid-cols-2 gap-6">
+          <div>
+            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 ml-1">Date de début</label>
+            <input formControlName="date_debut" type="date"
+                   class="w-full px-4 py-3 rounded-xl bg-surface-container-low border-transparent text-on-surface font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none transition-all">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 ml-1">Date de fin</label>
+            <input formControlName="date_fin" type="date"
+                   class="w-full px-4 py-3 rounded-xl bg-surface-container-low border-transparent text-on-surface font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none transition-all">
+          </div>
+        </div>
+      </section>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Date de fin</mat-label>
-          <input matInput type="date" formControlName="date_fin">
-          <mat-error *ngIf="form.get('date_fin')?.hasError('required')">Requis</mat-error>
-        </mat-form-field>
-      </div>
-
-      <!-- Statut + Niveau -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <mat-form-field appearance="outline">
-          <mat-label>Statut</mat-label>
-          <mat-select formControlName="statut">
-            <mat-option *ngFor="let s of statuts" [value]="s.value">{{ s.label }}</mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Niveau requis</mat-label>
-          <mat-select formControlName="niveau">
-            <mat-option value="">Non spécifié</mat-option>
-            <mat-option *ngFor="let n of niveaux" [value]="n">{{ n }}</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-
-      <!-- Établissement -->
-      <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Établissement</mat-label>
-        <mat-select formControlName="etablissement_id">
-          <mat-option *ngFor="let e of etablissements" [value]="e.id">
-            {{ e.nom }} <span *ngIf="e.ville" class="text-gray-400"> — {{ e.ville }}</span>
-          </mat-option>
-        </mat-select>
-        <mat-error *ngIf="form.get('etablissement_id')?.hasError('required')">L'établissement est requis</mat-error>
-      </mat-form-field>
-
-      <!-- Actions -->
-      <div class="flex justify-end gap-3 pt-2">
-        <button mat-stroked-button type="button" (click)="cancel()">Annuler</button>
-        <button mat-raised-button color="primary" type="submit"
-                [disabled]="form.invalid || loading">
-          <mat-spinner *ngIf="loading" diameter="18" class="inline mr-2"></mat-spinner>
-          {{ isEdit ? 'Enregistrer les modifications' : 'Créer le stage' }}
-        </button>
-      </div>
+      <!-- Paramètres Académiques -->
+      <section class="bg-surface-container-lowest p-8 rounded-2xl border border-outline-variant/20 shadow-sm">
+        <div class="flex items-center gap-3 mb-6">
+          <span class="w-8 h-8 rounded-lg bg-primary-fixed flex items-center justify-center">
+            <span class="material-symbols-outlined filled text-primary" style="font-size:18px;">account_balance</span>
+          </span>
+          <h2 class="font-headline text-xl font-bold text-primary">Paramètres Académiques</h2>
+        </div>
+        <div class="grid grid-cols-2 gap-6">
+          <div>
+            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 ml-1">Niveau demandé</label>
+            <select formControlName="niveau"
+                    class="pill-select w-full px-4 py-3 rounded-xl bg-surface-container-low border-transparent text-on-surface font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none">
+              <option value="">— Sélectionner —</option>
+              <option *ngFor="let n of niveaux" [value]="n">{{ n }}</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 ml-1">Établissement</label>
+            <select formControlName="etablissement_id"
+                    class="pill-select w-full px-4 py-3 rounded-xl bg-surface-container-low border-transparent text-on-surface font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none">
+              <option [ngValue]="null">— Sélectionner —</option>
+              <option *ngFor="let e of etablissements" [ngValue]="e.id">{{ e.nom }}</option>
+            </select>
+          </div>
+          <div *ngIf="isEdit" class="col-span-2">
+            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 ml-1">Statut</label>
+            <select formControlName="statut"
+                    class="pill-select w-full px-4 py-3 rounded-xl bg-surface-container-low border-transparent text-on-surface font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none">
+              <option *ngFor="let s of statuts" [value]="s.value">{{ s.label }}</option>
+            </select>
+          </div>
+        </div>
+      </section>
     </form>
   </div>
+
+  <!-- Right sidebar — actions (sticky) -->
+  <aside class="w-80 flex flex-col gap-6 sticky top-24 h-fit">
+    <div class="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/20 shadow-sm flex flex-col gap-3">
+      <button type="button" (click)="onSubmit()" [disabled]="form.invalid || loading"
+              class="w-full bg-gradient-to-br from-primary to-primary-container text-white py-3.5 rounded-xl font-bold shadow-md hover:shadow-lg transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined" style="font-size:20px;">rocket_launch</span>
+        {{ isEdit ? 'Enregistrer' : 'Publier le Stage' }}
+      </button>
+      <button type="button" routerLink="/stages"
+              class="w-full bg-surface-container-high text-primary py-3.5 rounded-xl font-bold hover:bg-surface-container-highest transition-all active:scale-95 flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined" style="font-size:20px;">close</span>
+        Annuler
+      </button>
+    </div>
+  </aside>
 </div>
