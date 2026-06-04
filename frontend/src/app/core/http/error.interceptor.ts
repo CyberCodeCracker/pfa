@@ -12,7 +12,11 @@ export class ErrorInterceptor implements HttpInterceptor {
   intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     return next.handle(req).pipe(
       catchError((error: HttpErrorResponse) => {
-        if (error.status === 401) {
+        // Don't hijack bootstrap auth probes — auth.effects + guards handle those.
+        const isAuthProbe = req.url.endsWith('/api/v1/me')
+                         || req.url.endsWith('/sanctum/csrf-cookie');
+
+        if (error.status === 401 && !isAuthProbe) {
           this.store.dispatch(AuthActions.clearUser());
           this.router.navigate(['/login']);
         }

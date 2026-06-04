@@ -1,12 +1,11 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { ComponentStore } from '@ngrx/component-store';
-import { Observable, Subject, takeUntil, tap, switchMap, catchError, of } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { StageApiService, StageFilters } from '../../../core/services/stage-api.service';
 import { Stage, StageStatut } from '../../../core/models/stage.model';
-import { PaginatedResponse } from '../../../core/models/api.model';
-import { selectCurrentUser } from '../../../store/auth/auth.selectors';
+import { selectFilter } from '../../../store/filter/filter.selectors';
+import { FilterState } from '../../../store/filter/filter.reducer';
 
 interface StageListState {
   stages: Stage[];
@@ -35,6 +34,7 @@ export class StageListComponent implements OnInit, OnDestroy {
   total = 0;
   search = '';
   filterStatut = '';
+  private sessionFilter: FilterState = { annee: '', semestre: '', etablissementId: null };
 
   readonly statuts: { value: string; label: string }[] = [
     { value: '', label: 'Tous les statuts' },
@@ -51,7 +51,13 @@ export class StageListComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.load();
+    this.store.select(selectFilter)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(f => {
+        this.sessionFilter = f;
+        this.currentPage = 1;
+        this.load();
+      });
   }
 
   ngOnDestroy(): void {
@@ -63,12 +69,16 @@ export class StageListComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.error = null;
 
+    const f = this.sessionFilter;
     const filters: StageFilters = {
       page: this.currentPage,
-      per_page: 12,
+      per_page: 6,
+      ...(this.search && { search: this.search }),
+      ...(this.filterStatut && { 'filter[statut]': this.filterStatut }),
+      ...(f.annee && { 'filter[annee_academique]': f.annee }),
+      ...(f.semestre && { 'filter[semestre]': f.semestre }),
+      ...(f.etablissementId && { 'filter[etablissement_id]': f.etablissementId }),
     };
-    if (this.search) filters['search'] = this.search;
-    if (this.filterStatut) filters['filter[statut]'] = this.filterStatut;
 
     this.stageApi.list(filters)
       .pipe(takeUntil(this.destroy$))
@@ -101,6 +111,21 @@ export class StageListComponent implements OnInit, OnDestroy {
     if (page < 1 || page > this.lastPage) return;
     this.currentPage = page;
     this.load();
+  }
+
+  get visiblePages(): (number | '…')[] {
+    const last = this.lastPage;
+    const cur  = this.currentPage;
+    if (last <= 7) return Array.from({ length: last }, (_, i) => i + 1);
+
+    const pages: (number | '…')[] = [1];
+    const start = Math.max(2, cur - 1);
+    const end   = Math.min(last - 1, cur + 1);
+    if (start > 2) pages.push('…');
+    for (let p = start; p <= end; p++) pages.push(p);
+    if (end < last - 1) pages.push('…');
+    pages.push(last);
+    return pages;
   }
 
   getStatutClass(statut: StageStatut): string {

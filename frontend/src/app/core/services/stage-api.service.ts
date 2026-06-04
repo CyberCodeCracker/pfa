@@ -11,6 +11,8 @@ export interface StageFilters {
   search?: string;
   'filter[statut]'?: string;
   'filter[etablissement_id]'?: number;
+  'filter[annee_academique]'?: string;
+  'filter[semestre]'?: string;
   sort?: string;
 }
 
@@ -21,6 +23,8 @@ export interface CreateStagePayload {
   date_fin: string;
   statut: string;
   niveau?: string;
+  annee_academique?: string;
+  semestre?: string;
   etablissement_id: number;
 }
 

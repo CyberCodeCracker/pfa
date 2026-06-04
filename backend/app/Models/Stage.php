@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Enums\Semestre;
 use App\Support\Enums\StageStatut;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -17,6 +18,8 @@ class Stage extends Model
         'date_fin',
         'statut',
         'niveau',
+        'annee_academique',
+        'semestre',
         'etablissement_id',
         'enseignant_id',
     ];
@@ -24,9 +27,10 @@ class Stage extends Model
     protected function casts(): array
     {
         return [
-            'date_debut' => 'date',
-            'date_fin'   => 'date',
-            'statut'     => StageStatut::class,
+            'date_debut'       => 'date',
+            'date_fin'         => 'date',
+            'statut'           => StageStatut::class,
+            'semestre'         => Semestre::class,
         ];
     }
 

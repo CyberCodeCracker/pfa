@@ -44,8 +44,11 @@
           <span class="material-symbols-outlined text-primary">calendar_month</span>
         </div>
         <div>
-          <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest block mb-1">Année Académique</span>
-          <span class="text-xl font-black text-primary">2026</span>
+          <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest block mb-1">Session active</span>
+          <span class="text-xl font-black text-primary">
+            {{ filter.annee || 'Toutes années' }}
+            <span *ngIf="filter.semestre" class="text-sm font-semibold text-on-surface-variant"> · {{ filter.semestre }}</span>
+          </span>
         </div>
       </div>
       <div class="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/20 shadow-sm flex items-center gap-5 group hover:border-primary/30 transition-colors">
@@ -53,7 +56,7 @@
           <span class="material-symbols-outlined text-primary">apartment</span>
         </div>
         <div>
-          <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest block mb-1">Stages Récents</span>
+          <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest block mb-1">Stages trouvés</span>
           <span class="text-xl font-black text-primary">{{ recentStages.length }}</span>
         </div>
       </div>

@@ -5,6 +5,7 @@ import { catchError, exhaustMap, map, of, tap } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
 import { EchoService } from '../../core/realtime/echo.service';
 import { AuthActions } from './auth.actions';
+import { FilterActions } from '../filter/filter.actions';
 
 @Injectable()
 export class AuthEffects {
@@ -60,6 +61,13 @@ export class AuthEffects {
       tap(() => this.echoService.connect())
     ),
     { dispatch: false }
+  );
+
+  initFilter$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(AuthActions.loginSuccess, AuthActions.loadMeSuccess),
+      map(({ user }) => FilterActions.initFilter({ user }))
+    )
   );
 
   logout$ = createEffect(() =>

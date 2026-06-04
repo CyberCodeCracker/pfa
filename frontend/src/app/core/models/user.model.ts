@@ -1,3 +1,5 @@
+import { Etablissement } from './etablissement.model';
+
 export type UserRole = 'enseignant' | 'etudiant';
 
 export interface User {
@@ -10,4 +12,5 @@ export interface User {
   must_change_password: boolean;
   email_verified: boolean;
   created_at: string;
+  etablissements?: Etablissement[];
 }

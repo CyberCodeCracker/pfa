@@ -4,6 +4,7 @@ namespace App\Http\Resources\V1;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Collection;
 
 class UserResource extends JsonResource
 {
@@ -19,6 +20,12 @@ class UserResource extends JsonResource
             'must_change_password' => $this->must_change_password,
             'email_verified'       => !is_null($this->email_verified_at),
             'created_at'           => $this->created_at,
+            'etablissements'       => $this->when(
+                $this->isEnseignant() && $this->relationLoaded('enseignantProfile'),
+                fn () => EtablissementResource::collection(
+                    $this->enseignantProfile?->etablissements ?? new Collection()
+                )
+            ),
         ];
     }
 }

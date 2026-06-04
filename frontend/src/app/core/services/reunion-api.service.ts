@@ -20,10 +20,19 @@ export class ReunionApiService {
 
   constructor(private http: HttpClient) {}
 
-  list(params: { page?: number; per_page?: number } = {}): Observable<PaginatedResponse<Reunion>> {
+  list(params: {
+    page?: number;
+    per_page?: number;
+    annee_academique?: string;
+    semestre?: string;
+    etablissement_id?: number | null;
+  } = {}): Observable<PaginatedResponse<Reunion>> {
     let p = new HttpParams();
     if (params.page) p = p.set('page', String(params.page));
     if (params.per_page) p = p.set('per_page', String(params.per_page));
+    if (params.annee_academique) p = p.set('annee_academique', params.annee_academique);
+    if (params.semestre) p = p.set('semestre', params.semestre);
+    if (params.etablissement_id) p = p.set('etablissement_id', String(params.etablissement_id));
     return this.http.get<PaginatedResponse<Reunion>>(`${this.base}/reunions`, { params: p, withCredentials: true });
   }
 

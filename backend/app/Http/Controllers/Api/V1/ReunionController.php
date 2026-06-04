@@ -18,11 +18,27 @@ class ReunionController extends Controller
 
     public function index(Request $request): AnonymousResourceCollection
     {
-        $user = $request->user();
+        $user            = $request->user();
+        $annee           = $request->query('annee_academique');
+        $semestre        = $request->query('semestre');
+        $etablissementId = $request->query('etablissement_id');
 
         $query = $user->isEnseignant()
-            ? Reunion::whereHas('stage', fn ($q) => $q->where('enseignant_id', $user->id))
+            ? Reunion::whereHas('stage', function ($q) use ($user, $annee, $semestre, $etablissementId) {
+                $q->where('enseignant_id', $user->id);
+                if ($annee)           $q->where('annee_academique', $annee);
+                if ($semestre)        $q->where('semestre', $semestre);
+                if ($etablissementId) $q->where('etablissement_id', (int) $etablissementId);
+              })
             : Reunion::whereHas('participants', fn ($q) => $q->where('user_id', $user->id));
+
+        if (!$user->isEnseignant() && ($annee || $semestre || $etablissementId)) {
+            $query->whereHas('stage', function ($q) use ($annee, $semestre, $etablissementId) {
+                if ($annee)           $q->where('annee_academique', $annee);
+                if ($semestre)        $q->where('semestre', $semestre);
+                if ($etablissementId) $q->where('etablissement_id', (int) $etablissementId);
+            });
+        }
 
         $reunions = $query->with(['stage', 'enseignant', 'participants'])
             ->orderBy('scheduled_at')

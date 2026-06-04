@@ -18,6 +18,7 @@ import { AuthEffects } from './store/auth/auth.effects';
 import { authReducer } from './store/auth/auth.reducer';
 import { AuthActions } from './store/auth/auth.actions';
 import { AuthService } from './core/auth/auth.service';
+import { filterReducer } from './store/filter/filter.reducer';
 import { environment } from '../environments/environment';
 
 export function createTranslateLoader() {
@@ -38,7 +39,7 @@ function initApp(authService: AuthService, store: Store): () => Promise<void> {
     BrowserAnimationsModule,
     HttpClientModule,
     AppRoutingModule,
-    StoreModule.forRoot({ auth: authReducer }),
+    StoreModule.forRoot({ auth: authReducer, filter: filterReducer }),
     EffectsModule.forRoot([AuthEffects]),
     StoreDevtoolsModule.instrument({ maxAge: 25, logOnly: environment.production }),
     TranslateModule.forRoot({

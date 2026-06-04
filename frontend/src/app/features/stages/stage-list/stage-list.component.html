@@ -71,8 +71,9 @@
             [class.text-on-surface-variant]="stage.statut === 'terminé' || stage.statut === 'archivé'">
         {{ getStatutLabel(stage.statut) }}
       </span>
-      <button class="text-outline hover:text-primary transition-colors" (click)="editStage($event, stage.id)">
-        <span class="material-symbols-outlined" style="font-size:20px;">edit</span>
+      <button (click)="editStage($event, stage.id)"
+              class="flex items-center justify-center w-9 h-9 rounded-xl bg-surface-container hover:bg-primary-container text-on-surface-variant hover:text-on-primary-container border border-outline-variant/30 hover:border-primary/40 hover:shadow-sm transition-all active:scale-95">
+        <span class="material-symbols-outlined" style="font-size:18px;">edit</span>
       </button>
     </div>
 
@@ -90,9 +91,9 @@
           <span class="text-xs font-semibold">{{ stage.date_fin | date:'MMM yy' }}</span>
         </div>
       </div>
-      <button class="text-primary text-sm font-bold flex items-center gap-1 group-hover:gap-2 transition-all">
+      <button class="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-white text-xs font-bold shadow-sm hover:shadow-md hover:gap-2.5 active:scale-95 transition-all">
         Voir détails
-        <span class="material-symbols-outlined" style="font-size:14px;">arrow_forward_ios</span>
+        <span class="material-symbols-outlined" style="font-size:14px;">arrow_forward</span>
       </button>
     </div>
   </article>
@@ -109,15 +110,19 @@
             class="w-10 h-10 rounded-lg flex items-center justify-center text-outline hover:bg-surface-container-high transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
       <span class="material-symbols-outlined">chevron_left</span>
     </button>
-    <button *ngFor="let p of [].constructor(lastPage); let i = index"
-            (click)="goToPage(i + 1)"
-            [class.bg-primary]="currentPage === i + 1"
-            [class.text-white]="currentPage === i + 1"
-            [class.text-on-surface-variant]="currentPage !== i + 1"
-            [class.hover:bg-surface-container-high]="currentPage !== i + 1"
-            class="w-10 h-10 rounded-lg flex items-center justify-center font-bold transition-colors">
-      {{ i + 1 }}
-    </button>
+    <ng-container *ngFor="let p of visiblePages">
+      <span *ngIf="p === '…'" class="w-10 h-10 flex items-center justify-center text-on-surface-variant">…</span>
+      <button *ngIf="p !== '…'"
+              (click)="goToPage(+p)"
+              [class.bg-primary]="currentPage === p"
+              [class.text-white]="currentPage === p"
+              [class.shadow-md]="currentPage === p"
+              [class.text-on-surface-variant]="currentPage !== p"
+              [class.hover:bg-surface-container-high]="currentPage !== p"
+              class="w-10 h-10 rounded-lg flex items-center justify-center font-bold transition-colors">
+        {{ p }}
+      </button>
+    </ng-container>
     <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage === lastPage"
             class="w-10 h-10 rounded-lg flex items-center justify-center text-outline hover:bg-surface-container-high transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
       <span class="material-symbols-outlined">chevron_right</span>

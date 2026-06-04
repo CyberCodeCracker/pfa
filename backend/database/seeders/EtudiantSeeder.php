@@ -14,13 +14,16 @@ class EtudiantSeeder extends Seeder
 {
     public function run(): void
     {
-        // French names (per project decision — only enseignants use Arabic-origin names)
-        $prenoms = ['Julien', 'Sophie', 'Lucas', 'Emma', 'Hugo', 'Léa', 'Nathan', 'Camille',
-                    'Ethan', 'Manon', 'Théo', 'Chloé', 'Maxime', 'Sarah', 'Antoine', 'Jade',
-                    'Romain', 'Inès', 'Adrien', 'Louise'];
-        $noms = ['Mercier', 'Lefebvre', 'Rousseau', 'Garnier', 'Faure', 'Bernard', 'Dubois',
-                 'Moreau', 'Laurent', 'Simon', 'Michel', 'Petit', 'Robert', 'Richard', 'Durand',
-                 'Leroy', 'David', 'Bertrand', 'Roux', 'Vincent'];
+        // Arabic-origin names (transliterated)
+        $prenoms = ['Mohamed', 'Ahmed', 'Ali', 'Omar', 'Youssef', 'Karim', 'Sami', 'Walid',
+                    'Hamza', 'Bilel', 'Aymen', 'Hatem', 'Mehdi', 'Rami', 'Tarek', 'Yassine',
+                    'Zied', 'Anis', 'Khaled', 'Hichem', 'Skander', 'Marouen',
+                    'Mariam', 'Fatma', 'Aicha', 'Salma', 'Sarra', 'Yasmine', 'Amira', 'Rim',
+                    'Nour', 'Ines', 'Imen', 'Manel', 'Olfa', 'Asma', 'Hanen', 'Wafa',
+                    'Marwa', 'Sana', 'Sirine', 'Wiem'];
+        $noms = ['Ben Ali', 'Trabelsi', 'Gharbi', 'Jebali', 'Mhiri', 'Bouzidi', 'Hamdi', 'Saidi',
+                 'Khelifi', 'Mansouri', 'Chaabane', 'Sassi', 'Mejri', 'Karoui', 'Ayari', 'Tlili',
+                 'Nasri', 'Abdallah', 'Ghozzi', 'Mathlouthi', 'Triki', 'Bouaziz', 'Lahmer', 'Souissi'];
         $niveaux = ['Licence 3', 'Master 1', 'Master 2', 'Ingénierie 2', 'Ingénierie 3'];
         $specialites = ['Informatique', 'Réseaux', 'IA', 'Génie logiciel', 'Cybersécurité', 'Data science'];
 
@@ -29,10 +32,12 @@ class EtudiantSeeder extends Seeder
 
         $count = 0;
         foreach ($etablissements as $etab) {
-            for ($i = 0; $i < 8; $i++) {
+            for ($i = 0; $i < 15; $i++) {
                 $prenom = $prenoms[array_rand($prenoms)];
                 $nom    = $noms[array_rand($noms)];
-                $email  = strtolower($prenom . '.' . $nom . $count . '@etudiant.pfa.tn');
+                $emailNom = strtolower(str_replace(' ', '', $nom));
+                $emailPrenom = strtolower($prenom);
+                $email  = $emailPrenom . '.' . $emailNom . $count . '@etudiant.pfa.tn';
                 $count++;
 
                 $user = User::firstOrCreate(['email' => $email], [

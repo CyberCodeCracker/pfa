@@ -43,11 +43,13 @@ class EnseignantSeeder extends Seeder
                 'specialite' => $data['specialite'],
             ]);
 
-            // Assign to an établissement (round-robin)
-            $etabKeys = $etablissements->keys()->values();
-            $etab = $etablissements->get($etabKeys[$index % $etabKeys->count()]);
-            if ($etab && !$profile->etablissements()->where('etablissements.id', $etab->id)->exists()) {
-                $profile->etablissements()->attach($etab->id);
+            // Assign to 2–4 établissements (enseignants typically teach across multiple schools)
+            $nbEtabs = rand(2, min(4, $etablissements->count()));
+            $assigned = $etablissements->random($nbEtabs);
+            foreach ($assigned as $etab) {
+                if (!$profile->etablissements()->where('etablissements.id', $etab->id)->exists()) {
+                    $profile->etablissements()->attach($etab->id);
+                }
             }
         }
     }

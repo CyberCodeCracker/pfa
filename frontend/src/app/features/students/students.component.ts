@@ -1,9 +1,12 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
+import { Store } from '@ngrx/store';
 import { StageApiService } from '../../core/services/stage-api.service';
 import { Stage } from '../../core/models/stage.model';
 import { User } from '../../core/models/user.model';
 import { Router } from '@angular/router';
+import { selectFilter } from '../../store/filter/filter.selectors';
+import { FilterState } from '../../store/filter/filter.reducer';
 
 interface StudentRow {
   user: User;
@@ -20,13 +23,35 @@ export class StudentsComponent implements OnInit, OnDestroy {
   rows: StudentRow[] = [];
   loading = true;
   search = '';
+  private filter: FilterState = { annee: '', semestre: '', etablissementId: null };
   private destroy$ = new Subject<void>();
   private allRows: StudentRow[] = [];
 
-  constructor(private stageApi: StageApiService, private router: Router) {}
+  constructor(
+    private stageApi: StageApiService,
+    private store: Store,
+    private router: Router,
+  ) {}
 
   ngOnInit(): void {
-    this.stageApi.list({ per_page: 100, 'filter[statut]': 'actif' })
+    this.store.select(selectFilter)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(f => {
+        this.filter = f;
+        this.load();
+      });
+  }
+
+  private load(): void {
+    this.loading = true;
+    const f = this.filter;
+    this.stageApi.list({
+      per_page: 100,
+      'filter[statut]': 'actif',
+      ...(f.annee && { 'filter[annee_academique]': f.annee }),
+      ...(f.semestre && { 'filter[semestre]': f.semestre }),
+      ...(f.etablissementId && { 'filter[etablissement_id]': f.etablissementId }),
+    })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: res => {

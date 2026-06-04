@@ -34,6 +34,10 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
+        if ($user->isEnseignant()) {
+            $user->load('enseignantProfile.etablissements');
+        }
+
         return response()->json(['data' => new UserResource($user)]);
     }
 
@@ -46,7 +50,11 @@ class AuthController extends Controller
 
     public function me(Request $request): JsonResponse
     {
-        return response()->json(['data' => new UserResource($request->user())]);
+        $user = $request->user();
+        if ($user->isEnseignant()) {
+            $user->load('enseignantProfile.etablissements');
+        }
+        return response()->json(['data' => new UserResource($user)]);
     }
 
     public function changePassword(Request $request): JsonResponse

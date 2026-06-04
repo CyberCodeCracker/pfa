@@ -14,7 +14,8 @@
 
   <!-- Header -->
   <header class="mb-8">
-    <button (click)="goBack()" class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors text-sm font-bold mb-4">
+    <button (click)="goBack()"
+            class="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-primary border border-outline-variant/30 text-sm font-semibold transition-all active:scale-95">
       <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span>
       Retour
     </button>
@@ -69,23 +70,26 @@
 
   <!-- Custom tabs -->
   <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/10 shadow-sm overflow-hidden">
-    <div class="flex border-b border-outline-variant/10 px-2 overflow-x-auto no-scrollbar">
-      <button *ngFor="let tab of [
-        { label: 'Aperçu', icon: 'info' },
-        { label: 'Étudiants', icon: 'group' },
-        { label: 'Documents', icon: 'description' },
-        { label: 'Réunions', icon: 'event' },
-        { label: 'Discussion', icon: 'chat' }
-      ]; let i = index"
-              (click)="selectedTabIndex = i"
-              [class.text-primary]="selectedTabIndex === i"
-              [class.border-primary]="selectedTabIndex === i"
-              [class.text-on-surface-variant]="selectedTabIndex !== i"
-              [class.border-transparent]="selectedTabIndex !== i"
-              class="flex items-center gap-2 px-5 py-4 text-sm font-bold border-b-2 transition-all whitespace-nowrap hover:text-primary">
-        <span class="material-symbols-outlined" style="font-size:18px;">{{ tab.icon }}</span>
-        {{ tab.label }}
-      </button>
+    <div class="p-2 border-b border-outline-variant/10 overflow-x-auto no-scrollbar items-center">
+      <div class="inline-flex items-center gap-1 bg-surface-container rounded-full p-1.5 min-w-fit">
+        <button *ngFor="let tab of [
+          { label: 'Aperçu', icon: 'info' },
+          { label: 'Étudiants', icon: 'group' },
+          { label: 'Documents', icon: 'description' },
+          { label: 'Réunions', icon: 'event' },
+          { label: 'Discussion', icon: 'chat' }
+        ]; let i = index"
+                (click)="selectedTabIndex = i"
+                [class.bg-primary-fixed]="selectedTabIndex === i"
+                [class.text-on-primary-fixed]="selectedTabIndex === i"
+                [class.shadow-sm]="selectedTabIndex === i"
+                [class.text-on-surface-variant]="selectedTabIndex !== i"
+                [class.hover:bg-surface-container-high]="selectedTabIndex !== i"
+                class="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all whitespace-nowrap">
+          <span class="material-symbols-outlined" style="font-size:18px;">{{ tab.icon }}</span>
+          {{ tab.label }}
+        </button>
+      </div>
     </div>
 
     <div class="p-6">

@@ -30,10 +30,17 @@ class StageService
             ->allowedFilters([
                 AllowedFilter::exact('statut'),
                 AllowedFilter::exact('etablissement_id'),
+                AllowedFilter::exact('annee_academique'),
+                AllowedFilter::exact('semestre'),
             ])
             ->allowedSorts(['date_debut', 'date_fin', 'titre', 'created_at'])
             ->defaultSort('-created_at')
-            ->with(['etablissement', 'enseignant'])
+            ->with([
+                'etablissement',
+                'enseignant',
+                'affectations' => fn ($q) => $q->where('statut', AffectationStatut::Actif)->with('etudiant'),
+            ])
+            ->withCount(['affectations' => fn ($q) => $q->where('statut', AffectationStatut::Actif)])
             ->paginate($perPage);
     }
 

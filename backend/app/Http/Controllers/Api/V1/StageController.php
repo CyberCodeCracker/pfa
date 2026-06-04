@@ -26,12 +26,14 @@ class StageController extends Controller
         $this->authorize('create', Stage::class);
 
         $validated = $request->validate([
-            'titre'            => ['required', 'string', 'max:255'],
-            'description'      => ['nullable', 'string'],
-            'date_debut'       => ['required', 'date'],
-            'date_fin'         => ['required', 'date', 'after:date_debut'],
-            'niveau'           => ['nullable', 'string', 'max:100'],
-            'etablissement_id' => ['required', 'integer', 'exists:etablissements,id'],
+            'titre'             => ['required', 'string', 'max:255'],
+            'description'       => ['nullable', 'string'],
+            'date_debut'        => ['required', 'date'],
+            'date_fin'          => ['required', 'date', 'after:date_debut'],
+            'niveau'            => ['nullable', 'string', 'max:100'],
+            'annee_academique'  => ['nullable', 'string', 'regex:/^\d{4}-\d{4}$/'],
+            'semestre'          => ['nullable', 'string', 'in:S1,S2'],
+            'etablissement_id'  => ['required', 'integer', 'exists:etablissements,id'],
         ]);
 
         $stage = $this->stageService->create($request->user(), $validated);
@@ -43,7 +45,10 @@ class StageController extends Controller
     {
         $this->authorize('view', $stage);
 
-        return response()->json(['data' => new StageResource($stage->load(['etablissement', 'enseignant', 'affectations.etudiant']))]);
+        $stage->load(['etablissement', 'enseignant', 'affectations.etudiant'])
+              ->loadCount(['affectations' => fn ($q) => $q->where('statut', \App\Support\Enums\AffectationStatut::Actif)]);
+
+        return response()->json(['data' => new StageResource($stage)]);
     }
 
     public function update(Request $request, Stage $stage): JsonResponse
@@ -51,13 +56,15 @@ class StageController extends Controller
         $this->authorize('update', $stage);
 
         $validated = $request->validate([
-            'titre'            => ['sometimes', 'string', 'max:255'],
-            'description'      => ['nullable', 'string'],
-            'date_debut'       => ['sometimes', 'date'],
-            'date_fin'         => ['sometimes', 'date'],
-            'niveau'           => ['nullable', 'string', 'max:100'],
-            'statut'           => ['sometimes', 'string', 'in:brouillon,actif,archivé,terminé'],
-            'etablissement_id' => ['sometimes', 'integer', 'exists:etablissements,id'],
+            'titre'             => ['sometimes', 'string', 'max:255'],
+            'description'       => ['nullable', 'string'],
+            'date_debut'        => ['sometimes', 'date'],
+            'date_fin'          => ['sometimes', 'date'],
+            'niveau'            => ['nullable', 'string', 'max:100'],
+            'annee_academique'  => ['nullable', 'string', 'regex:/^\d{4}-\d{4}$/'],
+            'semestre'          => ['nullable', 'string', 'in:S1,S2'],
+            'statut'            => ['sometimes', 'string', 'in:brouillon,actif,archivé,terminé'],
+            'etablissement_id'  => ['sometimes', 'integer', 'exists:etablissements,id'],
         ]);
 
         $stage = $this->stageService->update($stage, $validated);

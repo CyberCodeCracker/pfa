@@ -5,6 +5,8 @@ import { ReunionApiService } from '../../core/services/reunion-api.service';
 import { Reunion } from '../../core/models/reunion.model';
 import { Store } from '@ngrx/store';
 import { selectCurrentUser } from '../../store/auth/auth.selectors';
+import { selectFilter } from '../../store/filter/filter.selectors';
+import { FilterState } from '../../store/filter/filter.reducer';
 
 @Component({
   selector: 'app-meetings',
@@ -18,6 +20,7 @@ export class MeetingsComponent implements OnInit, OnDestroy {
   loading = true;
   selectedTabIndex = 0;
   user$ = this.store.select(selectCurrentUser);
+  private filter: FilterState = { annee: '', semestre: '', etablissementId: null };
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -27,7 +30,12 @@ export class MeetingsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.load();
+    this.store.select(selectFilter)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(f => {
+        this.filter = f;
+        this.load();
+      });
   }
 
   ngOnDestroy(): void {
@@ -37,7 +45,13 @@ export class MeetingsComponent implements OnInit, OnDestroy {
 
   load(): void {
     this.loading = true;
-    this.reunionApi.list({ per_page: 100 })
+    const f = this.filter;
+    this.reunionApi.list({
+      per_page: 100,
+      ...(f.annee && { annee_academique: f.annee }),
+      ...(f.semestre && { semestre: f.semestre }),
+      ...(f.etablissementId && { etablissement_id: f.etablissementId }),
+    })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: res => {

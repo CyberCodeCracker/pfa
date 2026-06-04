@@ -3,6 +3,8 @@ import { User } from './user.model';
 
 export type StageStatut = 'brouillon' | 'actif' | 'archivé' | 'terminé';
 
+export type Semestre = 'S1' | 'S2';
+
 export interface Stage {
   id: number;
   titre: string;
@@ -11,6 +13,8 @@ export interface Stage {
   date_fin: string;
   statut: StageStatut;
   niveau: string | null;
+  annee_academique: string | null;
+  semestre: Semestre | null;
   created_at: string;
   etablissement?: Etablissement;
   enseignant?: User;

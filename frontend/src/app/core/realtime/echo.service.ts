@@ -12,6 +12,8 @@ export class EchoService implements OnDestroy {
   connect(): void {
     if (this.echo) return;
 
+    const xsrfToken = this.getCookie('XSRF-TOKEN');
+
     this.echo = new Echo({
       broadcaster: 'reverb',
       key: environment.reverb.key,
@@ -22,7 +24,18 @@ export class EchoService implements OnDestroy {
       enabledTransports: ['ws', 'wss'],
       withCredentials: true,
       authEndpoint: `${environment.baseUrl}/broadcasting/auth`,
+      auth: {
+        headers: {
+          Accept: 'application/json',
+          ...(xsrfToken ? { 'X-XSRF-TOKEN': decodeURIComponent(xsrfToken) } : {}),
+        },
+      },
     });
+  }
+
+  private getCookie(name: string): string | null {
+    const match = document.cookie.match(new RegExp('(^|; )' + name + '=([^;]*)'));
+    return match ? match[2] : null;
   }
 
   disconnect(): void {

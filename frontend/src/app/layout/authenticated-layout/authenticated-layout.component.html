@@ -20,28 +20,28 @@
 
     <!-- Nav (enseignant) -->
     <nav class="flex-1 flex flex-col gap-1.5" *ngIf="user.role === 'enseignant'">
-      <a routerLink="/dashboard" routerLinkActive="bg-primary text-white shadow-md"
+      <a routerLink="/dashboard" routerLinkActive="bg-primary-fixed text-on-primary-fixed font-bold"
          [routerLinkActiveOptions]="{ exact: false }"
          class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center gap-3 px-4 py-3 transition-all duration-200">
         <span class="material-symbols-outlined">dashboard</span>
         <span class="font-semibold text-sm">Tableau de bord</span>
       </a>
-      <a routerLink="/stages" routerLinkActive="bg-primary text-white shadow-md"
+      <a routerLink="/stages" routerLinkActive="bg-primary-fixed text-on-primary-fixed font-bold"
          class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center gap-3 px-4 py-3 transition-all duration-200">
         <span class="material-symbols-outlined">work</span>
         <span class="font-semibold text-sm">Stages</span>
       </a>
-      <a routerLink="/etudiants" routerLinkActive="bg-primary text-white shadow-md"
+      <a routerLink="/etudiants" routerLinkActive="bg-primary-fixed text-on-primary-fixed font-bold"
          class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center gap-3 px-4 py-3 transition-all duration-200">
         <span class="material-symbols-outlined">group</span>
         <span class="font-semibold text-sm">Étudiants</span>
       </a>
-      <a routerLink="/reunions" routerLinkActive="bg-primary text-white shadow-md"
+      <a routerLink="/reunions" routerLinkActive="bg-primary-fixed text-on-primary-fixed font-bold"
          class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center gap-3 px-4 py-3 transition-all duration-200">
         <span class="material-symbols-outlined">calendar_month</span>
         <span class="font-semibold text-sm">Calendrier</span>
       </a>
-      <a routerLink="/messagerie" routerLinkActive="bg-primary text-white shadow-md"
+      <a routerLink="/messagerie" routerLinkActive="bg-primary-fixed text-on-primary-fixed font-bold"
          class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center gap-3 px-4 py-3 transition-all duration-200">
         <span class="material-symbols-outlined">chat_bubble_outline</span>
         <span class="font-semibold text-sm">Messagerie</span>
@@ -50,17 +50,17 @@
 
     <!-- Nav (étudiant) -->
     <nav class="flex-1 flex flex-col gap-1.5" *ngIf="user.role === 'etudiant'">
-      <a routerLink="/mes-stages" routerLinkActive="bg-primary text-white shadow-md"
+      <a routerLink="/mes-stages" routerLinkActive="bg-primary-fixed text-on-primary-fixed font-bold"
          class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center gap-3 px-4 py-3 transition-all duration-200">
         <span class="material-symbols-outlined">school</span>
         <span class="font-semibold text-sm">Mes stages</span>
       </a>
-      <a routerLink="/reunions" routerLinkActive="bg-primary text-white shadow-md"
+      <a routerLink="/reunions" routerLinkActive="bg-primary-fixed text-on-primary-fixed font-bold"
          class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center gap-3 px-4 py-3 transition-all duration-200">
         <span class="material-symbols-outlined">calendar_month</span>
         <span class="font-semibold text-sm">Calendrier</span>
       </a>
-      <a routerLink="/messagerie" routerLinkActive="bg-primary text-white shadow-md"
+      <a routerLink="/messagerie" routerLinkActive="bg-primary-fixed text-on-primary-fixed font-bold"
          class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center gap-3 px-4 py-3 transition-all duration-200">
         <span class="material-symbols-outlined">chat_bubble_outline</span>
         <span class="font-semibold text-sm">Messagerie</span>
@@ -69,7 +69,7 @@
 
     <!-- Bottom: notifications + logout -->
     <div class="space-y-1 border-t border-outline-variant/20 pt-4">
-      <a routerLink="/notifications" routerLinkActive="bg-primary text-white shadow-md"
+      <a routerLink="/notifications" routerLinkActive="bg-primary-fixed text-on-primary-fixed font-bold"
          class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center gap-3 px-4 py-3 transition-all duration-200 relative">
         <span class="material-symbols-outlined">notifications</span>
         <span class="font-semibold text-sm">Notifications</span>
@@ -91,7 +91,45 @@
 
     <!-- Topbar -->
     <header class="sticky top-0 z-30 w-full glass-nav flex justify-between items-center px-8 h-20 border-b border-outline-variant/20">
-      <div></div>
+
+      <!-- Session & establishment filter bar (enseignant only) -->
+      <div *ngIf="user.role === 'enseignant'"
+           class="flex items-center gap-3 bg-primary-container/30 border-2 border-primary/30 rounded-2xl px-4 py-2 shadow-md shadow-primary/10">
+        <div class="flex items-center gap-2 pr-3 border-r border-primary/20">
+          <span class="material-symbols-outlined text-primary" style="font-size:22px;">tune</span>
+          <span class="text-xs font-extrabold text-primary uppercase tracking-widest hidden lg:block">Filtres</span>
+        </div>
+
+        <div class="flex flex-col">
+          <span class="text-[9px] font-bold text-primary/80 uppercase tracking-widest leading-none mb-0.5">Année</span>
+          <select [(ngModel)]="filterAnnee" (change)="onFilterChange()"
+                  class="text-sm font-bold bg-surface-container-lowest text-primary rounded-lg px-3 py-2 border-2 border-primary/20 hover:border-primary/40 focus:ring-2 focus:ring-primary/30 focus:border-primary focus:outline-none cursor-pointer transition-all">
+            <option value="">Toutes</option>
+            <option *ngFor="let a of annees" [value]="a">{{ a }}</option>
+          </select>
+        </div>
+
+        <div class="flex flex-col">
+          <span class="text-[9px] font-bold text-primary/80 uppercase tracking-widest leading-none mb-0.5">Semestre</span>
+          <select [(ngModel)]="filterSemestre" (change)="onFilterChange()"
+                  class="text-sm font-bold bg-surface-container-lowest text-primary rounded-lg px-3 py-2 border-2 border-primary/20 hover:border-primary/40 focus:ring-2 focus:ring-primary/30 focus:border-primary focus:outline-none cursor-pointer transition-all">
+            <option value="">Tous</option>
+            <option value="S1">S1 — Stage d'été</option>
+            <option value="S2">S2 — PFE / PFA</option>
+          </select>
+        </div>
+
+        <div *ngIf="etablissements.length > 0" class="flex flex-col">
+          <span class="text-[9px] font-bold text-primary/80 uppercase tracking-widest leading-none mb-0.5">Établissement</span>
+          <select [(ngModel)]="filterEtablissementId" (change)="onFilterChange()"
+                  class="text-sm font-bold bg-surface-container-lowest text-primary rounded-lg px-3 py-2 border-2 border-primary/20 hover:border-primary/40 focus:ring-2 focus:ring-primary/30 focus:border-primary focus:outline-none cursor-pointer transition-all max-w-[200px] truncate">
+            <option [ngValue]="null">Tous</option>
+            <option *ngFor="let e of etablissements" [ngValue]="e.id">{{ e.nom }}</option>
+          </select>
+        </div>
+      </div>
+      <div *ngIf="user.role !== 'enseignant'"></div>
+
       <div class="flex items-center gap-5">
         <a routerLink="/notifications" class="relative p-2.5 bg-surface-container rounded-full text-on-surface-variant hover:bg-surface-container-high cursor-pointer transition-colors">
           <span class="material-symbols-outlined" style="font-size:20px;">notifications</span>

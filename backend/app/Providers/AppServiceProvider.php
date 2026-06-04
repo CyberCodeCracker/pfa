@@ -7,6 +7,7 @@ use App\Models\Stage;
 use App\Domain\Stage\Policies\StagePolicy;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
@@ -22,6 +23,9 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Broadcasting auth must use Sanctum (cookie-based SPA auth), not the web session guard
+        Broadcast::routes(['middleware' => ['auth:sanctum']]);
+
         // Rate limiters
         RateLimiter::for('auth', fn (Request $request) =>
             Limit::perMinute(5)->by($request->ip())->response(function () {

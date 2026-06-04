@@ -18,6 +18,8 @@ class StageResource extends JsonResource
             'statut'           => $this->statut?->value,
             'niveau'           => $this->niveau,
             'created_at'       => $this->created_at,
+            'annee_academique'  => $this->annee_academique,
+            'semestre'         => $this->semestre?->value,
             'etablissement'    => new EtablissementResource($this->whenLoaded('etablissement')),
             'enseignant'       => new UserResource($this->whenLoaded('enseignant')),
             'affectations'     => AffectationResource::collection($this->whenLoaded('affectations')),
