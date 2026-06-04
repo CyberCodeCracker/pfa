@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\V1\ChatController;
 use App\Http\Controllers\Api\V1\DocumentController;
 use App\Http\Controllers\Api\V1\EtablissementController;
 use App\Http\Controllers\Api\V1\FeedbackController;
+use App\Http\Controllers\Api\V1\MilestoneController;
 use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\ReunionController;
 use App\Http\Controllers\Api\V1\StageController;
@@ -43,6 +44,15 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
         Route::apiResource('/stages', StageController::class);
         Route::post('/stages/{stage}/affectations', [StageController::class, 'affecter']);
         Route::delete('/stages/{stage}/affectations/{etudiant}', [StageController::class, 'retirerEtudiant']);
+
+        // Milestones
+        Route::get('/stages/{stage}/milestones',           [MilestoneController::class, 'index']);
+        Route::post('/stages/{stage}/milestones',          [MilestoneController::class, 'store']);
+        Route::patch('/milestones/{milestone}',            [MilestoneController::class, 'update']);
+        Route::delete('/milestones/{milestone}',           [MilestoneController::class, 'destroy']);
+        Route::post('/milestones/{milestone}/complete',    [MilestoneController::class, 'markComplete']);
+        Route::post('/milestones/{milestone}/validate',    [MilestoneController::class, 'validate_']);
+        Route::post('/milestones/{milestone}/reopen',      [MilestoneController::class, 'reopen']);
 
         // Documents
         Route::get('/stages/{stage}/documents',    [DocumentController::class, 'index']);

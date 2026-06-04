@@ -1,0 +1,21 @@
+<div class="relative inline-flex items-center justify-center" [style.width.px]="size" [style.height.px]="size">
+  <svg [attr.width]="size" [attr.height]="size" class="-rotate-90">
+    <circle [attr.cx]="center" [attr.cy]="center" [attr.r]="radius"
+            fill="none" stroke="currentColor" [attr.stroke-width]="stroke"
+            class="text-surface-container-high"></circle>
+    <circle [attr.cx]="center" [attr.cy]="center" [attr.r]="radius"
+            fill="none" stroke="currentColor" [attr.stroke-width]="stroke"
+            stroke-linecap="round"
+            [attr.stroke-dasharray]="circumference"
+            [attr.stroke-dashoffset]="dashOffset"
+            [ngClass]="ringClass"
+            class="transition-all duration-500"></circle>
+  </svg>
+  <span class="absolute inset-0 flex items-center justify-center font-bold leading-none"
+        [class.text-[10px]]="size < 50"
+        [class.text-xs]="size >= 50 && size < 80"
+        [class.text-base]="size >= 80"
+        [ngClass]="ringClass">
+    {{ label }}
+  </span>
+</div>

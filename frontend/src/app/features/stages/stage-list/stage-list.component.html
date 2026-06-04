@@ -80,19 +80,24 @@
     <h3 class="font-headline text-xl font-bold text-primary mb-3">{{ stage.titre }}</h3>
     <p class="text-on-surface-variant text-sm line-clamp-2 mb-6">{{ stage.description || 'Aucune description.' }}</p>
 
-    <div class="mt-auto pt-6 border-t border-surface-container flex justify-between items-center">
-      <div class="flex items-center gap-4">
-        <div class="flex items-center gap-1.5 text-on-surface-variant">
-          <span class="material-symbols-outlined" style="font-size:16px;">group</span>
-          <span class="text-xs font-semibold">{{ stage.etudiants_count || 0 }} étudiant(s)</span>
-        </div>
-        <div class="flex items-center gap-1.5 text-on-surface-variant">
-          <span class="material-symbols-outlined" style="font-size:16px;">event</span>
-          <span class="text-xs font-semibold">{{ stage.date_fin | date:'MMM yy' }}</span>
+    <div class="mt-auto pt-6 border-t border-surface-container flex justify-between items-center gap-4">
+      <div class="flex items-center gap-4 flex-1 min-w-0">
+        <app-completion-wheel
+          [done]="stage.milestones_done_count || 0"
+          [total]="stage.milestones_count || 0"
+          [size]="52"
+          [stroke]="5"
+          [showCount]="true"></app-completion-wheel>
+        <div class="flex flex-col gap-1 min-w-0">
+          <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Progression</span>
+          <div class="flex items-center gap-3 text-xs text-on-surface-variant font-semibold">
+            <span class="flex items-center gap-1"><span class="material-symbols-outlined" style="font-size:14px;">group</span>{{ stage.etudiants_count || 0 }}</span>
+            <span class="flex items-center gap-1"><span class="material-symbols-outlined" style="font-size:14px;">event</span>{{ stage.date_fin | date:'MMM yy' }}</span>
+          </div>
         </div>
       </div>
-      <button class="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-white text-xs font-bold shadow-sm hover:shadow-md hover:gap-2.5 active:scale-95 transition-all">
-        Voir détails
+      <button class="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-white text-xs font-bold shadow-sm hover:shadow-md hover:gap-2.5 active:scale-95 transition-all">
+        Détails
         <span class="material-symbols-outlined" style="font-size:14px;">arrow_forward</span>
       </button>
     </div>

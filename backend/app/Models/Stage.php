@@ -73,4 +73,9 @@ class Stage extends Model
     {
         return $this->hasOne(PublicChat::class);
     }
+
+    public function milestones()
+    {
+        return $this->hasMany(Milestone::class)->orderBy('ordre');
+    }
 }

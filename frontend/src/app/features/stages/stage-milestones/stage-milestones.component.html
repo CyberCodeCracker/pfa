@@ -1,0 +1,130 @@
+<div *ngIf="loading" class="flex justify-center py-10">
+  <span class="material-symbols-outlined animate-spin text-primary" style="font-size:32px;">progress_activity</span>
+</div>
+
+<div *ngIf="!loading">
+
+  <!-- Header with completion wheel -->
+  <div class="flex items-center justify-between gap-6 mb-8 p-6 bg-surface-container-lowest rounded-2xl border border-outline-variant/20 shadow-sm">
+    <div class="flex items-center gap-5">
+      <app-completion-wheel [done]="doneCount" [total]="totalCount" [size]="84" [stroke]="7"></app-completion-wheel>
+      <div>
+        <h3 class="font-headline text-lg font-extrabold text-primary">Avancement du projet</h3>
+        <p class="text-sm text-on-surface-variant mt-1">
+          <span class="font-bold text-on-surface">{{ validatedCount }}</span> validée(s) ·
+          <span class="font-bold text-on-surface">{{ doneCount - validatedCount }}</span> à valider ·
+          <span class="font-bold text-on-surface">{{ totalCount - doneCount }}</span> restante(s)
+        </p>
+      </div>
+    </div>
+    <button *ngIf="isEnseignant && !adding" (click)="startAdd()"
+            class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-bold shadow-sm hover:shadow-md active:scale-95 transition-all">
+      <span class="material-symbols-outlined" style="font-size:18px;">add</span>
+      Ajouter une étape
+    </button>
+  </div>
+
+  <!-- Inline add form -->
+  <div *ngIf="adding" class="mb-6 p-5 bg-primary-container/20 border-2 border-primary/30 rounded-2xl">
+    <label class="block text-xs font-bold text-primary uppercase tracking-wider mb-1">Titre</label>
+    <input [(ngModel)]="newTitre" placeholder="Ex: Conception et planification"
+           class="w-full px-3 py-2 rounded-lg bg-surface-container-lowest border-transparent focus:ring-2 focus:ring-primary/30 focus:outline-none mb-3 font-semibold">
+    <label class="block text-xs font-bold text-primary uppercase tracking-wider mb-1">Description</label>
+    <textarea [(ngModel)]="newDescription" rows="2" placeholder="Brève description (optionnel)"
+              class="w-full px-3 py-2 rounded-lg bg-surface-container-lowest border-transparent focus:ring-2 focus:ring-primary/30 focus:outline-none mb-3"></textarea>
+    <div class="flex gap-2 justify-end">
+      <button (click)="cancelAdd()"
+              class="px-4 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high text-sm font-bold transition-all">Annuler</button>
+      <button (click)="saveAdd()" [disabled]="saving || !newTitre.trim()"
+              class="px-4 py-2 rounded-lg bg-primary text-white text-sm font-bold disabled:opacity-50 transition-all">Ajouter</button>
+    </div>
+  </div>
+
+  <!-- Empty state -->
+  <div *ngIf="milestones.length === 0 && !adding"
+       class="bg-surface-container-lowest border border-outline-variant/20 rounded-2xl p-12 text-center">
+    <span class="material-symbols-outlined text-outline" style="font-size:48px;">flag</span>
+    <p class="text-on-surface-variant mt-3">Aucune étape définie pour ce stage.</p>
+  </div>
+
+  <!-- Milestone timeline -->
+  <ol class="relative space-y-3" *ngIf="milestones.length > 0">
+    <li *ngFor="let m of milestones; trackBy: trackById"
+        class="relative bg-surface-container-lowest rounded-2xl border border-outline-variant/20 hover:border-primary/30 transition-all p-5 shadow-sm">
+
+      <!-- View mode -->
+      <div *ngIf="editingId !== m.id" class="flex items-start gap-4">
+        <div class="flex flex-col items-center shrink-0 pt-1">
+          <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm"
+               [ngClass]="statutClass(m.statut)">
+            <span class="material-symbols-outlined" style="font-size:18px;">{{ statutIcon(m.statut) }}</span>
+          </div>
+          <span class="text-[10px] font-bold text-on-surface-variant mt-1">{{ m.ordre }}</span>
+        </div>
+
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-3 mb-1 flex-wrap">
+            <h4 class="font-bold text-on-surface text-base">{{ m.titre }}</h4>
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest"
+                  [ngClass]="statutClass(m.statut)">{{ statutLabel(m.statut) }}</span>
+          </div>
+          <p *ngIf="m.description" class="text-sm text-on-surface-variant leading-relaxed">{{ m.description }}</p>
+          <div *ngIf="m.validated_at" class="text-[11px] text-on-surface-variant mt-2 flex items-center gap-1">
+            <span class="material-symbols-outlined" style="font-size:14px;">verified</span>
+            Validé le {{ m.validated_at | date:'dd MMM yyyy' }}
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1 shrink-0">
+          <!-- Teacher actions -->
+          <ng-container *ngIf="isEnseignant">
+            <button *ngIf="m.statut !== 'validated'" (click)="validate(m)"
+                    title="Valider"
+                    class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-primary-container hover:text-on-primary-container transition-all">
+              <span class="material-symbols-outlined" style="font-size:18px;">check_circle</span>
+            </button>
+            <button *ngIf="m.statut === 'validated' || m.statut === 'completed'" (click)="reopen(m)"
+                    title="Rouvrir"
+                    class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-all">
+              <span class="material-symbols-outlined" style="font-size:18px;">replay</span>
+            </button>
+            <button (click)="startEdit(m)"
+                    title="Modifier"
+                    class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-all">
+              <span class="material-symbols-outlined" style="font-size:18px;">edit</span>
+            </button>
+            <button (click)="delete(m)"
+                    title="Supprimer"
+                    class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-error-container hover:text-on-error-container transition-all">
+              <span class="material-symbols-outlined" style="font-size:18px;">delete</span>
+            </button>
+          </ng-container>
+
+          <!-- Student actions -->
+          <ng-container *ngIf="!isEnseignant">
+            <button *ngIf="m.statut === 'pending' || m.statut === 'in_progress'" (click)="markComplete(m)"
+                    class="px-3 py-2 rounded-lg bg-secondary-container text-on-secondary-container text-xs font-bold hover:opacity-90 transition-all">
+              Marquer terminé
+            </button>
+          </ng-container>
+        </div>
+      </div>
+
+      <!-- Edit mode -->
+      <div *ngIf="editingId === m.id" class="space-y-3">
+        <label class="block text-xs font-bold text-primary uppercase tracking-wider">Titre</label>
+        <input [(ngModel)]="editTitre"
+               class="w-full px-3 py-2 rounded-lg bg-surface-container-low border-transparent focus:ring-2 focus:ring-primary/30 focus:outline-none font-semibold">
+        <label class="block text-xs font-bold text-primary uppercase tracking-wider">Description</label>
+        <textarea [(ngModel)]="editDescription" rows="2"
+                  class="w-full px-3 py-2 rounded-lg bg-surface-container-low border-transparent focus:ring-2 focus:ring-primary/30 focus:outline-none"></textarea>
+        <div class="flex gap-2 justify-end">
+          <button (click)="cancelEdit()"
+                  class="px-4 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high text-sm font-bold transition-all">Annuler</button>
+          <button (click)="saveEdit(m)" [disabled]="saving || !editTitre.trim()"
+                  class="px-4 py-2 rounded-lg bg-primary text-white text-sm font-bold disabled:opacity-50 transition-all">Enregistrer</button>
+        </div>
+      </div>
+    </li>
+  </ol>
+</div>

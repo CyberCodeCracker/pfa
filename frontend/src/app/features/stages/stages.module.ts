@@ -24,6 +24,8 @@ import { StageMeetingsComponent } from './stage-meetings/stage-meetings.componen
 import { StageChatComponent } from './stage-chat/stage-chat.component';
 import { StageFeedbackComponent } from './stage-feedback/stage-feedback.component';
 import { MeetingCreateDialogComponent } from './meeting-create-dialog/meeting-create-dialog.component';
+import { SharedModule } from '../../shared/shared.module';
+import { StageMilestonesComponent } from './stage-milestones/stage-milestones.component';
 
 @NgModule({
   declarations: [
@@ -37,11 +39,13 @@ import { MeetingCreateDialogComponent } from './meeting-create-dialog/meeting-cr
     StageChatComponent,
     StageFeedbackComponent,
     MeetingCreateDialogComponent,
+    StageMilestonesComponent,
   ],
   imports: [
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
+    SharedModule,
     MatButtonModule,
     MatIconModule,
     MatInputModule,

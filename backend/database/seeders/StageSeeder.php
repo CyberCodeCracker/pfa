@@ -2,12 +2,15 @@
 
 namespace Database\Seeders;
 
+use App\Domain\Stage\Services\MilestoneTemplateService;
 use App\Models\Affectation;
 use App\Models\Etablissement;
 use App\Models\EtudiantProfile;
+use App\Models\Milestone;
 use App\Models\Stage;
 use App\Models\User;
 use App\Support\Enums\AffectationStatut;
+use App\Support\Enums\MilestoneStatut;
 use App\Support\Enums\Role;
 use App\Support\Enums\StageStatut;
 use Illuminate\Database\Seeder;
@@ -185,7 +188,48 @@ class StageSeeder extends Seeder
                         ]
                     );
                 }
+
+                $this->seedMilestonesForStage($stage, $slot['past']);
             }
+        }
+    }
+
+    private function seedMilestonesForStage(Stage $stage, bool $past): void
+    {
+        $templates = app(MilestoneTemplateService::class)->templateFor($stage->semestre);
+        $total = count($templates);
+
+        // Past stages → all validated. Current stages → progress between 1 and total-1.
+        $doneCount = $past
+            ? $total
+            : rand(1, max(1, $total - 1));
+
+        foreach ($templates as $i => $tpl) {
+            $statut       = MilestoneStatut::Pending;
+            $completedAt  = null;
+            $validatedAt  = null;
+
+            if ($i < $doneCount) {
+                $statut      = MilestoneStatut::Validated;
+                $completedAt = now()->subDays(rand(5, 60));
+                $validatedAt = $completedAt->copy()->addDays(rand(1, 3));
+            } elseif ($i === $doneCount) {
+                // The "next" one is in progress (or, 30% of the time, completed waiting validation)
+                $statut = rand(1, 10) <= 3 ? MilestoneStatut::Completed : MilestoneStatut::InProgress;
+                if ($statut === MilestoneStatut::Completed) {
+                    $completedAt = now()->subDays(rand(1, 5));
+                }
+            }
+
+            Milestone::create([
+                'stage_id'     => $stage->id,
+                'titre'        => $tpl['titre'],
+                'description'  => $tpl['description'],
+                'ordre'        => $i + 1,
+                'statut'       => $statut,
+                'completed_at' => $completedAt,
+                'validated_at' => $validatedAt,
+            ]);
         }
     }
 }

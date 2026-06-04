@@ -74,6 +74,7 @@
       <div class="inline-flex items-center gap-1 bg-surface-container rounded-full p-1.5 min-w-fit">
         <button *ngFor="let tab of [
           { label: 'Aperçu', icon: 'info' },
+          { label: 'Étapes', icon: 'flag' },
           { label: 'Étudiants', icon: 'group' },
           { label: 'Documents', icon: 'description' },
           { label: 'Réunions', icon: 'event' },
@@ -102,17 +103,20 @@
         <app-stage-feedback [stageId]="stage.id"></app-stage-feedback>
       </div>
 
+      <!-- Étapes (milestones) -->
+      <app-stage-milestones *ngIf="selectedTabIndex === 1" [stageId]="stage.id"></app-stage-milestones>
+
       <!-- Étudiants -->
-      <app-stage-students *ngIf="selectedTabIndex === 1" [stageId]="stage.id"></app-stage-students>
+      <app-stage-students *ngIf="selectedTabIndex === 2" [stageId]="stage.id"></app-stage-students>
 
       <!-- Documents -->
-      <app-stage-documents *ngIf="selectedTabIndex === 2" [stageId]="stage.id"></app-stage-documents>
+      <app-stage-documents *ngIf="selectedTabIndex === 3" [stageId]="stage.id"></app-stage-documents>
 
       <!-- Réunions -->
-      <app-stage-meetings *ngIf="selectedTabIndex === 3" [stageId]="stage.id"></app-stage-meetings>
+      <app-stage-meetings *ngIf="selectedTabIndex === 4" [stageId]="stage.id"></app-stage-meetings>
 
       <!-- Discussion -->
-      <app-stage-chat *ngIf="selectedTabIndex === 4" [stageId]="stage.id"></app-stage-chat>
+      <app-stage-chat *ngIf="selectedTabIndex === 5" [stageId]="stage.id"></app-stage-chat>
     </div>
   </div>
 </div>

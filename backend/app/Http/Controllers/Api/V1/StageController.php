@@ -45,8 +45,12 @@ class StageController extends Controller
     {
         $this->authorize('view', $stage);
 
-        $stage->load(['etablissement', 'enseignant', 'affectations.etudiant'])
-              ->loadCount(['affectations' => fn ($q) => $q->where('statut', \App\Support\Enums\AffectationStatut::Actif)]);
+        $stage->load(['etablissement', 'enseignant', 'affectations.etudiant', 'milestones'])
+              ->loadCount([
+                  'affectations' => fn ($q) => $q->where('statut', \App\Support\Enums\AffectationStatut::Actif),
+                  'milestones',
+                  'milestones as milestones_done_count' => fn ($q) => $q->whereIn('statut', ['completed', 'validated']),
+              ]);
 
         return response()->json(['data' => new StageResource($stage)]);
     }

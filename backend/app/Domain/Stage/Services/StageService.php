@@ -3,6 +3,7 @@
 namespace App\Domain\Stage\Services;
 
 use App\Domain\Auth\Services\InvitationService;
+use App\Domain\Stage\Services\MilestoneTemplateService;
 use App\Models\Affectation;
 use App\Models\Stage;
 use App\Models\User;
@@ -16,6 +17,7 @@ class StageService
 {
     public function __construct(
         private InvitationService $invitationService,
+        private MilestoneTemplateService $milestoneTemplates,
     ) {}
 
     public function listForUser(User $user, int $perPage = 20): LengthAwarePaginator
@@ -40,7 +42,11 @@ class StageService
                 'enseignant',
                 'affectations' => fn ($q) => $q->where('statut', AffectationStatut::Actif)->with('etudiant'),
             ])
-            ->withCount(['affectations' => fn ($q) => $q->where('statut', AffectationStatut::Actif)])
+            ->withCount([
+                'affectations' => fn ($q) => $q->where('statut', AffectationStatut::Actif),
+                'milestones',
+                'milestones as milestones_done_count' => fn ($q) => $q->whereIn('statut', ['completed', 'validated']),
+            ])
             ->paginate($perPage);
     }
 
@@ -51,6 +57,8 @@ class StageService
             'enseignant_id' => $enseignant->id,
             'statut'        => StageStatut::Brouillon,
         ]);
+
+        $this->milestoneTemplates->seedDefaults($stage);
 
         return $stage;
     }

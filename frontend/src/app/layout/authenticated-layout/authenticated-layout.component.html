@@ -90,40 +90,40 @@
   <main class="ml-64 min-h-screen flex flex-col">
 
     <!-- Topbar -->
-    <header class="sticky top-0 z-30 w-full glass-nav flex justify-between items-center px-8 h-20 border-b border-outline-variant/20">
+    <header class="sticky top-0 z-30 w-full glass-nav flex justify-between items-center px-8 h-24 border-b border-outline-variant/20">
 
       <!-- Session & establishment filter bar (enseignant only) -->
       <div *ngIf="user.role === 'enseignant'"
-           class="flex items-center gap-3 bg-primary-container/30 border-2 border-primary/30 rounded-2xl px-4 py-2 shadow-md shadow-primary/10">
-        <div class="flex items-center gap-2 pr-3 border-r border-primary/20">
-          <span class="material-symbols-outlined text-primary" style="font-size:22px;">tune</span>
-          <span class="text-xs font-extrabold text-primary uppercase tracking-widest hidden lg:block">Filtres</span>
+           class="flex-1 max-w-4xl mr-6 flex items-center gap-5 bg-primary-container/30 border-2 border-primary/30 rounded-2xl px-6 py-2.5 shadow-md shadow-primary/10">
+        <div class="flex items-center gap-2 pr-4 border-r-2 border-primary/20 shrink-0">
+          <span class="material-symbols-outlined text-primary" style="font-size:26px;">tune</span>
+          <span class="text-sm font-extrabold text-primary uppercase tracking-widest hidden lg:block">Filtres</span>
         </div>
 
-        <div class="flex flex-col">
-          <span class="text-[9px] font-bold text-primary/80 uppercase tracking-widest leading-none mb-0.5">Année</span>
+        <div class="flex flex-col flex-1 min-w-[140px]">
+          <span class="text-[10px] font-bold text-primary/80 uppercase tracking-widest leading-none mb-1">Année</span>
           <select [(ngModel)]="filterAnnee" (change)="onFilterChange()"
-                  class="text-sm font-bold bg-surface-container-lowest text-primary rounded-lg px-3 py-2 border-2 border-primary/20 hover:border-primary/40 focus:ring-2 focus:ring-primary/30 focus:border-primary focus:outline-none cursor-pointer transition-all">
-            <option value="">Toutes</option>
+                  class="w-full text-sm font-bold bg-surface-container-lowest text-primary rounded-lg px-3 py-2.5 border-2 border-primary/20 hover:border-primary/40 focus:ring-2 focus:ring-primary/30 focus:border-primary focus:outline-none cursor-pointer transition-all">
+            <option value="">Toutes les années</option>
             <option *ngFor="let a of annees" [value]="a">{{ a }}</option>
           </select>
         </div>
 
-        <div class="flex flex-col">
-          <span class="text-[9px] font-bold text-primary/80 uppercase tracking-widest leading-none mb-0.5">Semestre</span>
+        <div class="flex flex-col flex-1 min-w-[170px]">
+          <span class="text-[10px] font-bold text-primary/80 uppercase tracking-widest leading-none mb-1">Semestre</span>
           <select [(ngModel)]="filterSemestre" (change)="onFilterChange()"
-                  class="text-sm font-bold bg-surface-container-lowest text-primary rounded-lg px-3 py-2 border-2 border-primary/20 hover:border-primary/40 focus:ring-2 focus:ring-primary/30 focus:border-primary focus:outline-none cursor-pointer transition-all">
-            <option value="">Tous</option>
+                  class="w-full text-sm font-bold bg-surface-container-lowest text-primary rounded-lg px-3 py-2.5 border-2 border-primary/20 hover:border-primary/40 focus:ring-2 focus:ring-primary/30 focus:border-primary focus:outline-none cursor-pointer transition-all">
+            <option value="">Tous semestres</option>
             <option value="S1">S1 — Stage d'été</option>
             <option value="S2">S2 — PFE / PFA</option>
           </select>
         </div>
 
-        <div *ngIf="etablissements.length > 0" class="flex flex-col">
-          <span class="text-[9px] font-bold text-primary/80 uppercase tracking-widest leading-none mb-0.5">Établissement</span>
+        <div *ngIf="etablissements.length > 0" class="flex flex-col flex-1 min-w-[180px]">
+          <span class="text-[10px] font-bold text-primary/80 uppercase tracking-widest leading-none mb-1">Établissement</span>
           <select [(ngModel)]="filterEtablissementId" (change)="onFilterChange()"
-                  class="text-sm font-bold bg-surface-container-lowest text-primary rounded-lg px-3 py-2 border-2 border-primary/20 hover:border-primary/40 focus:ring-2 focus:ring-primary/30 focus:border-primary focus:outline-none cursor-pointer transition-all max-w-[200px] truncate">
-            <option [ngValue]="null">Tous</option>
+                  class="w-full text-sm font-bold bg-surface-container-lowest text-primary rounded-lg px-3 py-2.5 border-2 border-primary/20 hover:border-primary/40 focus:ring-2 focus:ring-primary/30 focus:border-primary focus:outline-none cursor-pointer transition-all">
+            <option [ngValue]="null">Tous établissements</option>
             <option *ngFor="let e of etablissements" [ngValue]="e.id">{{ e.nom }}</option>
           </select>
         </div>

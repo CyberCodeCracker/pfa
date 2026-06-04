@@ -1,4 +1,5 @@
 import { Etablissement } from './etablissement.model';
+import { Milestone } from './milestone.model';
 import { User } from './user.model';
 
 export type StageStatut = 'brouillon' | 'actif' | 'archivé' | 'terminé';
@@ -20,6 +21,9 @@ export interface Stage {
   enseignant?: User;
   affectations?: Affectation[];
   etudiants_count?: number;
+  milestones?: Milestone[];
+  milestones_count?: number;
+  milestones_done_count?: number;
 }
 
 export interface Affectation {

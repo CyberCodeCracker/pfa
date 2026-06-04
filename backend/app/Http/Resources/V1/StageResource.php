@@ -24,6 +24,12 @@ class StageResource extends JsonResource
             'enseignant'       => new UserResource($this->whenLoaded('enseignant')),
             'affectations'     => AffectationResource::collection($this->whenLoaded('affectations')),
             'etudiants_count'  => $this->whenCounted('affectations'),
+            'milestones'       => MilestoneResource::collection($this->whenLoaded('milestones')),
+            'milestones_count'           => $this->whenCounted('milestones'),
+            'milestones_done_count'      => $this->when(
+                isset($this->milestones_done_count),
+                fn () => (int) $this->milestones_done_count,
+            ),
         ];
     }
 }

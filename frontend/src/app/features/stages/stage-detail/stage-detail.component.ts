@@ -65,7 +65,7 @@ export class StageDetailComponent implements OnInit, OnDestroy {
     });
     ref.afterClosed().subscribe(reunion => {
       if (reunion) {
-        this.selectedTabIndex = 3;
+        this.selectedTabIndex = 4;
       }
     });
   }
