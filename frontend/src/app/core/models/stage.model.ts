@@ -2,9 +2,10 @@ import { Etablissement } from './etablissement.model';
 import { Milestone } from './milestone.model';
 import { User } from './user.model';
 
-export type StageStatut = 'brouillon' | 'actif' | 'archivé' | 'terminé';
+export type StageStatut = 'actif' | 'suspendu' | 'terminé';
+export type PaceIndicator = 'ahead' | 'on_track' | 'behind' | 'at_risk';
 
-export type Semestre = 'S1' | 'S2';
+export type Semestre = 'ete' | 'pfe' | 'pfa';
 
 export interface Stage {
   id: number;
@@ -13,6 +14,7 @@ export interface Stage {
   date_debut: string;
   date_fin: string;
   statut: StageStatut;
+  pace_indicator: PaceIndicator | null;
   niveau: string | null;
   annee_academique: string | null;
   semestre: Semestre | null;

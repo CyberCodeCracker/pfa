@@ -12,6 +12,10 @@ export interface Document {
   version: number;
   parent_document_id: number | null;
   date_upload: string;
+  is_report: boolean;
+  teacher_comment: string | null;
+  /** Teacher-only — null for students */
+  teacher_note: string | null;
   download_url?: string;
   uploader?: User;
 }

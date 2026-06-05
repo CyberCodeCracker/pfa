@@ -12,6 +12,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { AuthenticatedLayoutComponent } from './authenticated-layout.component';
 import { canActivateForRole } from '../../core/auth/role.guard';
 import { forcePasswordGuard } from '../../core/auth/force-password.guard';
+import { SharedModule } from '../../shared/shared.module';
 
 const routes: Routes = [
   {
@@ -79,6 +80,7 @@ const routes: Routes = [
     MatBadgeModule,
     MatMenuModule,
     MatButtonModule,
+    SharedModule,
   ],
 })
 export class AuthenticatedLayoutModule {}

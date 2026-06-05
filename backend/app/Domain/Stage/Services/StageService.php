@@ -55,7 +55,7 @@ class StageService
         $stage = Stage::create([
             ...$data,
             'enseignant_id' => $enseignant->id,
-            'statut'        => StageStatut::Brouillon,
+            'statut'        => StageStatut::Actif,
         ]);
 
         $this->milestoneTemplates->seedDefaults($stage);

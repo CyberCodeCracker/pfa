@@ -26,14 +26,40 @@ class MilestoneController extends Controller
         $validated = $request->validate([
             'titre'       => ['required', 'string', 'max:200'],
             'description' => ['nullable', 'string'],
+            'ordre'       => ['nullable', 'integer', 'min:1'],
         ]);
 
-        $ordre = ((int) $stage->milestones()->max('ordre')) + 1;
+        $last = (int) $stage->milestones()->max('ordre');
+
+        // Clamp requested ordre to [1, last+1]; default to last+1 (append).
+        $ordre = isset($validated['ordre'])
+            ? max(1, min($last + 1, (int) $validated['ordre']))
+            : $last + 1;
+
+        // Reject inserting before an already-validated milestone — would rewind the workflow.
+        if ($ordre <= $last) {
+            $blocker = $stage->milestones()
+                ->where('ordre', '>=', $ordre)
+                ->whereIn('statut', [MilestoneStatut::Validated, MilestoneStatut::Completed])
+                ->orderBy('ordre')
+                ->first();
+
+            if ($blocker) {
+                $label = $blocker->statut === MilestoneStatut::Validated ? 'validée' : 'en attente de validation';
+                return response()->json([
+                    'message' => "Impossible d'insérer à la position {$ordre} : l'étape \"{$blocker->titre}\" (position {$blocker->ordre}) est déjà {$label}. Choisissez une position après celle-ci.",
+                ], 422);
+            }
+
+            // Shift existing milestones at/after this position down by 1.
+            $stage->milestones()->where('ordre', '>=', $ordre)->increment('ordre');
+        }
 
         $milestone = Milestone::create([
-            ...$validated,
-            'stage_id' => $stage->id,
-            'ordre'    => $ordre,
+            'titre'       => $validated['titre'],
+            'description' => $validated['description'] ?? null,
+            'stage_id'    => $stage->id,
+            'ordre'       => $ordre,
         ]);
 
         return response()->json(['data' => new MilestoneResource($milestone)], 201);
@@ -48,6 +74,48 @@ class MilestoneController extends Controller
             'description' => ['nullable', 'string'],
             'ordre'       => ['sometimes', 'integer', 'min:1'],
         ]);
+
+        // If ordre is changing, reorder all milestones in the stage
+        if (array_key_exists('ordre', $validated) && (int) $validated['ordre'] !== $milestone->ordre) {
+            $stage    = $milestone->stage;
+            $last     = (int) $stage->milestones()->max('ordre');
+            $newOrdre = max(1, min($last, (int) $validated['ordre']));
+            $oldOrdre = $milestone->ordre;
+
+            // Reject moves that would push this milestone into the locked region,
+            // or that would step over a validated/completed milestone.
+            $rangeStart = min($oldOrdre, $newOrdre);
+            $rangeEnd   = max($oldOrdre, $newOrdre);
+
+            $blocker = $stage->milestones()
+                ->where('id', '!=', $milestone->id)
+                ->whereBetween('ordre', [$rangeStart, $rangeEnd])
+                ->whereIn('statut', [MilestoneStatut::Validated, MilestoneStatut::Completed])
+                ->orderBy('ordre')
+                ->first();
+
+            if ($blocker) {
+                $label = $blocker->statut === MilestoneStatut::Validated ? 'validée' : 'en attente de validation';
+                return response()->json([
+                    'message' => "Impossible de déplacer vers la position {$newOrdre} : cela traverserait l'étape \"{$blocker->titre}\" (position {$blocker->ordre}) qui est déjà {$label}.",
+                ], 422);
+            }
+
+            // Shift neighbours: move others by one slot in the opposite direction
+            if ($newOrdre < $oldOrdre) {
+                $stage->milestones()
+                    ->where('id', '!=', $milestone->id)
+                    ->whereBetween('ordre', [$newOrdre, $oldOrdre - 1])
+                    ->increment('ordre');
+            } else {
+                $stage->milestones()
+                    ->where('id', '!=', $milestone->id)
+                    ->whereBetween('ordre', [$oldOrdre + 1, $newOrdre])
+                    ->decrement('ordre');
+            }
+
+            $validated['ordre'] = $newOrdre;
+        }
 
         $milestone->update($validated);
 

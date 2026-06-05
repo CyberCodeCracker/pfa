@@ -31,16 +31,9 @@
            (click)="goToStage(s.id)"
            class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-transparent hover:border-outline-variant/30 card-hover-effect flex flex-col group cursor-pointer">
 
-    <div class="flex justify-between items-start mb-4">
-      <span class="px-3 py-1 text-xs font-bold rounded-full uppercase tracking-tighter"
-            [class.bg-tertiary-container]="s.statut === 'actif'"
-            [class.text-on-tertiary-container]="s.statut === 'actif'"
-            [class.bg-secondary-container]="s.statut === 'brouillon'"
-            [class.text-on-secondary-container]="s.statut === 'brouillon'"
-            [class.bg-surface-variant]="s.statut === 'terminé' || s.statut === 'archivé'"
-            [class.text-on-surface-variant]="s.statut === 'terminé' || s.statut === 'archivé'">
-        {{ s.statut }}
-      </span>
+    <div class="flex flex-wrap items-center gap-2 mb-4">
+      <app-stage-status-badge [statut]="s.statut" size="md"></app-stage-status-badge>
+      <app-stage-pace-badge [pace]="s.pace_indicator" size="md"></app-stage-pace-badge>
     </div>
 
     <h3 class="font-headline text-xl font-bold text-primary mb-3">{{ s.titre }}</h3>

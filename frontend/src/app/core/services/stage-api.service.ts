@@ -22,6 +22,7 @@ export interface CreateStagePayload {
   date_debut: string;
   date_fin: string;
   statut: string;
+  pace_indicator?: string | null;
   niveau?: string;
   annee_academique?: string;
   semestre?: string;

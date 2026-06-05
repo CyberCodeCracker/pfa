@@ -1,11 +1,8 @@
+<app-breadcrumbs [items]="[{ label: 'Calendrier' }]"></app-breadcrumbs>
+
 <!-- Header -->
 <div class="flex justify-between items-end mb-8">
   <div>
-    <nav class="flex items-center gap-2 text-xs font-semibold text-on-surface-variant/60 uppercase tracking-widest mb-2">
-      <span>Portail</span>
-      <span class="material-symbols-outlined" style="font-size:14px;">chevron_right</span>
-      <span class="text-primary">Calendrier</span>
-    </nav>
     <h1 class="font-headline text-3xl font-extrabold text-on-surface tracking-tight">Réunions</h1>
     <p class="text-on-surface-variant mt-1">{{ upcoming.length }} réunion(s) à venir</p>
   </div>

@@ -4,6 +4,7 @@ import { DocumentApiService } from '../../../core/services/document-api.service'
 import { Document, DocumentStatut } from '../../../core/models/document.model';
 import { Store } from '@ngrx/store';
 import { selectCurrentUser } from '../../../store/auth/auth.selectors';
+import { ToastService } from '../../../shared/toast/toast.service';
 
 @Component({
   selector: 'app-stage-documents',
@@ -21,11 +22,22 @@ export class StageDocumentsComponent implements OnInit, OnDestroy {
   isEnseignant = false;
   refusComment: Record<number, string> = {};
   confirmRefuseId: number | null = null;
+
+  // Report upload flag (student-only checkbox)
+  uploadAsReport = false;
+
+  // Inline annotate UI state (teacher-only)
+  annotateId: number | null = null;
+  annotateComment = '';
+  annotateNote = '';
+  annotating = false;
+
   private destroy$ = new Subject<void>();
 
   constructor(
     private docApi: DocumentApiService,
     private store: Store,
+    private toast: ToastService,
   ) {}
 
   ngOnInit(): void {
@@ -59,14 +71,18 @@ export class StageDocumentsComponent implements OnInit, OnDestroy {
   private upload(file: File): void {
     this.uploading = true;
     this.uploadError = null;
-    this.docApi.upload(this.stageId, file).pipe(takeUntil(this.destroy$)).subscribe({
+    const isReport = !this.isEnseignant && this.uploadAsReport;
+    this.docApi.upload(this.stageId, file, { isReport }).pipe(takeUntil(this.destroy$)).subscribe({
       next: res => {
         this.documents = [res.data, ...this.documents];
         this.uploading = false;
+        this.uploadAsReport = false;
+        this.toast.success(isReport ? 'Rapport déposé.' : 'Document déposé.');
       },
       error: err => {
         this.uploadError = err.error?.message ?? 'Erreur lors de l\'envoi.';
         this.uploading = false;
+        this.toast.error(this.uploadError!);
       },
     });
   }
@@ -95,7 +111,41 @@ export class StageDocumentsComponent implements OnInit, OnDestroy {
 
   deleteDoc(doc: Document): void {
     this.docApi.delete(doc.id).pipe(takeUntil(this.destroy$)).subscribe({
-      next: () => { this.documents = this.documents.filter(d => d.id !== doc.id); },
+      next: () => {
+        this.documents = this.documents.filter(d => d.id !== doc.id);
+        this.toast.success('Document supprimé.');
+      },
+    });
+  }
+
+  startAnnotate(doc: Document): void {
+    this.annotateId = doc.id;
+    this.annotateComment = doc.teacher_comment ?? '';
+    this.annotateNote = doc.teacher_note ?? '';
+  }
+
+  cancelAnnotate(): void {
+    this.annotateId = null;
+    this.annotateComment = '';
+    this.annotateNote = '';
+  }
+
+  saveAnnotate(doc: Document): void {
+    this.annotating = true;
+    this.docApi.annotate(doc.id, {
+      teacher_comment: this.annotateComment.trim() || null,
+      teacher_note:    this.annotateNote.trim() || null,
+    }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: res => {
+        this.updateDoc(res.data);
+        this.annotateId = null;
+        this.annotating = false;
+        this.toast.success('Annotations enregistrées.');
+      },
+      error: err => {
+        this.annotating = false;
+        this.toast.error(err.error?.message ?? 'Échec de l\'enregistrement.');
+      },
     });
   }
 

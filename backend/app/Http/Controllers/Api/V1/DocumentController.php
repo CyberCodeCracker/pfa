@@ -26,9 +26,10 @@ class DocumentController extends Controller
     {
         $this->authorize('view', $stage);
 
-        $request->validate([
+        $validated = $request->validate([
             'fichier'             => ['required', 'file', 'max:51200'],
             'parent_document_id'  => ['nullable', 'integer', 'exists:documents,id'],
+            'is_report'           => ['nullable', 'boolean'],
         ]);
 
         $document = $this->documentService->upload(
@@ -36,6 +37,7 @@ class DocumentController extends Controller
             $request->user(),
             $request->file('fichier'),
             $request->input('parent_document_id'),
+            (bool) $request->input('is_report', false),
         );
 
         return response()->json(['data' => new DocumentResource($document)], 201);
@@ -71,6 +73,27 @@ class DocumentController extends Controller
         $this->authorize('update', $document->stage);
         $request->validate(['commentaire' => ['required', 'string']]);
         $document = $this->documentService->refuser($document, $request->input('commentaire'));
+        return response()->json(['data' => new DocumentResource($document)]);
+    }
+
+    /**
+     * Teacher annotates a report — sets a public comment and/or private note.
+     */
+    public function annotate(Request $request, Document $document): JsonResponse
+    {
+        $this->authorize('update', $document->stage);
+
+        $validated = $request->validate([
+            'teacher_comment' => ['nullable', 'string', 'max:5000'],
+            'teacher_note'    => ['nullable', 'string', 'max:5000'],
+        ]);
+
+        $document = $this->documentService->annotateReport(
+            $document,
+            $validated['teacher_comment'] ?? null,
+            $validated['teacher_note'] ?? null,
+        );
+
         return response()->json(['data' => new DocumentResource($document)]);
     }
 }

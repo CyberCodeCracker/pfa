@@ -27,7 +27,7 @@ class DocumentService
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     ];
 
-    public function upload(Stage $stage, User $uploader, UploadedFile $file, ?int $parentId = null): Document
+    public function upload(Stage $stage, User $uploader, UploadedFile $file, ?int $parentId = null, bool $isReport = false): Document
     {
         $mime = $file->getMimeType();
 
@@ -58,6 +58,7 @@ class DocumentService
             'version'            => $version,
             'parent_document_id' => $parentId,
             'date_upload'        => now(),
+            'is_report'          => $isReport,
         ]);
 
         // Notify the enseignant when a student uploads
@@ -95,6 +96,25 @@ class DocumentService
     public function delete(Document $document): void
     {
         $document->delete();
+    }
+
+    /**
+     * Teacher annotates a report.
+     * - $comment is visible to the student
+     * - $note is private to the teacher
+     */
+    public function annotateReport(Document $document, ?string $comment, ?string $note): Document
+    {
+        if (!$document->is_report) {
+            throw new \InvalidArgumentException('Seuls les rapports peuvent être annotés.');
+        }
+
+        $document->update([
+            'teacher_comment' => $comment,
+            'teacher_note'    => $note,
+        ]);
+
+        return $document->fresh();
     }
 
     public function getSignedDownloadUrl(Document $document): string

@@ -26,17 +26,37 @@
 
   <!-- Inline add form -->
   <div *ngIf="adding" class="mb-6 p-5 bg-primary-container/20 border-2 border-primary/30 rounded-2xl">
-    <label class="block text-xs font-bold text-primary uppercase tracking-wider mb-1">Titre</label>
-    <input [(ngModel)]="newTitre" placeholder="Ex: Conception et planification"
-           class="w-full px-3 py-2 rounded-lg bg-surface-container-lowest border-transparent focus:ring-2 focus:ring-primary/30 focus:outline-none mb-3 font-semibold">
+    <div class="grid grid-cols-12 gap-3 mb-3">
+      <div class="col-span-9">
+        <label class="block text-xs font-bold text-primary uppercase tracking-wider mb-1">Titre</label>
+        <input [(ngModel)]="newTitre" placeholder="Ex: Conception et planification"
+               class="w-full px-3 py-2 rounded-lg bg-surface-container-lowest border-transparent focus:ring-2 focus:ring-primary/30 focus:outline-none font-semibold">
+      </div>
+      <div class="col-span-3">
+        <label class="block text-xs font-bold text-primary uppercase tracking-wider mb-1">Position</label>
+        <input type="number" [(ngModel)]="newOrdre" [min]="minInsertOrdre" [max]="nextOrdre"
+               [class.ring-2]="newOrdreInvalid"
+               [class.ring-error]="newOrdreInvalid"
+               class="w-full px-3 py-2 rounded-lg bg-surface-container-lowest border-transparent focus:ring-2 focus:ring-primary/30 focus:outline-none font-semibold text-center">
+        <p class="text-[10px] text-on-surface-variant mt-1 text-center">{{ minInsertOrdre }} à {{ nextOrdre }}</p>
+      </div>
+    </div>
+
+    <!-- Error message -->
+    <div *ngIf="addError"
+         class="mb-3 p-3 rounded-xl bg-error-container text-on-error-container text-sm flex items-start gap-2">
+      <span class="material-symbols-outlined shrink-0" style="font-size:20px;">error</span>
+      <span class="leading-relaxed">{{ addError }}</span>
+    </div>
+
     <label class="block text-xs font-bold text-primary uppercase tracking-wider mb-1">Description</label>
     <textarea [(ngModel)]="newDescription" rows="2" placeholder="Brève description (optionnel)"
               class="w-full px-3 py-2 rounded-lg bg-surface-container-lowest border-transparent focus:ring-2 focus:ring-primary/30 focus:outline-none mb-3"></textarea>
     <div class="flex gap-2 justify-end">
       <button (click)="cancelAdd()"
-              class="px-4 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high text-sm font-bold transition-all">Annuler</button>
-      <button (click)="saveAdd()" [disabled]="saving || !newTitre.trim()"
-              class="px-4 py-2 rounded-lg bg-primary text-white text-sm font-bold disabled:opacity-50 transition-all">Ajouter</button>
+              class="px-4 py-2.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface text-sm font-bold transition-all active:scale-95">Annuler</button>
+      <button (click)="saveAdd()" [disabled]="saving || !newTitre.trim() || newOrdreInvalid"
+              class="px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-bold shadow-sm hover:shadow-md disabled:opacity-50 active:scale-95 transition-all">Ajouter</button>
     </div>
   </div>
 
@@ -75,27 +95,28 @@
           </div>
         </div>
 
-        <div class="flex items-center gap-1 shrink-0">
+        <div class="flex items-center gap-2 shrink-0">
           <!-- Teacher actions -->
           <ng-container *ngIf="isEnseignant">
             <button *ngIf="m.statut !== 'validated'" (click)="validate(m)"
                     title="Valider"
-                    class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-primary-container hover:text-on-primary-container transition-all">
-              <span class="material-symbols-outlined" style="font-size:18px;">check_circle</span>
+                    class="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-primary text-white text-xs font-bold shadow-sm hover:shadow-md hover:bg-primary/90 active:scale-95 transition-all">
+              <span class="material-symbols-outlined" style="font-size:16px;">check_circle</span>
+              <span class="hidden xl:inline">Valider</span>
             </button>
             <button *ngIf="m.statut === 'validated' || m.statut === 'completed'" (click)="reopen(m)"
                     title="Rouvrir"
-                    class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-all">
+                    class="flex items-center justify-center w-10 h-10 rounded-xl bg-surface-container hover:bg-tertiary-container text-on-surface-variant hover:text-on-tertiary-container border border-outline-variant/30 hover:border-tertiary/40 shadow-sm hover:shadow-md active:scale-95 transition-all">
               <span class="material-symbols-outlined" style="font-size:18px;">replay</span>
             </button>
             <button (click)="startEdit(m)"
                     title="Modifier"
-                    class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-all">
+                    class="flex items-center justify-center w-10 h-10 rounded-xl bg-surface-container hover:bg-primary-container text-on-surface-variant hover:text-on-primary-container border border-outline-variant/30 hover:border-primary/40 shadow-sm hover:shadow-md active:scale-95 transition-all">
               <span class="material-symbols-outlined" style="font-size:18px;">edit</span>
             </button>
             <button (click)="delete(m)"
                     title="Supprimer"
-                    class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-error-container hover:text-on-error-container transition-all">
+                    class="flex items-center justify-center w-10 h-10 rounded-xl bg-surface-container hover:bg-error-container text-on-surface-variant hover:text-on-error-container border border-outline-variant/30 hover:border-error/40 shadow-sm hover:shadow-md active:scale-95 transition-all">
               <span class="material-symbols-outlined" style="font-size:18px;">delete</span>
             </button>
           </ng-container>
@@ -103,7 +124,8 @@
           <!-- Student actions -->
           <ng-container *ngIf="!isEnseignant">
             <button *ngIf="m.statut === 'pending' || m.statut === 'in_progress'" (click)="markComplete(m)"
-                    class="px-3 py-2 rounded-lg bg-secondary-container text-on-secondary-container text-xs font-bold hover:opacity-90 transition-all">
+                    class="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-secondary text-on-secondary text-xs font-bold shadow-sm hover:shadow-md hover:bg-secondary/90 active:scale-95 transition-all">
+              <span class="material-symbols-outlined" style="font-size:16px;">task_alt</span>
               Marquer terminé
             </button>
           </ng-container>
@@ -112,17 +134,32 @@
 
       <!-- Edit mode -->
       <div *ngIf="editingId === m.id" class="space-y-3">
-        <label class="block text-xs font-bold text-primary uppercase tracking-wider">Titre</label>
-        <input [(ngModel)]="editTitre"
-               class="w-full px-3 py-2 rounded-lg bg-surface-container-low border-transparent focus:ring-2 focus:ring-primary/30 focus:outline-none font-semibold">
+        <div class="grid grid-cols-12 gap-3">
+          <div class="col-span-9">
+            <label class="block text-xs font-bold text-primary uppercase tracking-wider mb-1">Titre</label>
+            <input [(ngModel)]="editTitre"
+                   class="w-full px-3 py-2 rounded-lg bg-surface-container-low border-transparent focus:ring-2 focus:ring-primary/30 focus:outline-none font-semibold">
+          </div>
+          <div class="col-span-3">
+            <label class="block text-xs font-bold text-primary uppercase tracking-wider mb-1">Position</label>
+            <input type="number" [(ngModel)]="editOrdre" [min]="1" [max]="totalCount"
+                   class="w-full px-3 py-2 rounded-lg bg-surface-container-low border-transparent focus:ring-2 focus:ring-primary/30 focus:outline-none font-semibold text-center">
+            <p class="text-[10px] text-on-surface-variant mt-1 text-center">1 à {{ totalCount }}</p>
+          </div>
+        </div>
+        <div *ngIf="editError"
+             class="p-3 rounded-xl bg-error-container text-on-error-container text-sm flex items-start gap-2">
+          <span class="material-symbols-outlined shrink-0" style="font-size:20px;">error</span>
+          <span class="leading-relaxed">{{ editError }}</span>
+        </div>
         <label class="block text-xs font-bold text-primary uppercase tracking-wider">Description</label>
         <textarea [(ngModel)]="editDescription" rows="2"
                   class="w-full px-3 py-2 rounded-lg bg-surface-container-low border-transparent focus:ring-2 focus:ring-primary/30 focus:outline-none"></textarea>
         <div class="flex gap-2 justify-end">
           <button (click)="cancelEdit()"
-                  class="px-4 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high text-sm font-bold transition-all">Annuler</button>
+                  class="px-4 py-2.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface text-sm font-bold transition-all active:scale-95">Annuler</button>
           <button (click)="saveEdit(m)" [disabled]="saving || !editTitre.trim()"
-                  class="px-4 py-2 rounded-lg bg-primary text-white text-sm font-bold disabled:opacity-50 transition-all">Enregistrer</button>
+                  class="px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-bold shadow-sm hover:shadow-md disabled:opacity-50 active:scale-95 transition-all">Enregistrer</button>
         </div>
       </div>
     </li>

@@ -38,10 +38,9 @@ export class StageListComponent implements OnInit, OnDestroy {
 
   readonly statuts: { value: string; label: string }[] = [
     { value: '', label: 'Tous les statuts' },
-    { value: 'brouillon', label: 'Brouillon' },
-    { value: 'actif', label: 'Actif' },
-    { value: 'archivé', label: 'Archivé' },
-    { value: 'terminé', label: 'Terminé' },
+    { value: 'actif',    label: 'Actif' },
+    { value: 'suspendu', label: 'Suspendu' },
+    { value: 'terminé',  label: 'Terminé' },
   ];
 
   constructor(
@@ -126,26 +125,6 @@ export class StageListComponent implements OnInit, OnDestroy {
     if (end < last - 1) pages.push('…');
     pages.push(last);
     return pages;
-  }
-
-  getStatutClass(statut: StageStatut): string {
-    const map: Record<StageStatut, string> = {
-      brouillon: 'status-draft',
-      actif: 'status-active',
-      archivé: 'status-archived',
-      terminé: 'status-done',
-    };
-    return map[statut] ?? '';
-  }
-
-  getStatutLabel(statut: StageStatut): string {
-    const map: Record<StageStatut, string> = {
-      brouillon: 'Brouillon',
-      actif: 'Actif',
-      archivé: 'Archivé',
-      terminé: 'Terminé',
-    };
-    return map[statut] ?? statut;
   }
 
   viewStage(id: number): void {

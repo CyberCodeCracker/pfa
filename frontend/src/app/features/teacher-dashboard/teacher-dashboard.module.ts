@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { SharedModule } from '../../shared/shared.module';
 import { TeacherDashboardComponent } from './teacher-dashboard.component';
 
 @NgModule({
@@ -13,6 +14,7 @@ import { TeacherDashboardComponent } from './teacher-dashboard.component';
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    SharedModule,
     RouterModule.forChild([{ path: '', component: TeacherDashboardComponent }]),
   ],
 })

@@ -20,11 +20,6 @@ function computeCurrentAcademicYear(): string {
   return month >= 9 ? `${year}-${year + 1}` : `${year - 1}-${year}`;
 }
 
-function computeCurrentSemestre(): string {
-  const month = new Date().getMonth() + 1;
-  return month >= 9 || month === 1 ? 'S1' : 'S2';
-}
-
 export const filterReducer = createReducer(
   initialState,
   on(FilterActions.setFilter, (_state, { annee, semestre, etablissementId }) => ({
@@ -34,7 +29,7 @@ export const filterReducer = createReducer(
   })),
   on(FilterActions.initFilter, (_state, { user }) => ({
     annee: computeCurrentAcademicYear(),
-    semestre: computeCurrentSemestre(),
+    semestre: '', // no default — show all types until the teacher picks one
     etablissementId: user.etablissements?.[0]?.id ?? null,
   })),
 );

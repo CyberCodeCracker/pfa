@@ -98,13 +98,10 @@
 
           <div class="flex justify-between items-start mb-4 pl-2">
             <div>
-              <span class="text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest"
-                    [class.bg-tertiary-container]="stage.statut === 'actif'"
-                    [class.text-on-tertiary-container]="stage.statut === 'actif'"
-                    [class.bg-surface-container]="stage.statut !== 'actif'"
-                    [class.text-on-surface-variant]="stage.statut !== 'actif'">
-                {{ stage.statut }}
-              </span>
+              <div class="flex flex-wrap items-center gap-2">
+                <app-stage-status-badge [statut]="stage.statut" size="sm"></app-stage-status-badge>
+                <app-stage-pace-badge [pace]="stage.pace_indicator" size="sm"></app-stage-pace-badge>
+              </div>
               <h4 class="font-headline text-lg font-bold mt-2 text-primary group-hover:text-primary transition-colors">{{ stage.titre }}</h4>
             </div>
             <button class="p-1 hover:bg-surface-container rounded-lg transition-colors" (click)="$event.stopPropagation()">

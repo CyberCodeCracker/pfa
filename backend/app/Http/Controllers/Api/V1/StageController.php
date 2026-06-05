@@ -32,7 +32,7 @@ class StageController extends Controller
             'date_fin'          => ['required', 'date', 'after:date_debut'],
             'niveau'            => ['nullable', 'string', 'max:100'],
             'annee_academique'  => ['nullable', 'string', 'regex:/^\d{4}-\d{4}$/'],
-            'semestre'          => ['nullable', 'string', 'in:S1,S2'],
+            'semestre'          => ['nullable', 'string', 'in:ete,pfe,pfa'],
             'etablissement_id'  => ['required', 'integer', 'exists:etablissements,id'],
         ]);
 
@@ -66,8 +66,9 @@ class StageController extends Controller
             'date_fin'          => ['sometimes', 'date'],
             'niveau'            => ['nullable', 'string', 'max:100'],
             'annee_academique'  => ['nullable', 'string', 'regex:/^\d{4}-\d{4}$/'],
-            'semestre'          => ['nullable', 'string', 'in:S1,S2'],
-            'statut'            => ['sometimes', 'string', 'in:brouillon,actif,archivé,terminé'],
+            'semestre'          => ['nullable', 'string', 'in:ete,pfe,pfa'],
+            'statut'            => ['sometimes', 'string', 'in:actif,suspendu,terminé'],
+            'pace_indicator'    => ['nullable', 'string', 'in:ahead,on_track,behind,at_risk'],
             'etablissement_id'  => ['sometimes', 'integer', 'exists:etablissements,id'],
         ]);
 

@@ -4,6 +4,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Subject, takeUntil } from 'rxjs';
 import { ReunionApiService } from '../../../core/services/reunion-api.service';
 import { StageApiService } from '../../../core/services/stage-api.service';
+import { ToastService } from '../../../shared/toast/toast.service';
 import { Reunion } from '../../../core/models/reunion.model';
 import { Affectation } from '../../../core/models/stage.model';
 import { User } from '../../../core/models/user.model';
@@ -30,6 +31,7 @@ export class MeetingCreateDialogComponent implements OnInit, OnDestroy {
     private reunionApi: ReunionApiService,
     private stageApi: StageApiService,
     private dialogRef: MatDialogRef<MeetingCreateDialogComponent>,
+    private toast: ToastService,
     @Inject(MAT_DIALOG_DATA) public data: MeetingDialogData,
   ) {}
 
@@ -97,10 +99,12 @@ export class MeetingCreateDialogComponent implements OnInit, OnDestroy {
       participant_ids: this.selectedParticipantIds,
     }).pipe(takeUntil(this.destroy$)).subscribe({
       next: res => {
+        this.toast.success('Réunion planifiée avec succès.');
         this.dialogRef.close(res.data);
       },
       error: err => {
         this.error = err.error?.message ?? 'Erreur lors de la création.';
+        this.toast.error(this.error!);
         this.loading = false;
       },
     });

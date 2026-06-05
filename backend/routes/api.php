@@ -61,6 +61,7 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
         Route::delete('/documents/{document}',     [DocumentController::class, 'destroy']);
         Route::post('/documents/{document}/valider', [DocumentController::class, 'valider']);
         Route::post('/documents/{document}/refuser', [DocumentController::class, 'refuser']);
+        Route::post('/documents/{document}/annotate', [DocumentController::class, 'annotate']);
 
         // Feedbacks
         Route::get('/stages/{stage}/feedbacks',  [FeedbackController::class, 'index']);

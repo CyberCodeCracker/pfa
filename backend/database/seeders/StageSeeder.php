@@ -80,15 +80,17 @@ class StageSeeder extends Seeder
         $niveauxPfe = ['Master 1', 'Master 2', 'Ingénierie 3'];
         $niveauxSte = ['Licence 3', 'Ingénierie 2', 'Ingénierie 3'];
 
-        // Year + semester combos. Past years → terminé. Current year (2025-2026) → actif/brouillon.
-        // S1 dates: Jun–Sep of the first year of the range. S2 dates: Feb–Jun of the second year.
+        // Year + type combos. Past years → terminé. Current year (2025-2026) → actif.
+        // 'ete' (stage d'été) runs Jun–Sep. 'pfe'/'pfa' (S2 projects) run Feb–Jun.
         $plan = [
-            ['annee' => '2023-2024', 'semestre' => 'S1', 'past' => true,  'start' => '2023-06-15', 'end' => '2023-09-15'],
-            ['annee' => '2023-2024', 'semestre' => 'S2', 'past' => true,  'start' => '2024-02-01', 'end' => '2024-06-15'],
-            ['annee' => '2024-2025', 'semestre' => 'S1', 'past' => true,  'start' => '2024-06-15', 'end' => '2024-09-15'],
-            ['annee' => '2024-2025', 'semestre' => 'S2', 'past' => true,  'start' => '2025-02-01', 'end' => '2025-06-15'],
-            ['annee' => '2025-2026', 'semestre' => 'S1', 'past' => true,  'start' => '2025-06-15', 'end' => '2025-09-15'],
-            ['annee' => '2025-2026', 'semestre' => 'S2', 'past' => false, 'start' => '2026-02-01', 'end' => '2026-06-30'],
+            ['annee' => '2023-2024', 'type' => 'ete', 'past' => true,  'start' => '2023-06-15', 'end' => '2023-09-15'],
+            ['annee' => '2023-2024', 'type' => 'pfa', 'past' => true,  'start' => '2024-02-01', 'end' => '2024-06-15'],
+            ['annee' => '2024-2025', 'type' => 'ete', 'past' => true,  'start' => '2024-06-15', 'end' => '2024-09-15'],
+            ['annee' => '2024-2025', 'type' => 'pfa', 'past' => true,  'start' => '2025-02-01', 'end' => '2025-06-15'],
+            ['annee' => '2024-2025', 'type' => 'pfe', 'past' => true,  'start' => '2025-02-01', 'end' => '2025-06-15'],
+            ['annee' => '2025-2026', 'type' => 'ete', 'past' => true,  'start' => '2025-06-15', 'end' => '2025-09-15'],
+            ['annee' => '2025-2026', 'type' => 'pfe', 'past' => false, 'start' => '2026-02-01', 'end' => '2026-06-30'],
+            ['annee' => '2025-2026', 'type' => 'pfa', 'past' => false, 'start' => '2026-02-01', 'end' => '2026-06-30'],
         ];
 
         $enseignants = User::where('role', Role::Enseignant)
@@ -98,25 +100,17 @@ class StageSeeder extends Seeder
 
         if ($enseignants->isEmpty() || $etablissements->isEmpty()) return;
 
-        // Aim: 5 PFE (S2) + 5 stage d'été (S1) per enseignant, spread across all years.
-        // 6 (year, semestre) slots → repeat picks so each type totals 5 per enseignant.
-        $s1Slots = array_values(array_filter($plan, fn ($p) => $p['semestre'] === 'S1')); // 3 slots
-        $s2Slots = array_values(array_filter($plan, fn ($p) => $p['semestre'] === 'S2')); // 3 slots
+        // Aim per enseignant: ~3 stages d'été + ~3 PFE + ~3 PFA, spread across years.
+        $eteSlots = array_values(array_filter($plan, fn ($p) => $p['type'] === 'ete'));  // 3 slots
+        $pfeSlots = array_values(array_filter($plan, fn ($p) => $p['type'] === 'pfe'));  // 2 slots
+        $pfaSlots = array_values(array_filter($plan, fn ($p) => $p['type'] === 'pfa'));  // 3 slots
 
-        // 5 S1 per enseignant — distribute round-robin across 3 S1 years (2+2+1)
-        $s1Distribution = [
-            $s1Slots[0], $s1Slots[0], // 2023-2024 S1 ×2
-            $s1Slots[1], $s1Slots[1], // 2024-2025 S1 ×2
-            $s1Slots[2],              // 2025-2026 S1 ×1
-        ];
-        // 5 S2 per enseignant
-        $s2Distribution = [
-            $s2Slots[0],              // 2023-2024 S2 ×1
-            $s2Slots[1], $s2Slots[1], // 2024-2025 S2 ×2
-            $s2Slots[2], $s2Slots[2], // 2025-2026 S2 ×2
-        ];
-
-        $perEnseignantPlan = array_merge($s1Distribution, $s2Distribution);
+        $perEnseignantPlan = array_merge(
+            $eteSlots,          // 3 stages d'été
+            $pfeSlots,          // 2 PFE (will mostly land in current + 2024-2025)
+            $pfeSlots,          // duplicate to hit ~4 PFE
+            $pfaSlots,          // 3 PFA spread across years
+        );
 
         $pfeIdx = 0;
         $steIdx = 0;
@@ -126,16 +120,16 @@ class StageSeeder extends Seeder
             $pool    = $myEtabs->count() > 0 ? $myEtabs : $etablissements;
 
             foreach ($perEnseignantPlan as $slot) {
-                $isPfe = $slot['semestre'] === 'S2';
+                $isS2 = in_array($slot['type'], ['pfe', 'pfa'], true);
 
-                if ($isPfe) {
-                    $titre = $pfeTitres[$pfeIdx % count($pfeTitres)];
-                    $desc  = $pfeDescriptions[$pfeIdx % count($pfeDescriptions)];
+                if ($isS2) {
+                    $titre  = $pfeTitres[$pfeIdx % count($pfeTitres)];
+                    $desc   = $pfeDescriptions[$pfeIdx % count($pfeDescriptions)];
                     $niveau = $niveauxPfe[array_rand($niveauxPfe)];
                     $pfeIdx++;
                 } else {
-                    $titre = $steTitres[$steIdx % count($steTitres)];
-                    $desc  = $steDescriptions[$steIdx % count($steDescriptions)];
+                    $titre  = $steTitres[$steIdx % count($steTitres)];
+                    $desc   = $steDescriptions[$steIdx % count($steDescriptions)];
                     $niveau = $niveauxSte[array_rand($niveauxSte)];
                     $steIdx++;
                 }
@@ -146,11 +140,9 @@ class StageSeeder extends Seeder
                     $stageStatut = StageStatut::Termine;
                     $affStatut   = AffectationStatut::Actif;
                 } else {
-                    // Current session — mix of actif (80%) and brouillon (20%)
-                    $stageStatut = rand(1, 5) === 1 ? StageStatut::Brouillon : StageStatut::Actif;
-                    $affStatut   = $stageStatut === StageStatut::Brouillon
-                        ? AffectationStatut::Invite
-                        : AffectationStatut::Actif;
+                    // Current session — mix of actif (85%) and suspendu (15%)
+                    $stageStatut = rand(1, 7) === 1 ? StageStatut::Suspendu : StageStatut::Actif;
+                    $affStatut   = AffectationStatut::Actif;
                 }
 
                 $stage = Stage::create([
@@ -161,7 +153,7 @@ class StageSeeder extends Seeder
                     'statut'            => $stageStatut,
                     'niveau'            => $niveau,
                     'annee_academique'  => $slot['annee'],
-                    'semestre'          => $slot['semestre'],
+                    'semestre'          => $slot['type'],
                     'etablissement_id'  => $etab->id,
                     'enseignant_id'     => $enseignant->id,
                 ]);

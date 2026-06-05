@@ -1,3 +1,5 @@
+<app-breadcrumbs [items]="[{ label: 'Stages' }]"></app-breadcrumbs>
+
 <!-- Header -->
 <header class="flex justify-between items-center mb-8">
   <div>
@@ -62,15 +64,10 @@
            class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-transparent hover:border-outline-variant/30 card-hover-effect flex flex-col group cursor-pointer">
 
     <div class="flex justify-between items-start mb-4">
-      <span class="px-3 py-1 text-xs font-bold rounded-full uppercase tracking-tighter"
-            [class.bg-tertiary-container]="stage.statut === 'actif'"
-            [class.text-on-tertiary-container]="stage.statut === 'actif'"
-            [class.bg-secondary-container]="stage.statut === 'brouillon'"
-            [class.text-on-secondary-container]="stage.statut === 'brouillon'"
-            [class.bg-surface-variant]="stage.statut === 'terminé' || stage.statut === 'archivé'"
-            [class.text-on-surface-variant]="stage.statut === 'terminé' || stage.statut === 'archivé'">
-        {{ getStatutLabel(stage.statut) }}
-      </span>
+      <div class="flex flex-wrap items-center gap-2">
+        <app-stage-status-badge [statut]="stage.statut" size="md"></app-stage-status-badge>
+        <app-stage-pace-badge [pace]="stage.pace_indicator" size="md"></app-stage-pace-badge>
+      </div>
       <button (click)="editStage($event, stage.id)"
               class="flex items-center justify-center w-9 h-9 rounded-xl bg-surface-container hover:bg-primary-container text-on-surface-variant hover:text-on-primary-container border border-outline-variant/30 hover:border-primary/40 hover:shadow-sm transition-all active:scale-95">
         <span class="material-symbols-outlined" style="font-size:18px;">edit</span>

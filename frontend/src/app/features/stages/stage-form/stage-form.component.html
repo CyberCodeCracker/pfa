@@ -1,3 +1,7 @@
+<div class="max-w-7xl mx-auto">
+  <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
+</div>
+
 <div class="flex gap-8 max-w-7xl mx-auto">
 
   <!-- Left column: form -->
@@ -100,18 +104,18 @@
           </div>
           <div>
             <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 ml-1">Année académique</label>
-            <select formControlName="annee_academique"
-                    class="pill-select w-full px-4 py-3 rounded-xl bg-surface-container-low border-transparent text-on-surface font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none">
-              <option value="">— Non précisée —</option>
-              <option *ngFor="let a of annees" [value]="a">{{ a }}</option>
-            </select>
+            <div class="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-primary-container/40 border-2 border-primary/20 text-on-primary-container font-bold">
+              <span class="material-symbols-outlined" style="font-size:20px;">calendar_today</span>
+              <span class="text-base tracking-wider">{{ form.get('annee_academique')?.value || currentAnnee }}</span>
+              <span class="ml-auto text-[10px] font-bold text-on-primary-container/70 uppercase tracking-widest">Auto</span>
+            </div>
           </div>
           <div>
-            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 ml-1">Semestre</label>
+            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 ml-1">Type de stage</label>
             <select formControlName="semestre"
                     class="pill-select w-full px-4 py-3 rounded-xl bg-surface-container-low border-transparent text-on-surface font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none">
-              <option value="">— Non précisé —</option>
-              <option *ngFor="let s of semestres" [value]="s.value">{{ s.label }}</option>
+              <option value="">— Sélectionner —</option>
+              <option *ngFor="let t of typesStage" [value]="t.value">{{ t.label }}</option>
             </select>
           </div>
           <div *ngIf="isEdit" class="col-span-2">

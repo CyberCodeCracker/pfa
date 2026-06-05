@@ -1,0 +1,5 @@
+<span *ngIf="statut" class="inline-flex items-center font-bold uppercase tracking-widest rounded-full border"
+      [ngClass]="[colorClass, sizeClass]">
+  <span class="material-symbols-outlined filled" [style.font-size.px]="iconSize">{{ icon }}</span>
+  {{ label }}
+</span>

@@ -8,6 +8,7 @@ import { Milestone } from '../models/milestone.model';
 export interface CreateMilestonePayload {
   titre: string;
   description?: string;
+  ordre?: number;
 }
 
 export interface UpdateMilestonePayload {

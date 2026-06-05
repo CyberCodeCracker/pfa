@@ -5,11 +5,26 @@
       Documents
       <span class="px-2 py-0.5 bg-surface-container-high rounded text-xs font-bold text-on-surface-variant">{{ documents.length }}</span>
     </h3>
-    <label class="cursor-pointer bg-primary text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all inline-flex items-center gap-2">
-      <span class="material-symbols-outlined" style="font-size:18px;">cloud_upload</span>
-      <span>{{ uploading ? 'Envoi…' : 'Téléverser' }}</span>
-      <input type="file" class="hidden" (change)="onFileSelected($event)" [disabled]="uploading">
-    </label>
+    <div class="flex items-center gap-3">
+      <!-- Student: "submit as report" toggle -->
+      <label *ngIf="!isEnseignant"
+             class="flex items-center gap-2 px-3 py-2 rounded-xl border-2 cursor-pointer transition-all"
+             [class.border-tertiary]="uploadAsReport"
+             [class.bg-tertiary-container]="uploadAsReport"
+             [class.text-on-tertiary-container]="uploadAsReport"
+             [class.border-outline-variant]="!uploadAsReport"
+             [class.text-on-surface-variant]="!uploadAsReport">
+        <input type="checkbox" [(ngModel)]="uploadAsReport" class="accent-tertiary">
+        <span class="material-symbols-outlined" style="font-size:18px;">assignment</span>
+        <span class="text-xs font-bold uppercase tracking-widest">Soumettre comme rapport</span>
+      </label>
+
+      <label class="cursor-pointer bg-primary text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all inline-flex items-center gap-2">
+        <span class="material-symbols-outlined" style="font-size:18px;">cloud_upload</span>
+        <span>{{ uploading ? 'Envoi…' : 'Téléverser' }}</span>
+        <input type="file" class="hidden" (change)="onFileSelected($event)" [disabled]="uploading">
+      </label>
+    </div>
   </div>
 
   <div *ngIf="uploadError" class="bg-error-container text-on-error-container rounded-lg p-3 text-sm mb-4">{{ uploadError }}</div>
@@ -36,7 +51,14 @@
             <span class="material-symbols-outlined" style="font-size:20px;">description</span>
           </div>
           <div class="min-w-0 flex-1">
-            <p class="text-sm font-bold text-on-surface truncate">{{ doc.nom }}</p>
+            <div class="flex items-center gap-2 flex-wrap">
+              <p class="text-sm font-bold text-on-surface truncate">{{ doc.nom }}</p>
+              <span *ngIf="doc.is_report"
+                    class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-tertiary text-on-tertiary text-[10px] font-bold uppercase tracking-widest shadow-sm">
+                <span class="material-symbols-outlined" style="font-size:13px;">assignment</span>
+                Rapport
+              </span>
+            </div>
             <p class="text-xs text-on-surface-variant">
               v{{ doc.version }} · {{ formatSize(doc.taille) }} · {{ doc.date_upload | date:'dd/MM/yyyy' }}
               <span *ngIf="doc.uploader"> · par {{ doc.uploader.prenom }} {{ doc.uploader.nom }}</span>
@@ -71,6 +93,11 @@
             </button>
           </ng-container>
 
+          <button *ngIf="isEnseignant && doc.is_report" (click)="startAnnotate(doc)" title="Annoter le rapport"
+                  class="p-2 text-on-surface-variant hover:text-on-tertiary-container hover:bg-tertiary-container rounded-lg transition-all">
+            <span class="material-symbols-outlined" style="font-size:18px;">rate_review</span>
+          </button>
+
           <button (click)="deleteDoc(doc)" title="Supprimer"
                   class="p-2 text-on-surface-variant hover:text-on-error-container hover:bg-error-container rounded-lg transition-all">
             <span class="material-symbols-outlined" style="font-size:18px;">delete</span>
@@ -95,6 +122,59 @@
       <!-- Refusal comment (when document is refused) -->
       <div *ngIf="doc.statut === 'refusé' && doc.commentaire" class="text-xs text-on-error-container bg-error-container/40 px-3 py-2 rounded-lg">
         <span class="font-bold">Motif :</span> {{ doc.commentaire }}
+      </div>
+
+      <!-- Teacher public comment on the report (visible to everyone) -->
+      <div *ngIf="doc.is_report && doc.teacher_comment && annotateId !== doc.id"
+           class="mt-2 p-3 rounded-xl border border-tertiary/30 bg-tertiary-container/40">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="material-symbols-outlined text-on-tertiary-container" style="font-size:16px;">forum</span>
+          <span class="text-[10px] font-bold uppercase tracking-widest text-on-tertiary-container">Commentaire de l'enseignant</span>
+        </div>
+        <p class="text-sm text-on-tertiary-container whitespace-pre-line">{{ doc.teacher_comment }}</p>
+      </div>
+
+      <!-- Teacher private note (teacher-only — backend nullifies for students) -->
+      <div *ngIf="isEnseignant && doc.is_report && doc.teacher_note && annotateId !== doc.id"
+           class="mt-2 p-3 rounded-xl border-2 border-dashed border-secondary/40 bg-secondary-container/30">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="material-symbols-outlined text-on-secondary-container" style="font-size:16px;">lock</span>
+          <span class="text-[10px] font-bold uppercase tracking-widest text-on-secondary-container">Note privée — non visible par l'étudiant</span>
+        </div>
+        <p class="text-sm text-on-secondary-container whitespace-pre-line">{{ doc.teacher_note }}</p>
+      </div>
+
+      <!-- Annotate form (teacher only) -->
+      <div *ngIf="annotateId === doc.id"
+           class="mt-2 p-4 rounded-xl border-2 border-tertiary/40 bg-tertiary-container/20 space-y-3">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="material-symbols-outlined text-on-tertiary-container" style="font-size:16px;">forum</span>
+            <label class="text-[10px] font-bold uppercase tracking-widest text-on-tertiary-container">
+              Commentaire — visible par l'étudiant
+            </label>
+          </div>
+          <textarea [(ngModel)]="annotateComment" rows="3"
+                    placeholder="Retours partagés avec l'étudiant…"
+                    class="w-full px-3 py-2 rounded-lg bg-surface-container-lowest border border-outline-variant/30 text-sm focus:ring-2 focus:ring-tertiary/30 focus:outline-none"></textarea>
+        </div>
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="material-symbols-outlined text-on-secondary-container" style="font-size:16px;">lock</span>
+            <label class="text-[10px] font-bold uppercase tracking-widest text-on-secondary-container">
+              Note privée — pour vous uniquement
+            </label>
+          </div>
+          <textarea [(ngModel)]="annotateNote" rows="2"
+                    placeholder="Observations confidentielles, à-faire de suivi…"
+                    class="w-full px-3 py-2 rounded-lg bg-surface-container-lowest border-2 border-dashed border-secondary/40 text-sm focus:ring-2 focus:ring-secondary/30 focus:outline-none"></textarea>
+        </div>
+        <div class="flex gap-2 justify-end">
+          <button (click)="cancelAnnotate()"
+                  class="px-4 py-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface text-sm font-bold transition-all active:scale-95">Annuler</button>
+          <button (click)="saveAnnotate(doc)" [disabled]="annotating"
+                  class="px-4 py-2 rounded-lg bg-primary text-white text-sm font-bold shadow-sm hover:shadow-md disabled:opacity-50 active:scale-95 transition-all">Enregistrer</button>
+        </div>
       </div>
     </div>
   </div>

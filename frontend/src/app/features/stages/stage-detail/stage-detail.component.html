@@ -14,25 +14,17 @@
 
   <!-- Header -->
   <header class="mb-8">
-    <button (click)="goBack()"
-            class="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-primary border border-outline-variant/30 text-sm font-semibold transition-all active:scale-95">
-      <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span>
-      Retour
-    </button>
+    <app-breadcrumbs [items]="[
+      { label: 'Stages', link: '/stages' },
+      { label: stage.titre }
+    ]"></app-breadcrumbs>
 
     <div class="flex justify-between items-start gap-4 mb-3">
       <div>
-        <div class="flex items-center gap-3 mb-2">
-          <span class="px-3 py-1 text-xs font-bold rounded-full uppercase tracking-tighter"
-                [class.bg-tertiary-container]="stage.statut === 'actif'"
-                [class.text-on-tertiary-container]="stage.statut === 'actif'"
-                [class.bg-secondary-container]="stage.statut === 'brouillon'"
-                [class.text-on-secondary-container]="stage.statut === 'brouillon'"
-                [class.bg-surface-variant]="stage.statut === 'terminé' || stage.statut === 'archivé'"
-                [class.text-on-surface-variant]="stage.statut === 'terminé' || stage.statut === 'archivé'">
-            {{ stage.statut }}
-          </span>
-          <span *ngIf="stage.niveau" class="text-xs font-bold text-on-surface-variant">{{ stage.niveau }}</span>
+        <div class="flex flex-wrap items-center gap-2 mb-2">
+          <app-stage-status-badge [statut]="stage.statut" size="md"></app-stage-status-badge>
+          <app-stage-pace-badge [pace]="stage.pace_indicator" size="md"></app-stage-pace-badge>
+          <span *ngIf="stage.niveau" class="text-xs font-bold text-on-surface-variant ml-1">{{ stage.niveau }}</span>
         </div>
         <h1 class="font-headline text-3xl font-extrabold text-primary tracking-tight">{{ stage.titre }}</h1>
         <p *ngIf="stage.etablissement" class="text-on-surface-variant mt-1 flex items-center gap-2">
@@ -41,17 +33,68 @@
         </p>
       </div>
 
-      <div class="flex items-center gap-2" *ngIf="(currentUser$ | async)?.role === 'enseignant'">
-        <button (click)="openCreateMeeting()"
-                class="bg-surface-container-high text-primary px-4 py-2.5 rounded-xl font-bold text-sm hover:bg-surface-container-highest transition-all flex items-center gap-2">
-          <span class="material-symbols-outlined" style="font-size:18px;">videocam</span>
-          Créer Réunion
-        </button>
-        <button (click)="editStage()"
-                class="bg-primary text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all flex items-center gap-2">
-          <span class="material-symbols-outlined" style="font-size:18px;">edit</span>
-          Modifier
-        </button>
+      <div class="flex flex-col items-stretch gap-3" *ngIf="(currentUser$ | async)?.role === 'enseignant'">
+
+        <!-- Quick status + pace changers (modern menu triggers) -->
+        <div class="flex items-stretch gap-3">
+
+          <!-- Status trigger -->
+          <button [matMenuTriggerFor]="statutMenu" [disabled]="changingStatut"
+                  class="group flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-surface-container-lowest border-2 border-outline-variant/30 hover:border-primary/40 hover:shadow-md active:scale-95 transition-all disabled:opacity-50">
+            <div class="flex flex-col items-start gap-1.5">
+              <span class="text-[9px] font-extrabold text-on-surface-variant uppercase tracking-widest leading-none">Statut</span>
+              <app-stage-status-badge [statut]="stage.statut" size="sm"></app-stage-status-badge>
+            </div>
+            <span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors" style="font-size:22px;">unfold_more</span>
+          </button>
+          <mat-menu #statutMenu="matMenu" xPosition="before" class="modern-menu">
+            <button mat-menu-item *ngFor="let s of statutOptions" (click)="onStatutChange(s.value)"
+                    class="!flex !items-center !gap-3 !py-2.5">
+              <app-stage-status-badge [statut]="s.value" size="sm"></app-stage-status-badge>
+              <span *ngIf="s.value === stage.statut" class="material-symbols-outlined text-primary ml-auto" style="font-size:18px;">check</span>
+            </button>
+          </mat-menu>
+
+          <!-- Pace trigger -->
+          <button [matMenuTriggerFor]="paceMenu" [disabled]="changingPace"
+                  class="group flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-surface-container-lowest border-2 border-outline-variant/30 hover:border-primary/40 hover:shadow-md active:scale-95 transition-all disabled:opacity-50">
+            <div class="flex flex-col items-start gap-1.5">
+              <span class="text-[9px] font-extrabold text-on-surface-variant uppercase tracking-widest leading-none">Rythme</span>
+              <app-stage-pace-badge *ngIf="stage.pace_indicator" [pace]="stage.pace_indicator" size="sm"></app-stage-pace-badge>
+              <span *ngIf="!stage.pace_indicator"
+                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-outline-variant/40 text-on-surface-variant">
+                <span class="material-symbols-outlined" style="font-size:13px;">remove</span>
+                Non évalué
+              </span>
+            </div>
+            <span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors" style="font-size:22px;">unfold_more</span>
+          </button>
+          <mat-menu #paceMenu="matMenu" xPosition="before" class="modern-menu">
+            <button mat-menu-item *ngFor="let p of paceOptions" (click)="onPaceChange(p.value)"
+                    class="!flex !items-center !gap-3 !py-2.5">
+              <app-stage-pace-badge *ngIf="p.value" [pace]="p.value" size="sm"></app-stage-pace-badge>
+              <span *ngIf="!p.value"
+                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-outline-variant/40 text-on-surface-variant">
+                <span class="material-symbols-outlined" style="font-size:13px;">remove</span>
+                Non évalué
+              </span>
+              <span *ngIf="p.value === (stage.pace_indicator ?? '')" class="material-symbols-outlined text-primary ml-auto" style="font-size:18px;">check</span>
+            </button>
+          </mat-menu>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button (click)="openCreateMeeting()"
+                  class="flex-1 flex items-center justify-center gap-2 bg-surface-container-high text-primary px-4 py-2.5 rounded-xl font-bold text-sm hover:bg-surface-container-highest active:scale-95 transition-all">
+            <span class="material-symbols-outlined" style="font-size:18px;">videocam</span>
+            Réunion
+          </button>
+          <button (click)="editStage()"
+                  class="flex-1 flex items-center justify-center gap-2 bg-primary text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-md hover:shadow-lg active:scale-95 transition-all">
+            <span class="material-symbols-outlined" style="font-size:18px;">edit</span>
+            Modifier
+          </button>
+        </div>
       </div>
     </div>
 
@@ -70,8 +113,8 @@
 
   <!-- Custom tabs -->
   <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/10 shadow-sm overflow-hidden">
-    <div class="p-2 border-b border-outline-variant/10 overflow-x-auto no-scrollbar items-center">
-      <div class="inline-flex items-center gap-1 bg-surface-container rounded-full p-1.5 min-w-fit">
+    <div class="p-3 border-b border-outline-variant/10">
+      <div class="flex items-stretch gap-2 bg-surface-container rounded-2xl p-2 w-full">
         <button *ngFor="let tab of [
           { label: 'Aperçu', icon: 'info' },
           { label: 'Étapes', icon: 'flag' },
@@ -81,14 +124,15 @@
           { label: 'Discussion', icon: 'chat' }
         ]; let i = index"
                 (click)="selectedTabIndex = i"
-                [class.bg-primary-fixed]="selectedTabIndex === i"
-                [class.text-on-primary-fixed]="selectedTabIndex === i"
-                [class.shadow-sm]="selectedTabIndex === i"
+                [class.bg-primary]="selectedTabIndex === i"
+                [class.text-white]="selectedTabIndex === i"
+                [class.shadow-md]="selectedTabIndex === i"
                 [class.text-on-surface-variant]="selectedTabIndex !== i"
                 [class.hover:bg-surface-container-high]="selectedTabIndex !== i"
-                class="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all whitespace-nowrap">
-          <span class="material-symbols-outlined" style="font-size:18px;">{{ tab.icon }}</span>
-          {{ tab.label }}
+                [class.hover:text-primary]="selectedTabIndex !== i"
+                class="flex-1 min-w-0 flex flex-col items-center justify-center gap-1.5 px-3 py-3 rounded-xl text-sm font-bold transition-all active:scale-[0.98]">
+          <span class="material-symbols-outlined" style="font-size:22px;">{{ tab.icon }}</span>
+          <span class="truncate">{{ tab.label }}</span>
         </button>
       </div>
     </div>

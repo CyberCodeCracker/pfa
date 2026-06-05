@@ -16,6 +16,7 @@ class StageResource extends JsonResource
             'date_debut'       => $this->date_debut?->toDateString(),
             'date_fin'         => $this->date_fin?->toDateString(),
             'statut'           => $this->statut?->value,
+            'pace_indicator'   => $this->pace_indicator?->value,
             'niveau'           => $this->niveau,
             'created_at'       => $this->created_at,
             'annee_academique'  => $this->annee_academique,

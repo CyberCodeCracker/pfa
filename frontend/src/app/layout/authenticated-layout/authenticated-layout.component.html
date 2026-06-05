@@ -110,12 +110,13 @@
         </div>
 
         <div class="flex flex-col flex-1 min-w-[170px]">
-          <span class="text-[10px] font-bold text-primary/80 uppercase tracking-widest leading-none mb-1">Semestre</span>
+          <span class="text-[10px] font-bold text-primary/80 uppercase tracking-widest leading-none mb-1">Type de stage</span>
           <select [(ngModel)]="filterSemestre" (change)="onFilterChange()"
                   class="w-full text-sm font-bold bg-surface-container-lowest text-primary rounded-lg px-3 py-2.5 border-2 border-primary/20 hover:border-primary/40 focus:ring-2 focus:ring-primary/30 focus:border-primary focus:outline-none cursor-pointer transition-all">
-            <option value="">Tous semestres</option>
-            <option value="S1">S1 — Stage d'été</option>
-            <option value="S2">S2 — PFE / PFA</option>
+            <option value="">Tous types</option>
+            <option value="ete">Stage d'été</option>
+            <option value="pfe">PFE</option>
+            <option value="pfa">PFA</option>
           </select>
         </div>
 
@@ -149,5 +150,7 @@
       <router-outlet></router-outlet>
     </div>
   </main>
+
+  <app-scroll-top></app-scroll-top>
 
 </ng-container>

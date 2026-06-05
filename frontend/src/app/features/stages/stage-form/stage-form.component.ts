@@ -5,11 +5,13 @@ import { Subject, take, takeUntil } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { Store } from '@ngrx/store';
+import { ToastService } from '../../../shared/toast/toast.service';
 import { StageApiService, CreateStagePayload } from '../../../core/services/stage-api.service';
 import { EtablissementApiService } from '../../../core/services/etablissement-api.service';
 import { Etablissement } from '../../../core/models/etablissement.model';
 import { Stage } from '../../../core/models/stage.model';
 import { selectFilter } from '../../../store/filter/filter.selectors';
+import { BreadcrumbItem } from '../../../shared/breadcrumbs/breadcrumbs.component';
 
 @Component({
   selector: 'app-stage-form',
@@ -27,8 +29,9 @@ export class StageFormComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   readonly statuts = [
-    { value: 'brouillon', label: 'Brouillon' },
-    { value: 'actif', label: 'Actif' },
+    { value: 'actif',    label: 'Actif' },
+    { value: 'suspendu', label: 'Suspendu' },
+    { value: 'terminé',  label: 'Terminé' },
   ];
 
   readonly niveaux = [
@@ -42,12 +45,24 @@ export class StageFormComponent implements OnInit, OnDestroy {
     'DUT',
   ];
 
-  readonly semestres = [
-    { value: 'S1', label: 'Semestre 1 — Stage d\'été' },
-    { value: 'S2', label: 'Semestre 2 — PFE / PFA' },
+  readonly typesStage = [
+    { value: 'ete', label: 'Stage d\'été' },
+    { value: 'pfe', label: 'PFE — Projet de Fin d\'Études' },
+    { value: 'pfa', label: 'PFA — Projet de Fin d\'Année' },
   ];
 
-  annees: string[] = [];
+  /** Auto-computed once on init — not editable by the user */
+  currentAnnee = '';
+
+  get breadcrumbs(): BreadcrumbItem[] {
+    if (!this.isEdit) {
+      return [{ label: 'Stages', link: '/stages' }, { label: 'Nouveau stage' }];
+    }
+    const items: BreadcrumbItem[] = [{ label: 'Stages', link: '/stages' }];
+    if (this.stageId) items.push({ label: `Stage #${this.stageId}`, link: ['/stages', this.stageId] });
+    items.push({ label: 'Modifier' });
+    return items;
+  }
 
   constructor(
     private fb: FormBuilder,
@@ -56,13 +71,14 @@ export class StageFormComponent implements OnInit, OnDestroy {
     private router: Router,
     private route: ActivatedRoute,
     private store: Store,
+    private toast: ToastService,
   ) {}
 
   ngOnInit(): void {
-    this.annees = this.buildAnnees();
+    this.currentAnnee = this.computeCurrentAcademicYear();
 
     this.store.select(selectFilter).pipe(take(1)).subscribe(f => {
-      this.buildForm(f.annee, f.semestre);
+      this.buildForm(this.currentAnnee, f.semestre);
       this.loadEtablissements();
 
       const id = this.route.snapshot.paramMap.get('id');
@@ -74,10 +90,11 @@ export class StageFormComponent implements OnInit, OnDestroy {
     });
   }
 
-  private buildAnnees(): string[] {
+  private computeCurrentAcademicYear(): string {
     const now = new Date();
-    const start = now.getMonth() >= 8 ? now.getFullYear() - 1 : now.getFullYear() - 2;
-    return [start, start + 1, start + 2].map(y => `${y}-${y + 1}`);
+    const month = now.getMonth() + 1;
+    const year = now.getFullYear();
+    return month >= 9 ? `${year}-${year + 1}` : `${year - 1}-${year}`;
   }
 
   ngOnDestroy(): void {
@@ -202,9 +219,13 @@ export class StageFormComponent implements OnInit, OnDestroy {
       this.stageApi.update(this.stageId, payload)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
-          next: res => this.router.navigate(['/stages', res.data.id]),
+          next: res => {
+            this.toast.success('Stage mis à jour.');
+            this.router.navigate(['/stages', res.data.id]);
+          },
           error: err => {
             this.error = err.error?.message ?? 'Erreur lors de l\'enregistrement.';
+            this.toast.error(this.error!);
             this.loading = false;
           },
         });
@@ -224,9 +245,17 @@ export class StageFormComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$),
       )
       .subscribe({
-        next: stageId => this.router.navigate(['/stages', stageId]),
+        next: stageId => {
+          this.toast.success(
+            invitedEtudiants.length > 0
+              ? `Stage créé et ${invitedEtudiants.length} étudiant(s) invité(s).`
+              : 'Stage créé avec succès.'
+          );
+          this.router.navigate(['/stages', stageId]);
+        },
         error: err => {
           this.error = err.error?.message ?? 'Erreur lors de l\'enregistrement.';
+          this.toast.error(this.error!);
           this.loading = false;
         },
       });

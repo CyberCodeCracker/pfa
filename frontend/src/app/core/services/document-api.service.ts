@@ -18,10 +18,11 @@ export class DocumentApiService {
     );
   }
 
-  upload(stageId: number, file: File, parentDocumentId?: number): Observable<ApiResponse<Document>> {
+  upload(stageId: number, file: File, options: { parentDocumentId?: number; isReport?: boolean } = {}): Observable<ApiResponse<Document>> {
     const fd = new FormData();
     fd.append('fichier', file);
-    if (parentDocumentId) fd.append('parent_document_id', String(parentDocumentId));
+    if (options.parentDocumentId) fd.append('parent_document_id', String(options.parentDocumentId));
+    if (options.isReport) fd.append('is_report', '1');
     return this.http.post<ApiResponse<Document>>(
       `${this.base}/stages/${stageId}/documents`,
       fd,
@@ -45,6 +46,14 @@ export class DocumentApiService {
     return this.http.post<ApiResponse<Document>>(
       `${this.base}/documents/${documentId}/refuser`,
       { commentaire },
+      { withCredentials: true },
+    );
+  }
+
+  annotate(documentId: number, payload: { teacher_comment?: string | null; teacher_note?: string | null }): Observable<ApiResponse<Document>> {
+    return this.http.post<ApiResponse<Document>>(
+      `${this.base}/documents/${documentId}/annotate`,
+      payload,
       { withCredentials: true },
     );
   }

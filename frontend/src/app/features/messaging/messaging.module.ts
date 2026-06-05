@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { SharedModule } from '../../shared/shared.module';
 import { MessagingComponent } from './messaging.component';
 
 @NgModule({
@@ -19,6 +20,7 @@ import { MessagingComponent } from './messaging.component';
     MatInputModule,
     MatFormFieldModule,
     MatProgressSpinnerModule,
+    SharedModule,
     RouterModule.forChild([{ path: '', component: MessagingComponent }]),
   ],
 })

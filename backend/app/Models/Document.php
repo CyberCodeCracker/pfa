@@ -22,6 +22,9 @@ class Document extends Model
         'version',
         'parent_document_id',
         'date_upload',
+        'is_report',
+        'teacher_comment',
+        'teacher_note',
     ];
 
     protected function casts(): array
@@ -31,6 +34,7 @@ class Document extends Model
             'date_upload' => 'datetime',
             'taille'      => 'integer',
             'version'     => 'integer',
+            'is_report'   => 'boolean',
         ];
     }
 

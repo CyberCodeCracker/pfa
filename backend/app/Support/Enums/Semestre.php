@@ -4,6 +4,7 @@ namespace App\Support\Enums;
 
 enum Semestre: string
 {
-    case S1 = 'S1'; // Semestre 1 — validation des stages d'été
-    case S2 = 'S2'; // Semestre 2 — PFE / PFA
+    case Ete = 'ete'; // Stage d'été (semestre 1)
+    case Pfe = 'pfe'; // Projet de Fin d'Études (semestre 2)
+    case Pfa = 'pfa'; // Projet de Fin d'Année (semestre 2)
 }

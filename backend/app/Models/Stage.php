@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Enums\PaceIndicator;
 use App\Support\Enums\Semestre;
 use App\Support\Enums\StageStatut;
 use Illuminate\Database\Eloquent\Model;
@@ -17,6 +18,7 @@ class Stage extends Model
         'date_debut',
         'date_fin',
         'statut',
+        'pace_indicator',
         'niveau',
         'annee_academique',
         'semestre',
@@ -30,6 +32,7 @@ class Stage extends Model
             'date_debut'       => 'date',
             'date_fin'         => 'date',
             'statut'           => StageStatut::class,
+            'pace_indicator'   => PaceIndicator::class,
             'semestre'         => Semestre::class,
         ];
     }

@@ -13,6 +13,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MatMenuModule } from '@angular/material/menu';
 
 import { StagesComponent } from './stages.component';
 import { StageListComponent } from './stage-list/stage-list.component';
@@ -56,6 +57,7 @@ import { StageMilestonesComponent } from './stage-milestones/stage-milestones.co
     MatTooltipModule,
     MatCheckboxModule,
     MatDialogModule,
+    MatMenuModule,
     RouterModule.forChild([
       { path: '',             component: StageListComponent },
       { path: 'nouveau',      component: StageFormComponent },

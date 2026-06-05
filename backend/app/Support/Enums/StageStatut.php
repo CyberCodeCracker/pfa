@@ -4,8 +4,7 @@ namespace App\Support\Enums;
 
 enum StageStatut: string
 {
-    case Brouillon = 'brouillon';
     case Actif     = 'actif';
-    case Archive   = 'archivé';
+    case Suspendu  = 'suspendu';
     case Termine   = 'terminé';
 }

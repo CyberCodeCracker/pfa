@@ -1,0 +1,21 @@
+<nav class="flex items-center gap-1.5 text-sm mb-6 flex-wrap" aria-label="Fil d'Ariane">
+
+  <a *ngIf="showHome" [routerLink]="homeLink$ | async"
+     class="px-2.5 py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary font-semibold transition-all">
+    Accueil
+  </a>
+
+  <ng-container *ngFor="let item of items; let last = last; let first = first">
+    <span *ngIf="showHome || !first"
+          class="material-symbols-outlined text-outline-variant" style="font-size:18px;">chevron_right</span>
+
+    <a *ngIf="item.link && !last" [routerLink]="item.link"
+       class="px-2.5 py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary font-semibold transition-all">
+      {{ item.label }}
+    </a>
+    <span *ngIf="!item.link || last"
+          class="px-3 py-1.5 rounded-lg bg-primary text-white font-bold shadow-sm truncate max-w-xs">
+      {{ item.label }}
+    </span>
+  </ng-container>
+</nav>
