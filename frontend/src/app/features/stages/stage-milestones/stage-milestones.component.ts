@@ -15,6 +15,7 @@ import { selectCurrentUser } from '../../../store/auth/auth.selectors';
 })
 export class StageMilestonesComponent implements OnInit, OnDestroy {
   @Input() stageId!: number;
+  @Input() isArchived = false;
 
   milestones: Milestone[] = [];
   loading = true;
@@ -261,6 +262,13 @@ export class StageMilestonesComponent implements OnInit, OnDestroy {
         next: res => { this.replace(res.data); this.toast.success('Étape marquée comme terminée.'); },
         error: err => this.toast.error(err.error?.message ?? 'Action impossible.'),
       });
+  }
+
+  canValidate(m: Milestone): boolean {
+    // All steps with a lower ordre must already be validated
+    return this.milestones
+      .filter(x => x.ordre < m.ordre)
+      .every(x => x.statut === 'validated');
   }
 
   validate(m: Milestone): void {

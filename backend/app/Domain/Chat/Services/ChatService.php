@@ -94,6 +94,77 @@ class ChatService
         ], ['read_at' => now()]);
     }
 
+    /**
+     * Mark every message in a private chat (not sent by $user) as read.
+     */
+    public function markPrivateChatRead(PrivateChat $chat, User $user): void
+    {
+        $unreadIds = Message::where('chat_type', ChatType::Private)
+            ->where('chat_id', $chat->id)
+            ->where('sender_id', '!=', $user->id)
+            ->whereNotExists(function ($q) use ($user) {
+                $q->selectRaw('1')
+                    ->from('message_reads')
+                    ->whereColumn('message_reads.message_id', 'messages.id')
+                    ->where('message_reads.user_id', $user->id);
+            })
+            ->pluck('id');
+
+        if ($unreadIds->isEmpty()) {
+            return;
+        }
+
+        $rows = $unreadIds->map(fn ($id) => [
+            'message_id' => $id,
+            'user_id'    => $user->id,
+            'read_at'    => now(),
+        ])->all();
+
+        MessageRead::insertOrIgnore($rows);
+    }
+
+    /**
+     * Count unread messages for $user in a single private chat.
+     */
+    public function unreadCountForChat(PrivateChat $chat, User $user): int
+    {
+        return Message::where('chat_type', ChatType::Private)
+            ->where('chat_id', $chat->id)
+            ->where('sender_id', '!=', $user->id)
+            ->whereNotExists(function ($q) use ($user) {
+                $q->selectRaw('1')
+                    ->from('message_reads')
+                    ->whereColumn('message_reads.message_id', 'messages.id')
+                    ->where('message_reads.user_id', $user->id);
+            })
+            ->count();
+    }
+
+    /**
+     * Total unread private messages across all of $user's private chats.
+     */
+    public function totalUnreadPrivate(User $user): int
+    {
+        $chatIds = PrivateChat::where('enseignant_id', $user->id)
+            ->orWhere('etudiant_id', $user->id)
+            ->pluck('id');
+
+        if ($chatIds->isEmpty()) {
+            return 0;
+        }
+
+        return Message::where('chat_type', ChatType::Private)
+            ->whereIn('chat_id', $chatIds)
+            ->where('sender_id', '!=', $user->id)
+            ->whereNotExists(function ($q) use ($user) {
+                $q->selectRaw('1')
+                    ->from('message_reads')
+                    ->whereColumn('message_reads.message_id', 'messages.id')
+                    ->where('message_reads.user_id', $user->id);
+            })
+            ->count();
+    }
+
     public function getPublicMessages(PublicChat $chat, int $perPage = 50): LengthAwarePaginator
     {
         return Message::where('chat_type', ChatType::Public)

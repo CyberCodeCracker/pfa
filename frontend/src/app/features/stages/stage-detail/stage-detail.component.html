@@ -26,14 +26,20 @@
           <app-stage-pace-badge [pace]="stage.pace_indicator" size="md"></app-stage-pace-badge>
           <span *ngIf="stage.niveau" class="text-xs font-bold text-on-surface-variant ml-1">{{ stage.niveau }}</span>
         </div>
-        <h1 class="font-headline text-3xl font-extrabold text-primary tracking-tight">{{ stage.titre }}</h1>
+        <h1 class="font-headline text-3xl font-extrabold text-primary tracking-tight flex items-center gap-3 flex-wrap">
+          {{ stage.titre }}
+          <span *ngIf="stage.semestre"
+                class="text-sm font-bold px-3 py-1 rounded-full bg-primary-container text-on-primary-container uppercase tracking-wider">
+            {{ stage.semestre === 'pfe' ? 'PFE' : stage.semestre === 'pfa' ? 'PFA' : 'Stage Été' }}
+          </span>
+        </h1>
         <p *ngIf="stage.etablissement" class="text-on-surface-variant mt-1 flex items-center gap-2">
           <span class="material-symbols-outlined" style="font-size:18px;">apartment</span>
           {{ stage.etablissement.nom }}
         </p>
       </div>
 
-      <div class="flex flex-col items-stretch gap-3" *ngIf="(currentUser$ | async)?.role === 'enseignant'">
+      <div class="flex flex-col items-stretch gap-3" *ngIf="(currentUser$ | async)?.role === 'enseignant' && stage.statut !== 'terminé'">
 
         <!-- Quick status + pace changers (modern menu triggers) -->
         <div class="flex items-stretch gap-3">
@@ -111,6 +117,13 @@
     </div>
   </header>
 
+  <!-- Archived banner -->
+  <div *ngIf="stage.statut === 'terminé'"
+       class="mb-4 flex items-center gap-3 px-4 py-3 bg-surface-container rounded-xl border border-outline-variant/20 text-on-surface-variant text-sm">
+    <span class="material-symbols-outlined" style="font-size:18px;">archive</span>
+    <span class="font-semibold">Ce stage est <strong>terminé</strong> — lecture seule. Aucune action n'est possible.</span>
+  </div>
+
   <!-- Custom tabs -->
   <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/10 shadow-sm overflow-hidden">
     <div class="p-3 border-b border-outline-variant/10">
@@ -144,23 +157,23 @@
           <h3 class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2">Description</h3>
           <p class="text-on-surface leading-relaxed">{{ stage.description || 'Aucune description.' }}</p>
         </div>
-        <app-stage-feedback [stageId]="stage.id"></app-stage-feedback>
+        <app-stage-feedback [stageId]="stage.id" [isArchived]="stage.statut === 'terminé'"></app-stage-feedback>
       </div>
 
       <!-- Étapes (milestones) -->
-      <app-stage-milestones *ngIf="selectedTabIndex === 1" [stageId]="stage.id"></app-stage-milestones>
+      <app-stage-milestones *ngIf="selectedTabIndex === 1" [stageId]="stage.id" [isArchived]="stage.statut === 'terminé'"></app-stage-milestones>
 
       <!-- Étudiants -->
-      <app-stage-students *ngIf="selectedTabIndex === 2" [stageId]="stage.id"></app-stage-students>
+      <app-stage-students *ngIf="selectedTabIndex === 2" [stageId]="stage.id" [isArchived]="stage.statut === 'terminé'"></app-stage-students>
 
       <!-- Documents -->
-      <app-stage-documents *ngIf="selectedTabIndex === 3" [stageId]="stage.id"></app-stage-documents>
+      <app-stage-documents *ngIf="selectedTabIndex === 3" [stageId]="stage.id" [isArchived]="stage.statut === 'terminé'"></app-stage-documents>
 
       <!-- Réunions -->
-      <app-stage-meetings *ngIf="selectedTabIndex === 4" [stageId]="stage.id"></app-stage-meetings>
+      <app-stage-meetings *ngIf="selectedTabIndex === 4" [stageId]="stage.id" [isArchived]="stage.statut === 'terminé'"></app-stage-meetings>
 
       <!-- Discussion -->
-      <app-stage-chat *ngIf="selectedTabIndex === 5" [stageId]="stage.id"></app-stage-chat>
+      <app-stage-chat *ngIf="selectedTabIndex === 5" [stageId]="stage.id" [isArchived]="stage.statut === 'terminé'"></app-stage-chat>
     </div>
   </div>
 </div>

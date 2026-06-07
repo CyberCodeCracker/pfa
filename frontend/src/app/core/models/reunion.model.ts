@@ -11,6 +11,8 @@ export interface Reunion {
   duration_minutes: number;
   meet_url: string | null;
   statut: ReunionStatut;
+  compte_rendu: string | null;
+  terminated_at: string | null;
   created_at: string;
   stage?: Stage;
   enseignant?: User;

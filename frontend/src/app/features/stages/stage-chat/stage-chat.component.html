@@ -47,7 +47,11 @@
 
   <!-- Input -->
   <footer class="p-4 border-t border-outline-variant/10 bg-surface-container-lowest">
-    <div class="flex items-center gap-3">
+    <div *ngIf="isArchived" class="text-center text-xs text-on-surface-variant italic py-1">
+      <span class="material-symbols-outlined align-middle" style="font-size:14px;">lock</span>
+      Stage archivé — discussion en lecture seule
+    </div>
+    <div *ngIf="!isArchived" class="flex items-center gap-3">
       <div class="flex-grow">
         <textarea [formControl]="messageCtrl" (keydown)="onKeyDown($event)" rows="1"
                   placeholder="Votre message…"

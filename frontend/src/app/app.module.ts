@@ -9,8 +9,9 @@ import { StoreModule } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
-import { firstValueFrom } from 'rxjs';
+import { filter, firstValueFrom } from 'rxjs';
 import { Store } from '@ngrx/store';
+import { selectAuthInitialized } from './store/auth/auth.selectors';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -31,6 +32,7 @@ function initApp(authService: AuthService, store: Store): () => Promise<void> {
   return async () => {
     await firstValueFrom(authService.csrfCookie()).catch(() => {});
     store.dispatch(AuthActions.loadMe());
+    await firstValueFrom(store.select(selectAuthInitialized).pipe(filter(v => v)));
   };
 }
 

@@ -1,5 +1,6 @@
 import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { StageApiService } from '../../../core/services/stage-api.service';
 import { Affectation } from '../../../core/models/stage.model';
@@ -13,6 +14,7 @@ import { selectCurrentUser } from '../../../store/auth/auth.selectors';
 })
 export class StageStudentsComponent implements OnInit, OnDestroy {
   @Input() stageId!: number;
+  @Input() isArchived = false;
 
   affectations: Affectation[] = [];
   loading = false;
@@ -33,7 +35,12 @@ export class StageStudentsComponent implements OnInit, OnDestroy {
     private stageApi: StageApiService,
     private fb: FormBuilder,
     private store: Store,
+    private router: Router,
   ) {}
+
+  chatWithStudent(etudiantId: number): void {
+    this.router.navigate(['/messagerie'], { queryParams: { userId: etudiantId } });
+  }
 
   ngOnInit(): void {
     this.addForm = this.fb.group({

@@ -59,7 +59,8 @@ export class StageFormComponent implements OnInit, OnDestroy {
       return [{ label: 'Stages', link: '/stages' }, { label: 'Nouveau stage' }];
     }
     const items: BreadcrumbItem[] = [{ label: 'Stages', link: '/stages' }];
-    if (this.stageId) items.push({ label: `Stage #${this.stageId}`, link: ['/stages', this.stageId] });
+    const titre = this.form?.get('titre')?.value;
+    if (this.stageId) items.push({ label: titre || `Stage #${this.stageId}`, link: ['/stages', this.stageId] });
     items.push({ label: 'Modifier' });
     return items;
   }
@@ -107,13 +108,13 @@ export class StageFormComponent implements OnInit, OnDestroy {
   private buildForm(defaultAnnee = '', defaultSemestre = ''): void {
     this.form = this.fb.group({
       titre:             ['', [Validators.required, Validators.maxLength(200)]],
-      description:       [''],
+      description:       ['', Validators.required],
       date_debut:        ['', [Validators.required, this.notInPastValidator()]],
       date_fin:          ['', Validators.required],
       statut:            ['brouillon', Validators.required],
-      niveau:            [''],
+      niveau:            ['', Validators.required],
       annee_academique:  [defaultAnnee],
-      semestre:          [defaultSemestre],
+      semestre:          [defaultSemestre, Validators.required],
       etablissement_id:  [null, Validators.required],
       etudiants:         this.fb.array([]),
     }, { validators: [this.dateRangeValidator] });

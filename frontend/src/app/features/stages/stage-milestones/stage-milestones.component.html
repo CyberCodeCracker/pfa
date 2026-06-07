@@ -17,7 +17,7 @@
         </p>
       </div>
     </div>
-    <button *ngIf="isEnseignant && !adding" (click)="startAdd()"
+    <button *ngIf="isEnseignant && !adding && !isArchived" (click)="startAdd()"
             class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-bold shadow-sm hover:shadow-md active:scale-95 transition-all">
       <span class="material-symbols-outlined" style="font-size:18px;">add</span>
       Ajouter une étape
@@ -97,10 +97,11 @@
 
         <div class="flex items-center gap-2 shrink-0">
           <!-- Teacher actions -->
-          <ng-container *ngIf="isEnseignant">
+          <ng-container *ngIf="isEnseignant && !isArchived">
             <button *ngIf="m.statut !== 'validated'" (click)="validate(m)"
-                    title="Valider"
-                    class="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-primary text-white text-xs font-bold shadow-sm hover:shadow-md hover:bg-primary/90 active:scale-95 transition-all">
+                    [disabled]="!canValidate(m)"
+                    [title]="canValidate(m) ? 'Valider' : 'Une étape précédente doit être validée en premier'"
+                    class="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-primary text-white text-xs font-bold shadow-sm hover:shadow-md hover:bg-primary/90 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none">
               <span class="material-symbols-outlined" style="font-size:16px;">check_circle</span>
               <span class="hidden xl:inline">Valider</span>
             </button>
@@ -121,14 +122,6 @@
             </button>
           </ng-container>
 
-          <!-- Student actions -->
-          <ng-container *ngIf="!isEnseignant">
-            <button *ngIf="m.statut === 'pending' || m.statut === 'in_progress'" (click)="markComplete(m)"
-                    class="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-secondary text-on-secondary text-xs font-bold shadow-sm hover:shadow-md hover:bg-secondary/90 active:scale-95 transition-all">
-              <span class="material-symbols-outlined" style="font-size:16px;">task_alt</span>
-              Marquer terminé
-            </button>
-          </ng-container>
         </div>
       </div>
 

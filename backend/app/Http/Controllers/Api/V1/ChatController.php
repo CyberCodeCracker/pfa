@@ -50,7 +50,31 @@ class ChatController extends Controller
             ->with(['enseignant', 'etudiant'])
             ->get();
 
+        // Attach per-chat unread count for the current user
+        $chats->each(function (PrivateChat $chat) use ($user) {
+            $chat->unread_count = $this->chatService->unreadCountForChat($chat, $user);
+        });
+
         return PrivateChatResource::collection($chats);
+    }
+
+    public function unreadPrivateCount(Request $request): JsonResponse
+    {
+        return response()->json([
+            'data' => ['unread_count' => $this->chatService->totalUnreadPrivate($request->user())],
+        ]);
+    }
+
+    public function markPrivateChatRead(Request $request, PrivateChat $privateChat): JsonResponse
+    {
+        $user = $request->user();
+        if ($user->id !== $privateChat->enseignant_id && $user->id !== $privateChat->etudiant_id) {
+            abort(403);
+        }
+
+        $this->chatService->markPrivateChatRead($privateChat, $user);
+
+        return response()->json(['message' => 'Conversation marquée comme lue.']);
     }
 
     public function startOrGetPrivateChat(Request $request): JsonResponse

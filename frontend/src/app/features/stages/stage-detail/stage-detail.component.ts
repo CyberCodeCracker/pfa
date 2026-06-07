@@ -51,6 +51,8 @@ export class StageDetailComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const id = +this.route.snapshot.paramMap.get('id')!;
+    const tab = this.route.snapshot.queryParamMap.get('tab');
+    if (tab !== null) this.selectedTabIndex = +tab;
     this.load(id);
   }
 

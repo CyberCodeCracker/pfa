@@ -28,30 +28,48 @@
 <div *ngIf="!loading && notifications.length > 0"
      class="bg-surface-container-lowest rounded-2xl border border-outline-variant/10 shadow-sm divide-y divide-outline-variant/10 overflow-hidden">
   <div *ngFor="let notif of notifications"
-       (click)="markRead(notif)"
+       (click)="navigate(notif)"
        [class.bg-primary-fixed]="!notif.read_at"
-       class="flex items-start gap-4 p-5 cursor-pointer hover:bg-surface-container-low transition-colors">
+       class="flex items-start gap-4 p-5 cursor-pointer hover:bg-surface-container-low transition-colors group">
 
-    <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+    <!-- Icon -->
+    <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-all"
          [class.bg-primary]="!notif.read_at"
-         [class.bg-surface-container-high]="notif.read_at">
-      <span class="material-symbols-outlined"
+         [class.bg-surface-container-high]="!!notif.read_at">
+      <span class="material-symbols-outlined text-lg"
             [class.text-white]="!notif.read_at"
-            [class.text-on-surface-variant]="notif.read_at">
-        {{ getNotifIcon(notif.type) }}
+            [class.text-on-surface-variant]="!!notif.read_at">
+        {{ getMeta(notif).icon }}
       </span>
     </div>
 
+    <!-- Content -->
     <div class="flex-1 min-w-0">
-      <p class="text-sm"
-         [class.font-bold]="!notif.read_at"
+      <!-- Type chip + date -->
+      <div class="flex items-center gap-2 mb-1 flex-wrap">
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest"
+              [ngClass]="getMeta(notif).chipClass">
+          {{ getMeta(notif).label }}
+        </span>
+        <span class="text-[11px] text-on-surface-variant/70">{{ notif.created_at | date:'dd/MM/yyyy · HH:mm' }}</span>
+      </div>
+
+      <!-- Message -->
+      <p class="text-sm leading-snug"
+         [class.font-semibold]="!notif.read_at"
          [class.text-on-surface]="!notif.read_at"
-         [class.text-on-surface-variant]="notif.read_at">
-        {{ getNotifMessage(notif) }}
+         [class.text-on-surface-variant]="!!notif.read_at">
+        {{ getMessage(notif) }}
       </p>
-      <p class="text-xs text-on-surface-variant/70 mt-1">{{ notif.created_at | date:'dd/MM/yyyy HH:mm' }}</p>
+
+      <!-- Navigate hint -->
+      <p class="text-[11px] text-primary/0 group-hover:text-primary/70 transition-colors mt-1 flex items-center gap-1">
+        <span class="material-symbols-outlined" style="font-size:12px;">arrow_forward</span>
+        Voir les détails
+      </p>
     </div>
 
+    <!-- Unread dot -->
     <div *ngIf="!notif.read_at" class="w-2 h-2 rounded-full bg-error mt-2 flex-shrink-0"></div>
   </div>
 </div>

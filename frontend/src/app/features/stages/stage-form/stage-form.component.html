@@ -28,14 +28,14 @@
         </div>
         <div class="space-y-6">
           <div>
-            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 ml-1">Titre du Projet</label>
+            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 ml-1">Titre du Projet <span class="text-error">*</span></label>
             <input formControlName="titre" type="text"
                    placeholder="Ex: Optimisation des Algorithmes de Deep Learning pour la Santé"
                    class="w-full px-4 py-3 rounded-xl bg-surface-container-low border-transparent text-on-surface font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none transition-all">
             <p *ngIf="form.get('titre')?.touched && form.get('titre')?.invalid" class="text-xs text-error mt-1 ml-1">Titre requis.</p>
           </div>
           <div>
-            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 ml-1">Description Détaillée</label>
+            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 ml-1">Description Détaillée <span class="text-error">*</span></label>
             <textarea formControlName="description" rows="6"
                       placeholder="Décrivez les objectifs, la méthodologie et les livrables attendus..."
                       class="w-full px-4 py-3 rounded-xl bg-surface-container-low border-transparent text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none transition-all"></textarea>
@@ -53,7 +53,7 @@
         </div>
         <div class="grid grid-cols-2 gap-6">
           <div>
-            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 ml-1">Date de début</label>
+            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 ml-1">Date de début <span class="text-error">*</span></label>
             <p *ngIf="form.get('date_debut')?.touched && form.get('date_debut')?.errors?.['required']"
                class="text-xs text-error mb-1 ml-1 font-medium">Date de début requise.</p>
             <p *ngIf="form.get('date_debut')?.touched && form.get('date_debut')?.errors?.['pastDate']"
@@ -64,7 +64,7 @@
                    [class.ring-error]="form.get('date_debut')?.touched && form.get('date_debut')?.invalid">
           </div>
           <div>
-            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 ml-1">Date de fin</label>
+            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 ml-1">Date de fin <span class="text-error">*</span></label>
             <p *ngIf="form.get('date_fin')?.touched && form.get('date_fin')?.errors?.['required']"
                class="text-xs text-error mb-1 ml-1 font-medium">Date de fin requise.</p>
             <p *ngIf="form.get('date_fin')?.touched && form.get('date_fin')?.errors?.['endBeforeStart']"
@@ -87,7 +87,7 @@
         </div>
         <div class="grid grid-cols-2 gap-6">
           <div>
-            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 ml-1">Niveau demandé</label>
+            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 ml-1">Niveau demandé <span class="text-error">*</span></label>
             <select formControlName="niveau"
                     class="pill-select w-full px-4 py-3 rounded-xl bg-surface-container-low border-transparent text-on-surface font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none">
               <option value="">— Sélectionner —</option>
@@ -95,7 +95,7 @@
             </select>
           </div>
           <div>
-            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 ml-1">Établissement</label>
+            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 ml-1">Établissement <span class="text-error">*</span></label>
             <select formControlName="etablissement_id"
                     class="pill-select w-full px-4 py-3 rounded-xl bg-surface-container-low border-transparent text-on-surface font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none">
               <option [ngValue]="null">— Sélectionner —</option>
@@ -104,14 +104,14 @@
           </div>
           <div>
             <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 ml-1">Année académique</label>
-            <div class="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-primary-container/40 border-2 border-primary/20 text-on-primary-container font-bold">
+            <div class="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-primary text-white font-bold shadow-sm">
               <span class="material-symbols-outlined" style="font-size:20px;">calendar_today</span>
               <span class="text-base tracking-wider">{{ form.get('annee_academique')?.value || currentAnnee }}</span>
-              <span class="ml-auto text-[10px] font-bold text-on-primary-container/70 uppercase tracking-widest">Auto</span>
+              <span class="ml-auto text-[10px] font-bold text-white/70 uppercase tracking-widest">Auto</span>
             </div>
           </div>
           <div>
-            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 ml-1">Type de stage</label>
+            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 ml-1">Type de stage <span class="text-error">*</span></label>
             <select formControlName="semestre"
                     class="pill-select w-full px-4 py-3 rounded-xl bg-surface-container-low border-transparent text-on-surface font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none">
               <option value="">— Sélectionner —</option>
@@ -153,17 +153,17 @@
           <div *ngFor="let etu of etudiants.controls; let i = index" [formGroupName]="i"
                class="grid grid-cols-12 gap-3 items-start p-4 rounded-xl bg-surface-container-low border border-outline-variant/30">
             <div class="col-span-3">
-              <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1 ml-1">Prénom</label>
+              <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1 ml-1">Prénom <span class="text-error">*</span></label>
               <input formControlName="prenom" type="text" placeholder="Prénom"
                      class="w-full px-3 py-2 rounded-lg bg-surface-container-lowest border-transparent text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none">
             </div>
             <div class="col-span-3">
-              <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1 ml-1">Nom</label>
+              <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1 ml-1">Nom <span class="text-error">*</span></label>
               <input formControlName="nom" type="text" placeholder="Nom"
                      class="w-full px-3 py-2 rounded-lg bg-surface-container-lowest border-transparent text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none">
             </div>
             <div class="col-span-5">
-              <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1 ml-1">Email</label>
+              <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1 ml-1">Email <span class="text-error">*</span></label>
               <input formControlName="email" type="email" placeholder="etudiant@univ.tn"
                      class="w-full px-3 py-2 rounded-lg bg-surface-container-lowest border-transparent text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none">
             </div>

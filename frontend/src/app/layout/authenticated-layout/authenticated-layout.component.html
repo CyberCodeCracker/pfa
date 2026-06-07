@@ -42,9 +42,13 @@
         <span class="font-semibold text-sm">Calendrier</span>
       </a>
       <a routerLink="/messagerie" routerLinkActive="bg-primary-fixed text-on-primary-fixed font-bold"
-         class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center gap-3 px-4 py-3 transition-all duration-200">
+         class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center gap-3 px-4 py-3 transition-all duration-200 relative">
         <span class="material-symbols-outlined">chat_bubble_outline</span>
         <span class="font-semibold text-sm">Messagerie</span>
+        <span *ngIf="(chatUnread$ | async)! > 0"
+              class="ml-auto bg-error text-on-error text-[10px] font-bold rounded-full min-w-[20px] h-5 px-1.5 flex items-center justify-center">
+          {{ chatUnread$ | async }}
+        </span>
       </a>
     </nav>
 
@@ -61,9 +65,13 @@
         <span class="font-semibold text-sm">Calendrier</span>
       </a>
       <a routerLink="/messagerie" routerLinkActive="bg-primary-fixed text-on-primary-fixed font-bold"
-         class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center gap-3 px-4 py-3 transition-all duration-200">
+         class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center gap-3 px-4 py-3 transition-all duration-200 relative">
         <span class="material-symbols-outlined">chat_bubble_outline</span>
         <span class="font-semibold text-sm">Messagerie</span>
+        <span *ngIf="(chatUnread$ | async)! > 0"
+              class="ml-auto bg-error text-on-error text-[10px] font-bold rounded-full min-w-[20px] h-5 px-1.5 flex items-center justify-center">
+          {{ chatUnread$ | async }}
+        </span>
       </a>
     </nav>
 
@@ -73,9 +81,9 @@
          class="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center gap-3 px-4 py-3 transition-all duration-200 relative">
         <span class="material-symbols-outlined">notifications</span>
         <span class="font-semibold text-sm">Notifications</span>
-        <span *ngIf="unreadNotifCount > 0"
+        <span *ngIf="(unreadNotifCount$ | async)! > 0"
               class="ml-auto bg-error text-on-error text-[10px] font-bold rounded-full min-w-[20px] h-5 px-1.5 flex items-center justify-center">
-          {{ unreadNotifCount }}
+          {{ unreadNotifCount$ | async }}
         </span>
       </a>
       <button (click)="logout()"
@@ -134,7 +142,7 @@
       <div class="flex items-center gap-5">
         <a routerLink="/notifications" class="relative p-2.5 bg-surface-container rounded-full text-on-surface-variant hover:bg-surface-container-high cursor-pointer transition-colors">
           <span class="material-symbols-outlined" style="font-size:20px;">notifications</span>
-          <span *ngIf="unreadNotifCount > 0" class="absolute top-2 right-2 w-2.5 h-2.5 bg-error border-2 border-surface rounded-full"></span>
+          <span *ngIf="(unreadNotifCount$ | async)! > 0" class="absolute top-2 right-2 w-2.5 h-2.5 bg-error border-2 border-surface rounded-full"></span>
         </a>
         <div class="flex items-center gap-3 p-1.5 pr-4 bg-surface-container rounded-full border border-outline-variant/20">
           <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold shadow-sm">

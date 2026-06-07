@@ -15,6 +15,7 @@ import { User } from '../../../core/models/user.model';
 })
 export class StageFeedbackComponent implements OnInit, OnDestroy {
   @Input() stageId!: number;
+  @Input() isArchived = false;
 
   feedbacks: Feedback[] = [];
   students: User[] = [];
@@ -36,7 +37,7 @@ export class StageFeedbackComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.form = this.fb.group({
       etudiant_id: [null, Validators.required],
-      contenu:     ['', [Validators.required, Validators.minLength(10)]],
+      contenu:     ['', [Validators.required, Validators.minLength(20), Validators.maxLength(3000)]],
       note:        [null],
     });
 

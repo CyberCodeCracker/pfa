@@ -16,14 +16,17 @@ class Reunion extends Model
         'duration_minutes',
         'meet_url',
         'statut',
+        'compte_rendu',
+        'terminated_at',
     ];
 
     protected function casts(): array
     {
         return [
-            'scheduled_at'     => 'datetime',
+            'scheduled_at'   => 'datetime',
+            'terminated_at'  => 'datetime',
             'duration_minutes' => 'integer',
-            'statut'           => ReunionStatut::class,
+            'statut'         => ReunionStatut::class,
         ];
     }
 

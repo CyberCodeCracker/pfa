@@ -17,7 +17,7 @@ export class TeacherDashboardComponent implements OnInit, OnDestroy {
   user$ = this.store.select(selectCurrentUser);
   recentStages: Stage[] = [];
   stagesActifs = 0;
-  stagesBrouillon = 0;
+  stagesTermines = 0;
   totalEtudiants = 0;
   loading = true;
   filter: FilterState = { annee: '', semestre: '', etablissementId: null };
@@ -68,9 +68,9 @@ export class TeacherDashboardComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({ next: res => { this.stagesActifs = res.meta.total; } });
 
-    this.stageApi.list({ 'filter[statut]': 'brouillon', per_page: 1, ...this.sessionFilters() })
+    this.stageApi.list({ 'filter[statut]': 'terminé', per_page: 1, ...this.sessionFilters() })
       .pipe(takeUntil(this.destroy$))
-      .subscribe({ next: res => { this.stagesBrouillon = res.meta.total; } });
+      .subscribe({ next: res => { this.stagesTermines = res.meta.total; } });
   }
 
   goToStage(id: number): void {

@@ -27,7 +27,7 @@ class FeedbackController extends Controller
 
         $validated = $request->validate([
             'etudiant_id'  => ['required', 'integer', 'exists:users,id'],
-            'contenu'      => ['required', 'string'],
+            'contenu'      => ['required', 'string', 'min:20', 'max:3000'],
             'note'         => ['nullable', 'numeric', 'min:0', 'max:20'],
             'document_id'  => ['nullable', 'integer', 'exists:documents,id'],
         ]);

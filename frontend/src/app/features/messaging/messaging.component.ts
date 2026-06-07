@@ -74,6 +74,7 @@ export class MessagingComponent implements OnInit, OnDestroy, AfterViewChecked {
         next: res => {
           this.chats = res.data;
           this.loadingChats = false;
+          this.refreshUnreadTotal();
         },
         error: () => { this.loadingChats = false; },
       });
@@ -100,16 +101,37 @@ export class MessagingComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.activeChatChannelName = `chat.${chat.id}`;
     this.loadMessages(chat.id);
     this.subscribeToPrivateChannel(chat.id);
+    this.markChatRead(chat);
+  }
+
+  private markChatRead(chat: PrivateChat): void {
+    if (!chat.unread_count) return;
+    this.chatApi.markPrivateChatRead(chat.id).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        chat.unread_count = 0;
+        this.refreshUnreadTotal();
+      },
+    });
+  }
+
+  private refreshUnreadTotal(): void {
+    this.chatApi.getUnreadPrivateCount().pipe(takeUntil(this.destroy$)).subscribe();
   }
 
   private subscribeToPrivateChannel(chatId: number): void {
     const channel = this.echo.privateChannel(`chat.${chatId}`);
     if (!channel) return;
-    (channel as any).listen('.MessagePosted', (event: { message: Message }) => {
-      if (event.message.sender?.id !== this.currentUser?.id &&
-          !this.messages.find(m => m.id === event.message.id)) {
-        this.messages = [...this.messages, event.message];
+    (channel as any).listen('.MessagePosted', (event: Message) => {
+      if (event.sender?.id !== this.currentUser?.id &&
+          !this.messages.find(m => m.id === event.id)) {
+        this.messages = [...this.messages, event];
         this.shouldScrollToBottom = true;
+        // The user is actively viewing this chat — immediately mark the new message read
+        if (this.activeChat?.id === chatId) {
+          this.chatApi.markPrivateChatRead(chatId).pipe(takeUntil(this.destroy$)).subscribe({
+            next: () => this.refreshUnreadTotal(),
+          });
+        }
       }
     });
   }

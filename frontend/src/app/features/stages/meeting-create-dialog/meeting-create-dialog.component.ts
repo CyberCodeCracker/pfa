@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Subject, takeUntil } from 'rxjs';
 import { ReunionApiService } from '../../../core/services/reunion-api.service';
@@ -35,6 +35,13 @@ export class MeetingCreateDialogComponent implements OnInit, OnDestroy {
     @Inject(MAT_DIALOG_DATA) public data: MeetingDialogData,
   ) {}
 
+  private futureDateValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      if (!control.value) return null;
+      return new Date(control.value) <= new Date() ? { pastDate: true } : null;
+    };
+  }
+
   ngOnInit(): void {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -43,7 +50,7 @@ export class MeetingCreateDialogComponent implements OnInit, OnDestroy {
     this.form = this.fb.group({
       sujet:            ['', [Validators.required, Validators.maxLength(200)]],
       description:      [''],
-      scheduled_at:     [tomorrow.toISOString().slice(0, 16), Validators.required],
+      scheduled_at:     [tomorrow.toISOString().slice(0, 16), [Validators.required, this.futureDateValidator()]],
       duration_minutes: [60, [Validators.required, Validators.min(15), Validators.max(480)]],
       meet_url:         [''],
     });
@@ -103,11 +110,24 @@ export class MeetingCreateDialogComponent implements OnInit, OnDestroy {
         this.dialogRef.close(res.data);
       },
       error: err => {
-        this.error = err.error?.message ?? 'Erreur lors de la création.';
-        this.toast.error(this.error!);
+        const raw: string = err.error?.message ?? '';
+        this.error = this.friendlyError(raw, err.error?.errors);
+        this.toast.error(this.error);
         this.loading = false;
       },
     });
+  }
+
+  private friendlyError(message: string, errors?: Record<string, string[]>): string {
+    // Map Laravel's raw validation keys to readable French messages
+    const fieldErrors = errors?.['scheduled_at'];
+    if (fieldErrors?.some(e => e.includes('after') || e.includes('validation.after'))) {
+      return 'La date et l\'heure de la réunion doivent être dans le futur.';
+    }
+    if (message.toLowerCase().includes('after') || message === 'validation.after') {
+      return 'La date et l\'heure de la réunion doivent être dans le futur.';
+    }
+    return message || 'Erreur lors de la création.';
   }
 
   cancel(): void {

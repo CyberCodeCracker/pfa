@@ -18,5 +18,6 @@ export interface PrivateChat {
   id: number;
   enseignant?: User;
   etudiant?: User;
+  unread_count?: number;
   created_at: string;
 }

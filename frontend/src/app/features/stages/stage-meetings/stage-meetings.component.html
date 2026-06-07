@@ -4,7 +4,7 @@
       Réunions
       <span class="px-2 py-0.5 bg-surface-container-high rounded text-xs font-bold text-on-surface-variant">{{ reunions.length }}</span>
     </h3>
-    <button *ngIf="isEnseignant" (click)="openCreate()"
+    <button *ngIf="isEnseignant && !isArchived" (click)="openCreate()"
             class="bg-primary text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all flex items-center gap-2">
       <span class="material-symbols-outlined" style="font-size:18px;">add</span>
       Créer une réunion
@@ -22,38 +22,128 @@
   </div>
 
   <div *ngIf="!loading && reunions.length > 0" class="space-y-3">
-    <div *ngFor="let r of reunions" class="bg-surface-container-low rounded-xl p-4 flex items-start gap-4">
-      <div class="flex-shrink-0 w-14 text-center bg-surface-container-lowest rounded-xl py-2">
-        <div class="text-[10px] font-bold text-on-surface-variant uppercase">{{ r.scheduled_at | date:'MMM' }}</div>
-        <div class="font-headline text-xl font-extrabold text-primary leading-none mt-0.5">{{ r.scheduled_at | date:'dd' }}</div>
-      </div>
-      <div class="flex-1 min-w-0">
-        <div class="flex items-start justify-between gap-2 mb-1">
-          <h4 class="font-headline font-bold text-on-surface text-sm">{{ r.sujet }}</h4>
-          <span class="text-[10px] font-bold uppercase tracking-tighter rounded-full px-3 py-1"
-                [class.bg-tertiary-container]="r.statut === 'planifiée'"
-                [class.text-on-tertiary-container]="r.statut === 'planifiée'"
-                [class.bg-surface-container]="r.statut !== 'planifiée'"
-                [class.text-on-surface-variant]="r.statut !== 'planifiée'">
-            {{ r.statut }}
-          </span>
+    <div *ngFor="let r of reunions"
+         class="bg-surface-container-low rounded-xl border border-outline-variant/10 overflow-hidden"
+         [class.opacity-60]="r.statut === 'annulée'">
+
+      <!-- Main row -->
+      <div class="p-4 flex items-start gap-4">
+
+        <!-- Date block -->
+        <div class="flex-shrink-0 w-14 text-center rounded-xl py-2"
+             [class.bg-surface-container-lowest]="r.statut === 'planifiée'"
+             [class.bg-primary-container]="r.statut === 'terminée'"
+             [class.bg-error-container]="r.statut === 'annulée'">
+          <div class="text-[10px] font-bold uppercase"
+               [class.text-on-surface-variant]="r.statut === 'planifiée'"
+               [class.text-on-primary-container]="r.statut === 'terminée'"
+               [class.text-on-error-container]="r.statut === 'annulée'">
+            {{ r.scheduled_at | date:'MMM' }}
+          </div>
+          <div class="font-headline text-xl font-extrabold leading-none mt-0.5"
+               [class.text-primary]="r.statut === 'planifiée'"
+               [class.text-on-primary-container]="r.statut === 'terminée'"
+               [class.text-on-error-container]="r.statut === 'annulée'">
+            {{ r.scheduled_at | date:'dd' }}
+          </div>
         </div>
-        <p class="text-xs text-on-surface-variant flex items-center gap-2">
-          <span class="material-symbols-outlined" style="font-size:14px;">schedule</span>
-          {{ r.scheduled_at | date:'HH:mm' }} · {{ formatDuration(r.duration_minutes) }}
-        </p>
-        <div class="flex items-center gap-2 mt-2">
-          <a *ngIf="r.meet_url" [href]="r.meet_url" target="_blank"
-             class="inline-flex items-center gap-1 text-xs bg-tertiary-container text-on-tertiary-container font-bold rounded-lg px-3 py-1 hover:opacity-90">
-            <span class="material-symbols-outlined" style="font-size:14px;">videocam</span>
-            Rejoindre Meet
-          </a>
-          <button *ngIf="isEnseignant && r.statut === 'planifiée'" (click)="annuler(r)"
-                  class="text-xs text-on-surface-variant hover:text-error font-bold px-2 py-1 hover:bg-error-container/30 rounded-lg transition-colors">
+
+        <!-- Content -->
+        <div class="flex-1 min-w-0">
+          <div class="flex items-start justify-between gap-2 mb-1">
+            <h4 class="font-headline font-bold text-on-surface text-sm">{{ r.sujet }}</h4>
+            <span class="text-[10px] font-bold uppercase tracking-tighter rounded-full px-3 py-1 flex-shrink-0"
+                  [class.bg-tertiary-container]="r.statut === 'planifiée'"
+                  [class.text-on-tertiary-container]="r.statut === 'planifiée'"
+                  [class.bg-primary-container]="r.statut === 'terminée'"
+                  [class.text-on-primary-container]="r.statut === 'terminée'"
+                  [class.bg-error-container]="r.statut === 'annulée'"
+                  [class.text-on-error-container]="r.statut === 'annulée'">
+              {{ r.statut }}
+            </span>
+          </div>
+
+          <p class="text-xs text-on-surface-variant flex items-center gap-2">
+            <span class="material-symbols-outlined" style="font-size:14px;">schedule</span>
+            {{ r.scheduled_at | date:'HH:mm' }} · {{ formatDuration(r.duration_minutes) }}
+          </p>
+
+          <!-- Actions -->
+          <div *ngIf="isEnseignant && !isArchived" class="flex items-center gap-2 mt-2 flex-wrap">
+            <a *ngIf="r.meet_url" [href]="r.meet_url" target="_blank"
+               class="inline-flex items-center gap-1 text-xs bg-tertiary-container text-on-tertiary-container font-bold rounded-lg px-3 py-1.5 hover:opacity-90 transition-all">
+              <span class="material-symbols-outlined" style="font-size:14px;">videocam</span>
+              Rejoindre Meet
+            </a>
+
+            <button *ngIf="r.statut === 'planifiée'" (click)="openTerminerForm(r)"
+                    class="inline-flex items-center gap-1.5 text-xs bg-primary text-white font-bold rounded-lg px-3 py-1.5 hover:opacity-90 active:scale-95 transition-all">
+              <span class="material-symbols-outlined" style="font-size:14px;">task_alt</span>
+              Terminer
+            </button>
+
+            <button *ngIf="r.statut === 'planifiée'" (click)="annuler(r)"
+                    class="inline-flex items-center gap-1.5 text-xs text-error font-bold px-3 py-1.5 hover:bg-error-container/40 rounded-lg transition-colors">
+              <span class="material-symbols-outlined" style="font-size:14px;">cancel</span>
+              Annuler
+            </button>
+          </div>
+
+          <!-- Student: just the meet link -->
+          <div *ngIf="!isEnseignant && r.meet_url" class="mt-2">
+            <a [href]="r.meet_url" target="_blank"
+               class="inline-flex items-center gap-1 text-xs bg-tertiary-container text-on-tertiary-container font-bold rounded-lg px-3 py-1 hover:opacity-90">
+              <span class="material-symbols-outlined" style="font-size:14px;">videocam</span>
+              Rejoindre Meet
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Terminer inline form -->
+      <div *ngIf="isEnseignant && terminerFormId === r.id"
+           class="border-t border-outline-variant/20 bg-primary-container/20 p-4 space-y-3">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="material-symbols-outlined text-primary" style="font-size:18px;">rate_review</span>
+          <span class="text-xs font-extrabold text-primary uppercase tracking-widest">Compte-rendu de la réunion</span>
+        </div>
+        <textarea [(ngModel)]="compteRenduDraft" rows="4"
+                  placeholder="Résumez ce qui a été discuté, les décisions prises, les points d'action…"
+                  class="w-full px-3 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/20 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none resize-none"></textarea>
+        <p class="text-[11px] text-on-surface-variant">Le compte-rendu est optionnel mais recommandé pour garder une trace des échanges.</p>
+        <div class="flex gap-2 justify-end">
+          <button (click)="cancelTerminer()"
+                  class="px-4 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface text-sm font-bold transition-all active:scale-95">
             Annuler
+          </button>
+          <button (click)="submitTerminer(r)" [disabled]="saving"
+                  class="px-4 py-2 rounded-xl bg-primary text-white text-sm font-bold shadow-sm hover:shadow-md disabled:opacity-50 active:scale-95 transition-all flex items-center gap-2">
+            <span *ngIf="saving" class="material-symbols-outlined animate-spin" style="font-size:16px;">progress_activity</span>
+            Marquer comme terminée
           </button>
         </div>
       </div>
+
+      <!-- Compte-rendu display (once saved) -->
+      <div *ngIf="r.statut === 'terminée' && r.compte_rendu"
+           class="border-t border-primary-container/40 bg-primary-container/10 px-4 py-3">
+        <div class="flex items-center gap-2 mb-1.5">
+          <span class="material-symbols-outlined text-primary" style="font-size:15px;">rate_review</span>
+          <span class="text-[10px] font-extrabold text-primary uppercase tracking-widest">Compte-rendu</span>
+          <span *ngIf="r.terminated_at" class="text-[10px] text-on-surface-variant ml-auto">
+            {{ r.terminated_at | date:'dd/MM/yyyy' }}
+          </span>
+        </div>
+        <p class="text-sm text-on-surface leading-relaxed whitespace-pre-line">{{ r.compte_rendu }}</p>
+      </div>
+
+      <!-- Terminated with no compte-rendu -->
+      <div *ngIf="r.statut === 'terminée' && !r.compte_rendu"
+           class="border-t border-outline-variant/10 px-4 py-2 flex items-center gap-1.5 text-on-surface-variant">
+        <span class="material-symbols-outlined" style="font-size:14px;">info</span>
+        <span class="text-xs italic">Aucun compte-rendu enregistré.</span>
+      </div>
+
     </div>
   </div>
 </div>

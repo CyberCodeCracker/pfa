@@ -1,0 +1,372 @@
+@startuml ScholarFlow_ClassDiagram
+
+skinparam classAttributeIconSize 0
+skinparam classFontStyle bold
+skinparam classBackgroundColor #FAFAFA
+skinparam classBorderColor #555
+skinparam arrowColor #333
+skinparam linetype ortho
+skinparam packageBackgroundColor #F0F4FF
+skinparam packageBorderColor #6677BB
+skinparam shadowing false
+skinparam class {
+  HeaderBackgroundColor #4F5BD5
+  HeaderFontColor #FFFFFF
+  BorderColor #4F5BD5
+}
+
+' ─────────────────────────────────────────────
+'  ENUMERATIONS
+' ─────────────────────────────────────────────
+
+enum Role {
+  enseignant
+  etudiant
+}
+
+enum StageStatut {
+  actif
+  suspendu
+  terminé
+}
+
+enum PaceIndicator {
+  ahead
+  on_track
+  behind
+  at_risk
+}
+
+enum Semestre {
+  ete
+  pfe
+  pfa
+}
+
+enum AffectationStatut {
+  invité
+  actif
+  retiré
+}
+
+enum DocumentStatut {
+  en_attente
+  validé
+  refusé
+}
+
+enum MilestoneStatut {
+  pending
+  in_progress
+  completed
+  validated
+}
+
+enum ReunionStatut {
+  planifiée
+  terminée
+  annulée
+}
+
+enum ParticipantStatut {
+  invité
+  accepté
+  décliné
+  présent
+  absent
+}
+
+enum ChatType {
+  public
+  private
+}
+
+' ─────────────────────────────────────────────
+'  CORE ENTITIES
+' ─────────────────────────────────────────────
+
+class User {
+  + id : int <<PK>>
+  + nom : string
+  + prenom : string
+  + email : string <<unique>>
+  + password : string <<hashed>>
+  + role : Role
+  + must_change_password : boolean
+  + last_login_at : datetime
+  + email_verified_at : datetime
+  + deleted_at : datetime
+  + created_at : datetime
+  + updated_at : datetime
+  --
+  + isEnseignant() : bool
+  + isEtudiant() : bool
+  + getFullNameAttribute() : string
+}
+
+class EnseignantProfile {
+  + user_id : int <<PK, FK>>
+  + grade : string
+  + specialite : string
+}
+
+class EtudiantProfile {
+  + user_id : int <<PK, FK>>
+  + niveau : string
+  + specialite : string
+  + groupe : string
+  + etablissement_id : int <<FK>>
+}
+
+class Etablissement {
+  + id : int <<PK>>
+  + nom : string
+  + code : string
+  + ville : string
+  + created_at : datetime
+  + updated_at : datetime
+}
+
+' ─────────────────────────────────────────────
+'  STAGE & RELATED
+' ─────────────────────────────────────────────
+
+class Stage {
+  + id : int <<PK>>
+  + enseignant_id : int <<FK>>
+  + etablissement_id : int <<FK>>
+  + titre : string
+  + description : text
+  + date_debut : date
+  + date_fin : date
+  + statut : StageStatut
+  + pace_indicator : PaceIndicator
+  + niveau : string
+  + annee_academique : string
+  + semestre : Semestre
+  + deleted_at : datetime
+  + created_at : datetime
+  + updated_at : datetime
+}
+
+class Affectation {
+  + id : int <<PK>>
+  + stage_id : int <<FK>>
+  + etudiant_id : int <<FK>>
+  + statut : AffectationStatut
+  + date_affectation : date
+  + invitation_token : string
+  + invitation_sent_at : datetime
+  + invitation_accepted_at : datetime
+  + created_at : datetime
+  + updated_at : datetime
+}
+
+class Milestone {
+  + id : int <<PK>>
+  + stage_id : int <<FK>>
+  + titre : string
+  + description : text
+  + ordre : int
+  + statut : MilestoneStatut
+  + completed_at : datetime
+  + validated_at : datetime
+  + created_at : datetime
+  + updated_at : datetime
+}
+
+class Document {
+  + id : int <<PK>>
+  + stage_id : int <<FK>>
+  + uploader_id : int <<FK>>
+  + parent_document_id : int <<FK, nullable>>
+  + nom : string
+  + fichier : string
+  + mime : string
+  + taille : int
+  + version : int
+  + statut : DocumentStatut
+  + commentaire : text
+  + is_report : boolean
+  + teacher_comment : text
+  + teacher_note : text
+  + date_upload : datetime
+  + deleted_at : datetime
+  + created_at : datetime
+  + updated_at : datetime
+}
+
+class Feedback {
+  + id : int <<PK>>
+  + stage_id : int <<FK>>
+  + enseignant_id : int <<FK>>
+  + etudiant_id : int <<FK>>
+  + document_id : int <<FK, nullable>>
+  + contenu : text
+  + note : decimal(4,2)
+  + created_at : datetime
+}
+
+' ─────────────────────────────────────────────
+'  RÉUNIONS
+' ─────────────────────────────────────────────
+
+class Reunion {
+  + id : int <<PK>>
+  + stage_id : int <<FK>>
+  + enseignant_id : int <<FK>>
+  + sujet : string
+  + description : text
+  + scheduled_at : datetime
+  + duration_minutes : int
+  + meet_url : string
+  + statut : ReunionStatut
+  + compte_rendu : text
+  + terminated_at : datetime
+  + created_at : datetime
+  + updated_at : datetime
+}
+
+class ReunionParticipant <<pivot>> {
+  + reunion_id : int <<FK>>
+  + user_id : int <<FK>>
+  + statut : ParticipantStatut
+}
+
+' ─────────────────────────────────────────────
+'  MESSAGERIE
+' ─────────────────────────────────────────────
+
+class PublicChat {
+  + id : int <<PK>>
+  + stage_id : int <<FK, unique>>
+  + created_at : datetime
+}
+
+class PrivateChat {
+  + id : int <<PK>>
+  + enseignant_id : int <<FK>>
+  + etudiant_id : int <<FK>>
+  + created_at : datetime
+}
+
+class Message {
+  + id : int <<PK>>
+  + chat_type : ChatType
+  + chat_id : int
+  + sender_id : int <<FK>>
+  + contenu : text
+  + attachment_path : string
+  + attachment_mime : string
+  + edited_at : datetime
+  + created_at : datetime
+}
+
+class MessageRead {
+  + message_id : int <<FK>>
+  + user_id : int <<FK>>
+  + read_at : datetime
+}
+
+' ─────────────────────────────────────────────
+'  PIVOT TABLE (enseignant ↔ établissement)
+' ─────────────────────────────────────────────
+
+class EnseignantEtablissement <<pivot>> {
+  + enseignant_id : int <<FK>>
+  + etablissement_id : int <<FK>>
+}
+
+' ─────────────────────────────────────────────
+'  ENUM USAGES
+' ─────────────────────────────────────────────
+
+User ..> Role : role
+Stage ..> StageStatut : statut
+Stage ..> PaceIndicator : pace_indicator
+Stage ..> Semestre : semestre
+Affectation ..> AffectationStatut : statut
+Document ..> DocumentStatut : statut
+Milestone ..> MilestoneStatut : statut
+Reunion ..> ReunionStatut : statut
+ReunionParticipant ..> ParticipantStatut : statut
+Message ..> ChatType : chat_type
+
+' ─────────────────────────────────────────────
+'  RELATIONSHIPS
+' ─────────────────────────────────────────────
+
+' User ↔ Profiles (1-to-1)
+User "1" *-- "0..1" EnseignantProfile : has
+User "1" *-- "0..1" EtudiantProfile : has
+
+' EnseignantProfile ↔ Etablissement (many-to-many)
+EnseignantProfile "0..*" -- "0..*" Etablissement
+(EnseignantProfile, Etablissement) .. EnseignantEtablissement
+
+' EtudiantProfile ↔ Etablissement
+EtudiantProfile "0..*" --> "1" Etablissement : belongs to
+
+' User (enseignant) → Stage (1-to-many)
+User "1" o-- "0..*" Stage : teaches >
+
+' Stage ↔ Etablissement
+Stage "0..*" --> "1" Etablissement : belongs to
+
+' Stage ↔ Affectation ↔ User (etudiant)  (many-to-many via Affectation)
+Stage "1" *-- "0..*" Affectation : has
+Affectation "0..*" --> "1" User : etudiant
+
+' Stage → Milestone (1-to-many)
+Stage "1" *-- "0..*" Milestone : has
+
+' Stage → Document (1-to-many)
+Stage "1" *-- "0..*" Document : has
+
+' Document → Document (self-referential versioning)
+Document "0..*" --> "0..1" Document : parent version
+
+' Document → Uploader
+Document "0..*" --> "1" User : uploaded by
+
+' Stage → Feedback (1-to-many)
+Stage "1" *-- "0..*" Feedback : has
+
+' Feedback → Users
+Feedback "0..*" --> "1" User : enseignant
+Feedback "0..*" --> "1" User : etudiant
+
+' Feedback → Document (optional)
+Feedback "0..*" --> "0..1" Document : references
+
+' Stage → Reunion (1-to-many)
+Stage "1" *-- "0..*" Reunion : has
+
+' Reunion → enseignant
+Reunion "0..*" --> "1" User : created by
+
+' Reunion ↔ User participants (many-to-many via pivot)
+Reunion "0..*" -- "0..*" User : participants
+(Reunion, User) .. ReunionParticipant
+
+' Stage → PublicChat (1-to-1)
+Stage "1" *-- "1" PublicChat : has
+
+' PrivateChat ↔ Users
+PrivateChat "0..*" --> "1" User : enseignant
+PrivateChat "0..*" --> "1" User : etudiant
+
+' PublicChat / PrivateChat → Messages (polymorphic via chat_type + chat_id)
+PublicChat "1" o-- "0..*" Message : chat_type=public
+PrivateChat "1" o-- "0..*" Message : chat_type=private
+
+' Message → sender
+Message "0..*" --> "1" User : sent by
+
+' Message → MessageRead
+Message "1" *-- "0..*" MessageRead : read receipts
+
+' MessageRead → User
+MessageRead "0..*" --> "1" User : read by
+
+@enduml

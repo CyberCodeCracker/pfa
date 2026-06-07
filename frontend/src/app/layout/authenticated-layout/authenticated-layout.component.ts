@@ -8,6 +8,7 @@ import { selectCurrentUser } from '../../store/auth/auth.selectors';
 import { User } from '../../core/models/user.model';
 import { Etablissement } from '../../core/models/etablissement.model';
 import { NotificationApiService } from '../../core/services/notification-api.service';
+import { ChatApiService } from '../../core/services/chat-api.service';
 import { EchoService } from '../../core/realtime/echo.service';
 
 @Component({
@@ -18,7 +19,8 @@ import { EchoService } from '../../core/realtime/echo.service';
 export class AuthenticatedLayoutComponent implements OnInit, OnDestroy {
   user$!: Observable<User | null>;
   sidenavOpen = true;
-  unreadNotifCount = 0;
+  unreadNotifCount$ = this.notifApi.unreadCount$;
+  chatUnread$ = this.chatApi.unreadPrivate$;
 
   filterAnnee = '';
   filterSemestre = '';
@@ -31,6 +33,7 @@ export class AuthenticatedLayoutComponent implements OnInit, OnDestroy {
   constructor(
     private store: Store,
     private notifApi: NotificationApiService,
+    private chatApi: ChatApiService,
     private echo: EchoService,
   ) {}
 
@@ -38,6 +41,7 @@ export class AuthenticatedLayoutComponent implements OnInit, OnDestroy {
     this.user$ = this.store.select(selectCurrentUser);
     this.echo.connect();
     this.pollNotifications();
+    this.pollChatUnread();
     this.subscribeToRealtimeNotifications();
     this.annees = this.buildAnnees();
 
@@ -77,7 +81,7 @@ export class AuthenticatedLayoutComponent implements OnInit, OnDestroy {
       const channel = this.echo.privateChannel(`App.Models.User.${user.id}`);
       if (!channel) return;
       (channel as any).notification(() => {
-        this.unreadNotifCount += 1;
+        this.notifApi.incrementUnread();
       });
     });
   }
@@ -89,9 +93,17 @@ export class AuthenticatedLayoutComponent implements OnInit, OnDestroy {
       takeUntil(this.destroy$),
     ).subscribe({
       next: res => {
-        this.unreadNotifCount = res.data.filter(n => !n.read_at).length;
+        this.notifApi.setUnreadCount(res.data.filter(n => !n.read_at).length);
       },
     });
+  }
+
+  private pollChatUnread(): void {
+    interval(30000).pipe(
+      startWith(0),
+      switchMap(() => this.chatApi.getUnreadPrivateCount()),
+      takeUntil(this.destroy$),
+    ).subscribe();
   }
 
   logout(): void {

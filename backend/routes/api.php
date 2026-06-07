@@ -71,6 +71,7 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
         Route::get('/reunions',                                            [ReunionController::class, 'index']);
         Route::post('/stages/{stage}/reunions',                            [ReunionController::class, 'store']);
         Route::patch('/reunions/{reunion}',                                [ReunionController::class, 'update']);
+        Route::post('/reunions/{reunion}/terminer',                        [ReunionController::class, 'terminer']);
         Route::post('/reunions/{reunion}/annuler',                         [ReunionController::class, 'annuler']);
         Route::post('/reunions/{reunion}/participants/{user}/reponse',     [ReunionController::class, 'repondre']);
 
@@ -80,9 +81,11 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
 
         // Chat privé
         Route::get('/chats/private',                              [ChatController::class, 'privateConversations']);
+        Route::get('/chats/private/unread-count',                 [ChatController::class, 'unreadPrivateCount']);
         Route::post('/chats/private',                             [ChatController::class, 'startOrGetPrivateChat']);
         Route::get('/chats/private/{privateChat}/messages',       [ChatController::class, 'privateMessages']);
         Route::post('/chats/private/{privateChat}/messages',      [ChatController::class, 'sendPrivateMessage']);
+        Route::post('/chats/private/{privateChat}/read',          [ChatController::class, 'markPrivateChatRead']);
 
         // Messages
         Route::post('/messages/{message}/read', [ChatController::class, 'markRead']);

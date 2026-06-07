@@ -51,7 +51,7 @@ class DocumentController extends Controller
             abort(403, 'Lien de téléchargement invalide ou expiré.');
         }
 
-        return response()->download(storage_path('app/' . $document->fichier), $document->nom);
+        return response()->download(\Storage::disk('local')->path($document->fichier), $document->nom);
     }
 
     public function destroy(Request $request, Document $document): JsonResponse

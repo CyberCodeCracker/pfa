@@ -13,6 +13,7 @@ import { ToastService } from '../../../shared/toast/toast.service';
 })
 export class StageDocumentsComponent implements OnInit, OnDestroy {
   @Input() stageId!: number;
+  @Input() isArchived = false;
 
   documents: Document[] = [];
   loading = false;
@@ -23,8 +24,9 @@ export class StageDocumentsComponent implements OnInit, OnDestroy {
   refusComment: Record<number, string> = {};
   confirmRefuseId: number | null = null;
 
-  // Report upload flag (student-only checkbox)
-  uploadAsReport = false;
+  // Pending file awaiting report-or-not confirmation (student-only modal)
+  pendingFile: File | null = null;
+  showReportModal = false;
 
   // Inline annotate UI state (teacher-only)
   annotateId: number | null = null;
@@ -64,19 +66,35 @@ export class StageDocumentsComponent implements OnInit, OnDestroy {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
-    this.upload(file);
     input.value = '';
+    if (this.isEnseignant) {
+      this.upload(file, false);
+    } else {
+      this.pendingFile = file;
+      this.showReportModal = true;
+    }
   }
 
-  private upload(file: File): void {
+  confirmUpload(isReport: boolean): void {
+    if (!this.pendingFile) return;
+    const file = this.pendingFile;
+    this.pendingFile = null;
+    this.showReportModal = false;
+    this.upload(file, isReport);
+  }
+
+  cancelUpload(): void {
+    this.pendingFile = null;
+    this.showReportModal = false;
+  }
+
+  private upload(file: File, isReport: boolean): void {
     this.uploading = true;
     this.uploadError = null;
-    const isReport = !this.isEnseignant && this.uploadAsReport;
     this.docApi.upload(this.stageId, file, { isReport }).pipe(takeUntil(this.destroy$)).subscribe({
       next: res => {
         this.documents = [res.data, ...this.documents];
         this.uploading = false;
-        this.uploadAsReport = false;
         this.toast.success(isReport ? 'Rapport déposé.' : 'Document déposé.');
       },
       error: err => {

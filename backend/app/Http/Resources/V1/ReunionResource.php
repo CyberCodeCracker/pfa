@@ -17,6 +17,8 @@ class ReunionResource extends JsonResource
             'duration_minutes' => $this->duration_minutes,
             'meet_url'         => $this->meet_url,
             'statut'           => $this->statut?->value,
+            'compte_rendu'     => $this->compte_rendu,
+            'terminated_at'    => $this->terminated_at,
             'created_at'       => $this->created_at,
             'stage'            => new StageResource($this->whenLoaded('stage')),
             'enseignant'       => new UserResource($this->whenLoaded('enseignant')),

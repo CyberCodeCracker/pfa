@@ -40,7 +40,7 @@ class ReunionController extends Controller
             });
         }
 
-        $reunions = $query->with(['stage', 'enseignant', 'participants'])
+        $reunions = $query->with(['stage.etablissement', 'enseignant', 'participants'])
             ->orderBy('scheduled_at')
             ->paginate(50);
 
@@ -79,6 +79,27 @@ class ReunionController extends Controller
         ]);
 
         $reunion->update($validated);
+
+        return response()->json(['data' => new ReunionResource($reunion->fresh())]);
+    }
+
+    public function terminer(Request $request, Reunion $reunion): JsonResponse
+    {
+        $this->authorize('update', $reunion->stage);
+
+        $validated = $request->validate([
+            'compte_rendu' => ['nullable', 'string', 'max:5000'],
+        ]);
+
+        if ($reunion->statut?->value === 'annulée') {
+            return response()->json(['message' => 'Une réunion annulée ne peut pas être marquée comme terminée.'], 422);
+        }
+
+        $reunion->update([
+            'statut'        => \App\Support\Enums\ReunionStatut::Terminee,
+            'compte_rendu'  => $validated['compte_rendu'] ?? null,
+            'terminated_at' => now(),
+        ]);
 
         return response()->json(['data' => new ReunionResource($reunion->fresh())]);
     }

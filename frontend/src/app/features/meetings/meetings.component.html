@@ -4,7 +4,7 @@
 <div class="flex justify-between items-end mb-8">
   <div>
     <h1 class="font-headline text-3xl font-extrabold text-on-surface tracking-tight">Réunions</h1>
-    <p class="text-on-surface-variant mt-1">{{ upcoming.length }} réunion(s) à venir</p>
+    <p class="text-on-surface-variant mt-1">{{ upcomingCount }} réunion(s) à venir</p>
   </div>
 </div>
 
@@ -15,15 +15,16 @@
 
 <ng-container *ngIf="!loading">
 
-  <!-- Custom tabs -->
+  <!-- Tabs -->
   <div class="flex bg-surface-container-low p-1 rounded-full border border-outline-variant/20 w-fit mb-6">
     <button (click)="selectedTabIndex = 0"
             [class.bg-white]="selectedTabIndex === 0"
             [class.shadow-sm]="selectedTabIndex === 0"
             [class.text-primary]="selectedTabIndex === 0"
             [class.text-on-surface-variant]="selectedTabIndex !== 0"
-            class="px-5 py-2 rounded-full text-xs font-bold cursor-pointer transition-colors">
-      À venir ({{ upcoming.length }})
+            class="px-5 py-2 rounded-full text-xs font-bold cursor-pointer transition-colors flex items-center gap-1.5">
+      <span class="material-symbols-outlined" style="font-size:15px;">calendar_month</span>
+      Calendrier
     </button>
     <button (click)="selectedTabIndex = 1"
             [class.bg-white]="selectedTabIndex === 1"
@@ -35,59 +36,111 @@
     </button>
   </div>
 
-  <!-- À venir -->
-  <div *ngIf="selectedTabIndex === 0" class="space-y-4">
-    <div *ngIf="upcoming.length === 0" class="bg-surface-container-lowest border border-outline-variant/10 rounded-2xl p-16 text-center">
-      <span class="material-symbols-outlined text-outline" style="font-size:48px;">event_busy</span>
-      <p class="text-on-surface-variant mt-3">Aucune réunion planifiée.</p>
-    </div>
+  <!-- ── CALENDAR VIEW ── -->
+  <div *ngIf="selectedTabIndex === 0">
 
-    <div *ngFor="let r of upcoming"
-         class="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 shadow-sm p-6 flex items-start gap-5 hover:shadow-md hover:border-primary/30 transition-all">
-      <!-- Date block -->
-      <div class="flex-shrink-0 w-16 text-center bg-surface-container-low rounded-xl py-3">
-        <div class="text-[10px] font-bold text-on-surface-variant uppercase">{{ r.scheduled_at | date:'MMM' }}</div>
-        <div class="font-headline text-3xl font-extrabold text-primary leading-none mt-1">{{ r.scheduled_at | date:'dd' }}</div>
-        <div class="text-[10px] text-on-surface-variant mt-1">{{ r.scheduled_at | date:'yyyy' }}</div>
+    <!-- Month navigation -->
+    <div class="flex items-center justify-between mb-4 px-1">
+      <button (click)="prevMonth()"
+              class="w-9 h-9 flex items-center justify-center rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-primary transition-all active:scale-95">
+        <span class="material-symbols-outlined" style="font-size:20px;">chevron_left</span>
+      </button>
+
+      <div class="flex items-center gap-2">
+        <select (change)="setMonth(+$any($event.target).value)"
+                class="px-3 py-1.5 rounded-xl bg-surface-container border border-outline-variant/20 text-sm font-bold text-on-surface focus:ring-2 focus:ring-primary/20 focus:outline-none cursor-pointer">
+          <option *ngFor="let m of monthNames; let i = index" [value]="i" [selected]="i === selectedMonth">{{ m }}</option>
+        </select>
+        <select (change)="setYear(+$any($event.target).value)"
+                class="px-3 py-1.5 rounded-xl bg-surface-container border border-outline-variant/20 text-sm font-bold text-on-surface focus:ring-2 focus:ring-primary/20 focus:outline-none cursor-pointer">
+          <option *ngFor="let y of years" [value]="y" [selected]="y === selectedYear">{{ y }}</option>
+        </select>
+        <button (click)="goToToday()"
+                class="px-3 py-1.5 rounded-xl bg-primary-container text-on-primary-container text-xs font-bold hover:opacity-90 transition-all">
+          Aujourd'hui
+        </button>
       </div>
 
-      <div class="flex-1 min-w-0">
-        <div class="flex items-start justify-between gap-2 mb-2">
-          <h3 class="font-headline font-bold text-on-surface">{{ r.sujet }}</h3>
-          <span class="text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-tighter"
-                [class.bg-tertiary-container]="r.statut === 'planifiée'"
-                [class.text-on-tertiary-container]="r.statut === 'planifiée'"
-                [class.bg-surface-container]="r.statut !== 'planifiée'"
-                [class.text-on-surface-variant]="r.statut !== 'planifiée'">
-            {{ r.statut }}
-          </span>
-        </div>
+      <button (click)="nextMonth()"
+              class="w-9 h-9 flex items-center justify-center rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-primary transition-all active:scale-95">
+        <span class="material-symbols-outlined" style="font-size:20px;">chevron_right</span>
+      </button>
+    </div>
 
-        <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-on-surface-variant mb-3">
-          <span class="flex items-center gap-1.5">
-            <span class="material-symbols-outlined" style="font-size:14px;">schedule</span>
-            {{ r.scheduled_at | date:'HH:mm' }} · {{ formatDuration(r.duration_minutes) }}
-          </span>
-          <span *ngIf="r.stage" class="flex items-center gap-1.5">
-            <span class="material-symbols-outlined" style="font-size:14px;">work_outline</span>
-            {{ r.stage.titre }}
-          </span>
-          <span *ngIf="r.participants" class="flex items-center gap-1.5">
-            <span class="material-symbols-outlined" style="font-size:14px;">group</span>
-            {{ r.participants.length }} participant(s)
-          </span>
+    <!-- Legend (above grid) -->
+    <div class="flex flex-wrap items-center gap-4 mb-3 px-1">
+      <ng-container *ngIf="isEnseignant">
+        <div *ngFor="let entry of etabLegend" class="flex items-center gap-1.5 text-xs text-on-surface-variant">
+          <span class="w-3 h-3 rounded inline-block" [ngClass]="entry.classes.split(' ')[0]"></span>
+          {{ entry.nom }}
         </div>
-
-        <a *ngIf="r.meet_url" [href]="r.meet_url" target="_blank" rel="noopener"
-           class="inline-flex items-center gap-1.5 text-xs bg-tertiary-container text-on-tertiary-container font-bold rounded-lg px-3 py-1.5 hover:opacity-90 transition-all">
-          <span class="material-symbols-outlined" style="font-size:14px;">videocam</span>
-          Rejoindre Google Meet
-        </a>
+      </ng-container>
+      <div class="flex items-center gap-1.5 text-xs text-on-surface-variant">
+        <span class="w-3 h-3 rounded bg-surface-container inline-block"></span>
+        Passée
+      </div>
+      <div class="flex items-center gap-1.5 text-xs text-on-surface-variant">
+        <span class="w-3 h-3 rounded bg-error-container inline-block"></span>
+        Annulée
+      </div>
+      <div *ngIf="!isEnseignant" class="flex items-center gap-1.5 text-xs text-on-surface-variant">
+        <span class="w-3 h-3 rounded bg-tertiary-container inline-block"></span>
+        À venir
       </div>
     </div>
+
+    <!-- Calendar grid -->
+    <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 shadow-sm overflow-hidden">
+
+      <!-- Day-of-week headers -->
+      <div class="grid grid-cols-7 border-b border-outline-variant/20">
+        <div *ngFor="let d of weekDays"
+             class="py-3 text-center text-[11px] font-extrabold text-on-surface-variant uppercase tracking-widest"
+             [class.text-primary]="d === 'Sam' || d === 'Dim'">
+          {{ d }}
+        </div>
+      </div>
+
+      <!-- Cells -->
+      <div class="grid grid-cols-7 divide-x divide-y divide-outline-variant/10">
+        <div *ngFor="let cell of calendarGrid"
+             class="min-h-[120px] p-2 flex flex-col gap-1.5"
+             [class.bg-surface-container-low]="!cell.day">
+
+          <!-- Day number -->
+          <div *ngIf="cell.day" class="flex justify-end">
+            <span class="w-7 h-7 flex items-center justify-center rounded-full text-sm font-bold"
+                  [class.bg-primary]="isToday(cell.day)"
+                  [class.text-white]="isToday(cell.day)"
+                  [class.text-on-surface]="!isToday(cell.day)">
+              {{ cell.day }}
+            </span>
+          </div>
+
+          <!-- Meeting chips -->
+          <ng-container *ngIf="cell.day">
+            <div *ngFor="let r of cell.meetings"
+                 (click)="goToStage(r)"
+                 [ngClass]="chipClasses(r)"
+                 [title]="r.sujet + ' — ' + (r.scheduled_at | date:'HH:mm') + (r.stage ? ' · ' + r.stage.titre : '')"
+                 class="rounded-lg px-2 py-1 text-[11px] font-semibold leading-snug cursor-pointer hover:opacity-80 active:scale-95 transition-all">
+              <div class="flex items-center gap-1 truncate">
+                <span class="material-symbols-outlined flex-shrink-0" style="font-size:11px;">{{ r.meet_url ? 'videocam' : 'event' }}</span>
+                <span class="truncate">{{ r.scheduled_at | date:'HH:mm' }} {{ r.sujet }}</span>
+              </div>
+              <!-- University + stage name -->
+              <div *ngIf="r.stage" class="text-[10px] opacity-75 font-bold truncate mt-0.5 pl-4">
+                <ng-container *ngIf="isEnseignant && r.stage.etablissement">{{ r.stage.etablissement.code || r.stage.etablissement.nom }} · </ng-container>{{ r.stage.titre }}
+              </div>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+
   </div>
 
-  <!-- Passées -->
+  <!-- ── PAST LIST ── -->
   <div *ngIf="selectedTabIndex === 1" class="space-y-4">
     <div *ngIf="past.length === 0" class="bg-surface-container-lowest border border-outline-variant/10 rounded-2xl p-16 text-center">
       <span class="material-symbols-outlined text-outline" style="font-size:48px;">history</span>
@@ -95,7 +148,8 @@
     </div>
 
     <div *ngFor="let r of past"
-         class="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-5 flex items-start gap-5 opacity-75">
+         (click)="goToStage(r)"
+         class="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-5 flex items-start gap-5 opacity-75 cursor-pointer hover:opacity-100 hover:border-primary/30 hover:shadow-sm transition-all">
       <div class="flex-shrink-0 w-16 text-center bg-surface-container-low rounded-xl py-3">
         <div class="text-[10px] font-bold text-on-surface-variant uppercase">{{ r.scheduled_at | date:'MMM' }}</div>
         <div class="font-headline text-2xl font-bold text-on-surface-variant leading-none mt-1">{{ r.scheduled_at | date:'dd' }}</div>
@@ -111,8 +165,10 @@
         <p class="text-xs text-on-surface-variant mt-2">
           {{ r.scheduled_at | date:'dd/MM/yyyy HH:mm' }} · {{ formatDuration(r.duration_minutes) }}
           <span *ngIf="r.stage"> · {{ r.stage.titre }}</span>
+          <span *ngIf="r.stage?.etablissement"> · {{ r.stage!.etablissement!.nom }}</span>
         </p>
       </div>
     </div>
   </div>
+
 </ng-container>

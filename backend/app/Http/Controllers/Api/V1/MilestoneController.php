@@ -129,12 +129,9 @@ class MilestoneController extends Controller
         return response()->json(null, 204);
     }
 
-    /**
-     * Student marks a milestone as completed (awaiting teacher validation).
-     */
     public function markComplete(Request $request, Milestone $milestone): JsonResponse
     {
-        $this->authorize('view', $milestone->stage);
+        $this->authorize('update', $milestone->stage);
 
         $milestone->update([
             'statut'       => MilestoneStatut::Completed,

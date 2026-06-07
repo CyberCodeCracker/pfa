@@ -48,6 +48,14 @@ export class ReunionApiService {
     return this.http.patch<ApiResponse<Reunion>>(`${this.base}/reunions/${id}`, payload, { withCredentials: true });
   }
 
+  terminer(id: number, compteRendu: string | null): Observable<ApiResponse<Reunion>> {
+    return this.http.post<ApiResponse<Reunion>>(
+      `${this.base}/reunions/${id}/terminer`,
+      { compte_rendu: compteRendu },
+      { withCredentials: true },
+    );
+  }
+
   annuler(id: number): Observable<ApiResponse<Reunion>> {
     return this.http.post<ApiResponse<Reunion>>(`${this.base}/reunions/${id}/annuler`, {}, { withCredentials: true });
   }

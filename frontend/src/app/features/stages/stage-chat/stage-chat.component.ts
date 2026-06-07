@@ -15,6 +15,7 @@ import { User } from '../../../core/models/user.model';
 })
 export class StageChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   @Input() stageId!: number;
+  @Input() isArchived = false;
   @ViewChild('msgContainer') msgContainer!: ElementRef;
 
   messages: Message[] = [];
@@ -40,7 +41,7 @@ export class StageChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   ngOnDestroy(): void {
-    this.echo.leaveChannel(`presence-stage.${this.stageId}`);
+    this.echo.leaveChannel(`stage.${this.stageId}`);
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -71,9 +72,9 @@ export class StageChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     const channel = this.echo.presenceChannel(`stage.${this.stageId}`);
     if (!channel) return;
 
-    (channel as any).listen('.MessagePosted', (event: { message: Message }) => {
-      if (!this.messages.find(m => m.id === event.message.id)) {
-        this.messages = [...this.messages, event.message];
+    (channel as any).listen('.MessagePosted', (event: Message) => {
+      if (!this.messages.find(m => m.id === event.id)) {
+        this.messages = [...this.messages, event];
         this.shouldScroll = true;
       }
     });
@@ -88,7 +89,10 @@ export class StageChatComponent implements OnInit, OnDestroy, AfterViewChecked {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: res => {
-          this.messages = [...this.messages, res.data];
+          // Guard against a race where the broadcast echo arrived first
+          if (!this.messages.find(m => m.id === res.data.id)) {
+            this.messages = [...this.messages, res.data];
+          }
           this.messageCtrl.reset();
           this.sending = false;
           this.shouldScroll = true;

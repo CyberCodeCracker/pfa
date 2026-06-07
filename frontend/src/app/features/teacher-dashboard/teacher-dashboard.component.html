@@ -20,8 +20,8 @@
         </div>
         <div class="flex gap-8 mt-4">
           <div>
-            <div class="text-3xl font-bold">{{ stagesBrouillon }}</div>
-            <div class="text-primary-fixed-dim text-sm">Brouillons</div>
+            <div class="text-3xl font-bold">{{ stagesTermines }}</div>
+            <div class="text-primary-fixed-dim text-sm">Terminés</div>
           </div>
           <div>
             <div class="text-3xl font-bold">{{ recentStages.length }}</div>
@@ -101,6 +101,10 @@
               <div class="flex flex-wrap items-center gap-2">
                 <app-stage-status-badge [statut]="stage.statut" size="sm"></app-stage-status-badge>
                 <app-stage-pace-badge [pace]="stage.pace_indicator" size="sm"></app-stage-pace-badge>
+                <span *ngIf="stage.semestre"
+                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-primary-container text-on-primary-container">
+                  {{ stage.semestre === 'pfe' ? 'PFE' : stage.semestre === 'pfa' ? 'PFA' : 'Été' }}
+                </span>
               </div>
               <h4 class="font-headline text-lg font-bold mt-2 text-primary group-hover:text-primary transition-colors">{{ stage.titre }}</h4>
             </div>

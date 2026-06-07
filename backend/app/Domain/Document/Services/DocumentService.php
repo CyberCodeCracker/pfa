@@ -3,6 +3,7 @@
 namespace App\Domain\Document\Services;
 
 use App\Domain\Document\Notifications\DocumentRefusedNotification;
+use App\Domain\Document\Notifications\DocumentDeposeParEnseignantNotification;
 use App\Domain\Document\Notifications\DocumentUploadedNotification;
 use App\Domain\Document\Notifications\DocumentValidatedNotification;
 use App\Models\Document;
@@ -61,9 +62,19 @@ class DocumentService
             'is_report'          => $isReport,
         ]);
 
-        // Notify the enseignant when a student uploads
         if ($uploader->isEtudiant()) {
+            // Notify the enseignant when a student uploads
             $stage->enseignant?->notify(new DocumentUploadedNotification($document->load('uploader')));
+        } else {
+            // Notify all active students when the teacher uploads
+            $document->load('stage');
+            $stage->affectations()
+                ->with('etudiant')
+                ->where('statut', \App\Support\Enums\AffectationStatut::Actif)
+                ->get()
+                ->each(fn ($affectation) => $affectation->etudiant?->notify(
+                    new DocumentDeposeParEnseignantNotification($document)
+                ));
         }
 
         return $document;

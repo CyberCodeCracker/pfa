@@ -6,20 +6,9 @@
       <span class="px-2 py-0.5 bg-surface-container-high rounded text-xs font-bold text-on-surface-variant">{{ documents.length }}</span>
     </h3>
     <div class="flex items-center gap-3">
-      <!-- Student: "submit as report" toggle -->
-      <label *ngIf="!isEnseignant"
-             class="flex items-center gap-2 px-3 py-2 rounded-xl border-2 cursor-pointer transition-all"
-             [class.border-tertiary]="uploadAsReport"
-             [class.bg-tertiary-container]="uploadAsReport"
-             [class.text-on-tertiary-container]="uploadAsReport"
-             [class.border-outline-variant]="!uploadAsReport"
-             [class.text-on-surface-variant]="!uploadAsReport">
-        <input type="checkbox" [(ngModel)]="uploadAsReport" class="accent-tertiary">
-        <span class="material-symbols-outlined" style="font-size:18px;">assignment</span>
-        <span class="text-xs font-bold uppercase tracking-widest">Soumettre comme rapport</span>
-      </label>
-
-      <label class="cursor-pointer bg-primary text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all inline-flex items-center gap-2">
+      <label *ngIf="!isArchived"
+             class="cursor-pointer bg-primary text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all inline-flex items-center gap-2"
+             [class.opacity-50]="uploading" [class.pointer-events-none]="uploading">
         <span class="material-symbols-outlined" style="font-size:18px;">cloud_upload</span>
         <span>{{ uploading ? 'Envoi…' : 'Téléverser' }}</span>
         <input type="file" class="hidden" (change)="onFileSelected($event)" [disabled]="uploading">
@@ -39,6 +28,44 @@
        class="bg-surface-container-low border-2 border-dashed border-outline-variant/30 rounded-2xl p-12 text-center">
     <span class="material-symbols-outlined text-outline" style="font-size:40px;">folder_off</span>
     <p class="text-on-surface-variant text-sm mt-3 italic">Aucun document pour le moment.</p>
+  </div>
+
+  <!-- Report confirmation modal (student-only) -->
+  <div *ngIf="showReportModal"
+       class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+       (click)="cancelUpload()">
+    <div class="bg-surface rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4 space-y-5"
+         (click)="$event.stopPropagation()">
+      <div class="flex items-start gap-4">
+        <div class="w-12 h-12 rounded-xl bg-tertiary-container flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-on-tertiary-container" style="font-size:24px;">assignment</span>
+        </div>
+        <div>
+          <h4 class="font-headline text-lg font-extrabold text-on-surface leading-snug">Soumettre comme rapport ?</h4>
+          <p class="text-sm text-on-surface-variant mt-1">
+            Ce fichier sera-t-il votre rapport de stage officiel, ou s'agit-il d'un simple document ?
+          </p>
+          <p *ngIf="pendingFile" class="mt-2 text-xs font-bold text-primary truncate">{{ pendingFile.name }}</p>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <button (click)="confirmUpload(true)"
+                class="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-tertiary text-on-tertiary font-bold text-sm hover:opacity-90 active:scale-[0.98] transition-all shadow-sm">
+          <span class="material-symbols-outlined" style="font-size:18px;">assignment_turned_in</span>
+          Oui, c'est mon rapport de stage
+        </button>
+        <button (click)="confirmUpload(false)"
+                class="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-surface-container-high text-on-surface font-bold text-sm hover:bg-surface-container-highest active:scale-[0.98] transition-all">
+          <span class="material-symbols-outlined" style="font-size:18px;">insert_drive_file</span>
+          Non, c'est un simple document
+        </button>
+        <button (click)="cancelUpload()"
+                class="w-full px-4 py-2.5 rounded-xl text-on-surface-variant font-semibold text-sm hover:bg-surface-container active:scale-[0.98] transition-all">
+          Annuler
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- Document list -->
@@ -82,7 +109,7 @@
             <span class="material-symbols-outlined" style="font-size:18px;">download</span>
           </a>
 
-          <ng-container *ngIf="isEnseignant && doc.statut === 'en_attente'">
+          <ng-container *ngIf="isEnseignant && doc.statut === 'en_attente' && !isArchived">
             <button (click)="valider(doc)" title="Valider"
                     class="p-2 text-on-surface-variant hover:text-on-tertiary-container hover:bg-tertiary-container rounded-lg transition-all">
               <span class="material-symbols-outlined" style="font-size:18px;">check_circle</span>
@@ -126,7 +153,7 @@
 
       <!-- Teacher public comment on the report (visible to everyone) -->
       <div *ngIf="doc.is_report && doc.teacher_comment && annotateId !== doc.id"
-           class="mt-2 p-3 rounded-xl border border-tertiary/30 bg-tertiary-container/40">
+           class="mt-2 p-3 rounded-xl border border-tertiary/30 bg-tertiary-container">
         <div class="flex items-center gap-2 mb-1">
           <span class="material-symbols-outlined text-on-tertiary-container" style="font-size:16px;">forum</span>
           <span class="text-[10px] font-bold uppercase tracking-widest text-on-tertiary-container">Commentaire de l'enseignant</span>

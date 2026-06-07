@@ -10,10 +10,11 @@ class PrivateChatResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id'          => $this->id,
-            'enseignant'  => new UserResource($this->whenLoaded('enseignant')),
-            'etudiant'    => new UserResource($this->whenLoaded('etudiant')),
-            'created_at'  => $this->created_at,
+            'id'            => $this->id,
+            'enseignant'    => new UserResource($this->whenLoaded('enseignant')),
+            'etudiant'      => new UserResource($this->whenLoaded('etudiant')),
+            'unread_count'  => $this->unread_count ?? 0,
+            'created_at'    => $this->created_at,
         ];
     }
 }

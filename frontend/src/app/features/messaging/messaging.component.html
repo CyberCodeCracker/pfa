@@ -26,9 +26,14 @@
           {{ getInitials(getChatPartner(chat)) }}
         </div>
         <div class="flex-1 min-w-0">
-          <p class="text-sm font-bold text-on-surface truncate">{{ getChatPartner(chat)?.nom_complet }}</p>
+          <p class="text-sm font-bold text-on-surface truncate"
+             [class.font-extrabold]="(chat.unread_count ?? 0) > 0">{{ getChatPartner(chat)?.nom_complet }}</p>
           <p class="text-xs text-on-surface-variant truncate">{{ getChatPartner(chat)?.email }}</p>
         </div>
+        <span *ngIf="(chat.unread_count ?? 0) > 0"
+              class="flex-shrink-0 bg-error text-on-error text-[10px] font-bold rounded-full min-w-[20px] h-5 px-1.5 flex items-center justify-center">
+          {{ chat.unread_count }}
+        </span>
       </button>
     </div>
   </aside>

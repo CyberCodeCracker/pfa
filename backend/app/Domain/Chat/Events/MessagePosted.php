@@ -43,8 +43,9 @@ class MessagePosted implements ShouldBroadcastNow
             'contenu'         => $this->message->contenu,
             'attachment_path' => $this->message->attachment_path ? '/api/v1/messages/' . $this->message->id . '/attachment' : null,
             'sender'          => [
-                'id'        => $this->message->sender->id,
-                'nom_complet' => $this->message->sender->full_name,
+                'id'     => $this->message->sender->id,
+                'prenom' => $this->message->sender->prenom,
+                'nom'    => $this->message->sender->nom,
             ],
             'created_at'      => $this->message->created_at?->toIso8601String(),
         ];
