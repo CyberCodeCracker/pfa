@@ -190,30 +190,22 @@ package "Laravel\\Sanctum" {
 ```plantuml
 @startuml SEQ_Sprint1_Login
 actor Visiteur
-participant "SPA Angular" as SPA
-participant "Sanctum\n/sanctum/csrf-cookie" as CSRF
-participant "AuthController" as Ctrl
-participant "AuthService" as Svc
-database "MySQL" as DB
+boundary "Page de Connexion\n(LoginPage)" as Login
+control "API Backend\n(/api)" as API
 
-Visiteur -> SPA : saisit email + mot de passe
-SPA -> CSRF : GET /sanctum/csrf-cookie
-CSRF --> SPA : Set-Cookie XSRF-TOKEN
-SPA -> Ctrl : POST /api/login\n(X-XSRF-TOKEN, credentials)
-Ctrl -> Ctrl : validate(email, password, remember)
-Ctrl -> Svc : login(email, password, remember)
-Svc -> DB : SELECT user WHERE email
-DB --> Svc : User
-Svc -> Svc : Hash::check(password)
+Visiteur -> Login : saisir(email, motDePasse)
+Login -> API : getCsrfCookie()
+API --> Login : xsrfToken
+Login -> API : login(email, motDePasse, remember)
 alt identifiants valides
-  Svc --> Ctrl : User
-  Ctrl -> Ctrl : session()->regenerate()
-  Ctrl -> Ctrl : load enseignantProfile.etablissements
-  Ctrl --> SPA : 200 { data: UserResource }
-  SPA --> Visiteur : redirection tableau de bord
+  API --> Login : utilisateur(rôle, établissements)
+  Login -> Visiteur : afficherTableauDeBord()
 else identifiants invalides
-  Svc --> Ctrl : ValidationException
-  Ctrl --> SPA : 422 { message }
+  API --> Login : erreurValidation(message)
+  Login -> Visiteur : afficherErreur(message)
+else trop de tentatives
+  API --> Login : tropDeTentatives()
+  Login -> Visiteur : afficherErreur("Réessayez plus tard")
 end
 @enduml
 ```
@@ -223,25 +215,18 @@ end
 ```plantuml
 @startuml SEQ_Sprint1_Invitation
 actor "Étudiant invité" as Etu
-participant "SPA Angular" as SPA
-participant "AuthController" as Ctrl
-participant "InvitationService" as Inv
-database "MySQL" as DB
+boundary "Page d'Acceptation\nd'Invitation" as Page
+control "API Backend\n(/api/v1)" as API
 
-Etu -> SPA : ouvre lien /accepter-invitation/{token}
-SPA -> Ctrl : POST /api/v1/auth/accept-invitation\n{ token, new_password, new_password_confirmation }
-Ctrl -> Ctrl : validate(token, new_password: min10|mixedCase|numbers|confirmed)
-Ctrl -> Inv : acceptInvitation(token, new_password)
-Inv -> DB : SELECT affectation WHERE invitation_token
-DB --> Inv : Affectation (valide ?)
-alt jeton valide
-  Inv -> DB : UPDATE user (password, must_change_password=false)
-  Inv --> Ctrl : User activé
-  Ctrl -> Ctrl : auth()->login(user) + session regenerate
-  Ctrl --> SPA : 200 { data: UserResource }
-else jeton expiré
-  Inv --> Ctrl : Exception
-  Ctrl --> SPA : 422 { message }
+Etu -> Page : ouvrirLien(token)
+Etu -> Page : definirMotDePasse(nouveauMotDePasse, confirmation)
+Page -> API : accepterInvitation(token, nouveauMotDePasse, confirmation)
+alt jeton valide & mot de passe conforme
+  API --> Page : utilisateur
+  Page -> Etu : redirigerVersEspace()
+else jeton expiré / invalide
+  API --> Page : erreurValidation(message)
+  Page -> Etu : afficherErreur(message)
 end
 @enduml
 ```

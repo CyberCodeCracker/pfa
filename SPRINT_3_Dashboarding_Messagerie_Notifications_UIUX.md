@@ -236,46 +236,45 @@ package "Broadcasting (Reverb)" {
 ```plantuml
 @startuml SEQ_Sprint3_RealtimeChat
 actor "Émetteur" as A
+boundary "Discussion émetteur\n(StageChat)" as ChatA
+control "API Backend\n(/api/v1)" as API
+control "Reverb\n(WebSocket)" as WS
+boundary "Discussion destinataire\n(StageChat)" as ChatB
 actor "Destinataire" as B
-participant "ChatController" as Ctrl
-participant "ChatService" as Svc
-participant "MessagePosted\n(ShouldBroadcastNow)" as Evt
-participant "Reverb (WS)" as WS
-database "MySQL" as DB
 
-A -> Ctrl : POST /chats/public/{stage}/messages\n(X-Socket-ID, contenu)
-Ctrl -> Svc : sendPublicMessage(chat, user, contenu)
-Svc -> DB : INSERT messages (chat_type=public)
-Svc -> Evt : broadcast(MessagePosted)->toOthers()
-Evt -> WS : push canal presence stage.{id}\n(exclut le socket émetteur)
-Svc --> Ctrl : Message
-Ctrl --> A : 201 { data: MessageResource } (ajout optimiste)
-WS --> B : event .MessagePosted
-note right of B : Echo (NgZone) → ajout\nimmédiat à la liste
+A -> ChatA : saisit et envoie un message
+ChatA -> API : POST /api/v1/chats/public/{stage}/messages\n(X-Socket-ID, contenu)
+API --> ChatA : 201 { data: message }
+ChatA -> A : affiche le message (ajout optimiste)
+API -> WS : diffuse .MessagePosted sur stage.{id}\n(exclut l'émetteur via X-Socket-ID)
+WS -> ChatB : .MessagePosted
+ChatB -> B : affiche le message instantanément\n(sans rechargement)
 @enduml
 ```
 
-### 4.3. Diagramme de séquence — « Authentification d'un canal privé (temps réel) »
+### 4.3. Diagramme de séquence — « Abonnement & authentification d'un canal privé (temps réel) »
 
 ```plantuml
 @startuml SEQ_Sprint3_ChannelAuth
-participant "SPA Angular\n(Laravel Echo)" as SPA
-participant "EchoService\n(custom authorizer)" as Echo
-participant "Reverb (WS)" as WS
-participant "/broadcasting/auth\n(auth:sanctum)" as Auth
-participant "channels.php" as Ch
+actor Utilisateur as U
+boundary "Page Messagerie / Discussion\n(EchoService)" as Echo
+control "Reverb\n(WebSocket)" as WS
+control "API Backend\n(/broadcasting/auth)" as API
 
-SPA -> Echo : private('chat.{id}') / join('stage.{id}')
+U -> Echo : ouvre une conversation / un salon
 Echo -> WS : connexion WebSocket (ws://localhost:8080)
 WS --> Echo : socket_id
-Echo -> Auth : POST /broadcasting/auth\nfetch(credentials:'include', X-XSRF-TOKEN)\n{ socket_id, channel_name }
-note right of Echo : credentials:'include' →\nle cookie de session Sanctum\nest envoyé (cross-origin)
-Auth -> Ch : callback d'autorisation du canal
-Ch --> Auth : autorisé (membre du stage / propriétaire)
-Auth --> Echo : 200 { auth, channel_data }
-Echo -> WS : subscribe(auth)
-WS --> Echo : subscription_succeeded
-note right of SPA : abonnement actif →\nréception des évènements
+Echo -> API : POST /broadcasting/auth (credentials:'include')\n{ socket_id, channel_name }
+note right of Echo : le cookie de session Sanctum\nest envoyé (cross-origin)
+alt utilisateur autorisé sur le canal
+  API --> Echo : 200 { auth, channel_data }
+  Echo -> WS : subscribe(auth)
+  WS --> Echo : subscription_succeeded
+  Echo -> U : réception des messages en temps réel
+else non autorisé
+  API --> Echo : 403
+  Echo -> U : abonnement refusé
+end
 @enduml
 ```
 
@@ -283,23 +282,22 @@ note right of SPA : abonnement actif →\nréception des évènements
 
 ```plantuml
 @startuml SEQ_Sprint3_Notification
-actor "Évènement métier" as Biz
-participant "Notification\n(database+broadcast)" as Notif
-participant "Queue worker" as Q
-participant "Reverb (WS)" as WS
-participant "Sidebar (Angular)" as Side
-actor "Utilisateur" as U
-participant "NotificationController" as Ctrl
+actor "Enseignant\n(déclencheur)" as Ens
+control "API Backend\n(/api/v1)" as API
+control "Reverb\n(WebSocket)" as WS
+boundary "Barre latérale\n(Sidebar)" as Side
+actor "Destinataire" as U
+boundary "Page Notifications" as NotifPage
 
-Biz -> Notif : user.notify(...)
-Notif -> Q : BroadcastNotificationCreated (file broadcasts)
-Q -> WS : push canal App.Models.User.{id}
-WS --> Side : .notification(...)
-Side -> Side : incrémente le badge (NgZone)
-U -> Side : clic sur la notification
-Side -> Ctrl : POST /notifications/{id}/read
-Ctrl --> Side : 200
-Side -> U : navigation vers /stages/{id}?tab=N\n(ou /reunions)
+Ens -> API : action métier (ex : planifier une réunion)
+API -> WS : diffuse la notification sur App.Models.User.{id}
+WS -> Side : .notification(...)
+Side -> U : incrémente le badge de non-lus (temps réel)
+
+U -> NotifPage : ouvre la page et clique sur une notification
+NotifPage -> API : POST /api/v1/notifications/{id}/read
+API --> NotifPage : 200
+NotifPage -> U : navigation vers la page concernée\n(/stages/{id}?tab=N ou /reunions)
 @enduml
 ```
 

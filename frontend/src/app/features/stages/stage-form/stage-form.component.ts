@@ -34,15 +34,18 @@ export class StageFormComponent implements OnInit, OnDestroy {
     { value: 'terminé',  label: 'Terminé' },
   ];
 
+  private readonly FINAL_LEVELS = ['Licence 3', 'Master 2', 'Ingénierie 3'];
+  private readonly NON_FINAL_LEVELS = ['Licence 1', 'Licence 2', 'Master 1', 'Ingénierie 1', 'Ingénierie 2'];
+
   readonly niveaux = [
+    'Licence 1',
+    'Licence 2',
     'Licence 3',
     'Master 1',
     'Master 2',
     'Ingénierie 1',
     'Ingénierie 2',
     'Ingénierie 3',
-    'BTS',
-    'DUT',
   ];
 
   readonly typesStage = [
@@ -50,6 +53,20 @@ export class StageFormComponent implements OnInit, OnDestroy {
     { value: 'pfe', label: 'PFE — Projet de Fin d\'Études' },
     { value: 'pfa', label: 'PFA — Projet de Fin d\'Année' },
   ];
+
+  get filteredNiveaux(): string[] {
+    const semestre = this.form?.get('semestre')?.value;
+    if (semestre === 'pfe') return this.FINAL_LEVELS;
+    if (semestre === 'ete' || semestre === 'pfa') return this.NON_FINAL_LEVELS;
+    return this.niveaux;
+  }
+
+  get filteredTypesStage(): { value: string; label: string }[] {
+    const niveau = this.form?.get('niveau')?.value;
+    if (this.FINAL_LEVELS.includes(niveau)) return this.typesStage.filter(t => t.value === 'pfe');
+    if (this.NON_FINAL_LEVELS.includes(niveau)) return this.typesStage.filter(t => t.value !== 'pfe');
+    return this.typesStage;
+  }
 
   /** Auto-computed once on init — not editable by the user */
   currentAnnee = '';
@@ -123,6 +140,31 @@ export class StageFormComponent implements OnInit, OnDestroy {
     this.form.get('date_debut')!.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => this.form.get('date_fin')!.updateValueAndValidity({ emitEvent: false }));
+
+    // When niveau changes, auto-set semestre for final levels; clear incompatible semestre
+    this.form.get('niveau')!.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(niveau => {
+        if (this.FINAL_LEVELS.includes(niveau)) {
+          this.form.get('semestre')!.setValue('pfe', { emitEvent: false });
+        } else if (this.NON_FINAL_LEVELS.includes(niveau)) {
+          if (this.form.get('semestre')?.value === 'pfe') {
+            this.form.get('semestre')!.setValue('', { emitEvent: false });
+          }
+        }
+      });
+
+    // When semestre changes, clear niveau if it's incompatible with the new type
+    this.form.get('semestre')!.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(semestre => {
+        const niveau = this.form.get('niveau')?.value;
+        if ((semestre === 'ete' || semestre === 'pfa') && this.FINAL_LEVELS.includes(niveau)) {
+          this.form.get('niveau')!.setValue('', { emitEvent: false });
+        } else if (semestre === 'pfe' && this.NON_FINAL_LEVELS.includes(niveau)) {
+          this.form.get('niveau')!.setValue('', { emitEvent: false });
+        }
+      });
   }
 
   private notInPastValidator(): ValidatorFn {

@@ -256,36 +256,26 @@ package "Support\\Enums" {
 ```plantuml
 @startuml SEQ_Sprint2_CreateStage
 actor Enseignant as Ens
-participant "StageController" as Ctrl
-participant "StagePolicy" as Pol
-participant "StageService" as Svc
-participant "InvitationNotification" as Notif
-database "MySQL" as DB
-participant "Mailpit (SMTP)" as Mail
+boundary "Formulaire de Stage\n(StageForm)" as Form
+control "API Backend\n(/api/v1)" as API
+actor "Étudiant invité" as Etu
 
-Ens -> Ctrl : POST /api/v1/stages { titre, dates, etablissement_id, semestre }
-Ctrl -> Pol : authorize('create', Stage)
-Pol --> Ctrl : OK (rôle enseignant)
-Ctrl -> Ctrl : validate(...)
-Ctrl -> Svc : create(user, data)
-Svc -> DB : INSERT stages
-Svc -> DB : INSERT public_chats (salon de groupe)
-DB --> Svc : Stage
-Svc --> Ctrl : Stage
-Ctrl --> Ens : 201 { data: StageResource }
+Ens -> Form : saisir(titre, dates, etablissement, type)
+Form -> API : creerStage(titre, dates, etablissementId, semestre)
+alt données valides
+  API --> Form : stage
+  Form -> Ens : afficherStageCree(stage)
+else validation échouée (dates, établissement)
+  API --> Form : erreursValidation(erreurs)
+  Form -> Ens : afficherErreurs(erreurs)
+end
 
 == Affectation d'étudiants ==
-Ens -> Ctrl : POST /api/v1/stages/{id}/affectations { etudiants:[...] }
-Ctrl -> Pol : authorize('affecter', stage)
-Pol --> Ctrl : OK
-Ctrl -> Svc : affecterEtudiants(stage, etudiants)
-loop pour chaque étudiant
-  Svc -> DB : create/find User + Affectation(invité, token)
-  Svc -> Notif : notify(InvitationNotification)
-  Notif -> Mail : email d'invitation (lien + mdp temporaire)
-end
-Svc --> Ctrl : affectations
-Ctrl --> Ens : 201 { message: "N étudiant(s) invité(s)." }
+Ens -> Form : ajouterEtudiants(nom, prenom, email)
+Form -> API : affecterEtudiants(stageId, etudiants)
+API --> Form : nombreInvites
+API -> Etu : envoyerInvitation(lien, motDePasseTemporaire)
+Form -> Ens : confirmerInvitation()
 @enduml
 ```
 
@@ -294,31 +284,29 @@ Ctrl --> Ens : 201 { message: "N étudiant(s) invité(s)." }
 ```plantuml
 @startuml SEQ_Sprint2_Document
 actor "Étudiant" as Etu
+boundary "Onglet Documents\n(StageDocuments)" as Docs
+control "API Backend\n(/api/v1)" as API
 actor Enseignant as Ens
-participant "DocumentController" as Ctrl
-participant "DocumentService" as Svc
-participant "Storage (local/private)" as FS
-participant "Notification" as Notif
-database "MySQL" as DB
 
-Etu -> Ctrl : POST /api/v1/stages/{id}/documents (fichier, is_report)
-Ctrl -> Ctrl : authorize('view', stage) + validate(fichier ≤ 50Mo)
-Ctrl -> Svc : upload(stage, user, file, parentId, isReport)
-Svc -> Svc : vérifie MIME autorisé
-Svc -> FS : putFileAs(stages/{id}/documents/.../v{n})
-Svc -> DB : INSERT documents (statut=en_attente)
-Svc -> Notif : enseignant.notify(DocumentUploadedNotification)
-Svc --> Ctrl : Document
-Ctrl --> Etu : 201 { data: DocumentResource }
+Etu -> Docs : choisirFichier(fichier)
+Docs -> Etu : demanderConfirmationRapport()
+Etu -> Docs : confirmer(estRapport)
+Docs -> API : televerserDocument(stageId, fichier, estRapport)
+alt type de fichier autorisé
+  API --> Docs : document(en_attente)
+  Docs -> Etu : ajouterAListe(document)
+  API -> Ens : notifier("document déposé")
+else type non autorisé
+  API --> Docs : erreurValidation(message)
+  Docs -> Etu : afficherErreur(message)
+end
 
 == Validation par l'enseignant ==
-Ens -> Ctrl : POST /api/v1/documents/{doc}/valider
-Ctrl -> Ctrl : authorize('update', stage)
-Ctrl -> Svc : valider(document, enseignant)
-Svc -> DB : UPDATE document (statut=validé)
-Svc -> Notif : etudiant.notify(DocumentValidatedNotification)
-Svc --> Ctrl : Document
-Ctrl --> Ens : 200 { data: DocumentResource }
+Ens -> Docs : validerDocument()
+Docs -> API : validerDocument(documentId)
+API --> Docs : document(validé)
+API -> Etu : notifier("document validé")
+Docs -> Ens : mettreAJourStatut(document)
 @enduml
 ```
 
@@ -327,24 +315,24 @@ Ctrl --> Ens : 200 { data: DocumentResource }
 ```plantuml
 @startuml SEQ_Sprint2_Milestone
 actor Enseignant as Ens
-participant "MilestoneController" as Ctrl
-database "MySQL" as DB
+boundary "Onglet Étapes\n(StageMilestones)" as Steps
+control "API Backend\n(/api/v1)" as API
 
-Ens -> Ctrl : POST /api/v1/stages/{id}/milestones { titre, ordre }
-Ctrl -> Ctrl : authorize('update', stage)
-Ctrl -> DB : vérifie position / décale les ordres
-Ctrl -> DB : INSERT milestone (statut=pending)
-Ctrl --> Ens : 201 { data: MilestoneResource }
+Ens -> Steps : crée une étape (titre, position)
+Steps -> API : POST /api/v1/stages/{id}/milestones { titre, ordre }
+API --> Steps : 201 { data: étape (pending) }
+Steps -> Ens : étape ajoutée à la timeline
 
-Ens -> Ctrl : POST /api/v1/milestones/{m}/validate
-Ctrl -> Ctrl : authorize('update', stage)
-note right of Ctrl : contrôle d'ordre côté UI :\nles étapes précédentes\ndoivent être validées
-Ctrl -> DB : UPDATE milestone (statut=validated, validated_at)
-Ctrl --> Ens : 200 { data: MilestoneResource }
+Ens -> Steps : clique « Valider »
+note right of Steps : le bouton « Valider » est actif\nuniquement si toutes les étapes\nprécédentes sont validées
+Steps -> API : POST /api/v1/milestones/{m}/validate
+API --> Steps : 200 { data: étape (validated) }
+Steps -> Ens : progression mise à jour
 
-Ens -> Ctrl : POST /api/v1/milestones/{m}/reopen
-Ctrl -> DB : UPDATE milestone (statut=in_progress, validated_at=null)
-Ctrl --> Ens : 200 { data: MilestoneResource }
+Ens -> Steps : clique « Rouvrir »
+Steps -> API : POST /api/v1/milestones/{m}/reopen
+API --> Steps : 200 { data: étape (in_progress) }
+Steps -> Ens : étape rouverte
 @enduml
 ```
 

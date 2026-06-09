@@ -91,7 +91,7 @@
             <select formControlName="niveau"
                     class="pill-select w-full px-4 py-3 rounded-xl bg-surface-container-low border-transparent text-on-surface font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none">
               <option value="">— Sélectionner —</option>
-              <option *ngFor="let n of niveaux" [value]="n">{{ n }}</option>
+              <option *ngFor="let n of filteredNiveaux" [value]="n">{{ n }}</option>
             </select>
           </div>
           <div>
@@ -115,7 +115,7 @@
             <select formControlName="semestre"
                     class="pill-select w-full px-4 py-3 rounded-xl bg-surface-container-low border-transparent text-on-surface font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none">
               <option value="">— Sélectionner —</option>
-              <option *ngFor="let t of typesStage" [value]="t.value">{{ t.label }}</option>
+              <option *ngFor="let t of filteredTypesStage" [value]="t.value">{{ t.label }}</option>
             </select>
           </div>
           <div *ngIf="isEdit" class="col-span-2">
